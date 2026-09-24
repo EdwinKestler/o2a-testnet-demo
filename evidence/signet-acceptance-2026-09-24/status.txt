@@ -1,0 +1,7 @@
+chain signet
+headers 323518
+blocks 323518
+verificationprogress 1
+initialblockdownload false
+bestblockhash 0000000a653c2403ae63afa116b6347f52dd246b5214bd876317b830de2b9b0b
+electrs_height 323518

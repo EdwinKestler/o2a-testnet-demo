@@ -1,0 +1,15 @@
+name: signet-infra_signet-bitcoind
+created: 2026-09-24T08:10:35-06:00
+project: signet-infra
+compose_volume: signet-bitcoind
+acceptance_bytes: 29391150476
+acceptance_measured_utc: 2026-09-24T16:12:00Z
+note: docker volume inspect does not report usage. The byte size is du -sb /data inside the container at the acceptance check, before the step-7 restart. After that restart the node kept new signet blocks, so a later read-only du was 29493020189 bytes. The volume creation time did not change.
+
+name: signet-infra_signet-electrs
+created: 2026-09-24T09:51:10-06:00
+project: signet-infra
+compose_volume: signet-electrs
+acceptance_bytes: 1436471842
+acceptance_measured_utc: 2026-09-24T16:12:00Z
+note: byte size is du -sb /data at the same acceptance check. A later read-only du was 1436433063 bytes. The volume creation time did not change. This is the clean index volume created after the interrupted index was removed.
