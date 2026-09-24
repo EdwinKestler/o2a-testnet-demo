@@ -1,0 +1,19 @@
+[workspace]
+members = [
+    "crates/o2a-demo-core",
+    "crates/o2a-demo-rgb",
+    "crates/o2a-demo-cli",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.98.1"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[workspace.dependencies]
+o2a-demo-core = { version = "=0.1.0", path = "crates/o2a-demo-core" }
+o2a-demo-rgb = { version = "=0.1.0", path = "crates/o2a-demo-rgb" }
+rgb-runtime = { version = "=0.12.0-rc.3", git = "https://github.com/RGB-WG/rgb.git", rev = "a1e6b41524131f6d6f183b2235fdaacb5c1abb31", default-features = false, features = ["resolver-electrum", "fs"] }

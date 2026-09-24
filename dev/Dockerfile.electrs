@@ -1,0 +1,32 @@
+FROM rust:1.98.1-slim-bookworm@sha256:ff521445a372125ed4f76e1453a1f8098f2d05332d1601d30db1c1f62757e730 AS build
+
+ARG ELECTRS_TAG=v0.12.0
+ARG ELECTRS_COMMIT=37501cc4b94aea99e50670a6524fa3ad4ac9aabb
+
+RUN set -eux; \
+    apt-get update; \
+    apt-get install --yes --no-install-recommends \
+      build-essential ca-certificates clang cmake git libclang-dev pkg-config; \
+    rm --recursive --force /var/lib/apt/lists/*
+
+WORKDIR /src
+RUN set -eux; \
+    git clone --depth 1 --branch "${ELECTRS_TAG}" https://github.com/romanz/electrs.git; \
+    test "$(git -C electrs rev-parse HEAD)" = "${ELECTRS_COMMIT}"; \
+    cargo build --manifest-path electrs/Cargo.toml --release --locked
+
+FROM debian:bookworm-slim@sha256:3783cc01769c7b2b1b83a5c5ad96c815348e28ed7da68e2e3687004faa906251
+
+RUN set -eux; \
+    apt-get update; \
+    apt-get install --yes --no-install-recommends ca-certificates libgcc-s1 libstdc++6; \
+    rm --recursive --force /var/lib/apt/lists/*; \
+    groupadd --gid 10001 o2a; \
+    useradd --uid 10001 --gid 10001 --create-home --shell /usr/sbin/nologin o2a; \
+    install --directory --owner 10001 --group 10001 /var/lib/electrs
+
+COPY --from=build /src/electrs/target/release/electrs /usr/local/bin/electrs
+
+USER 10001:10001
+VOLUME ["/var/lib/electrs"]
+ENTRYPOINT ["electrs"]

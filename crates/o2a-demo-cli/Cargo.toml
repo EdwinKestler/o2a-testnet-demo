@@ -1,0 +1,15 @@
+[package]
+name = "o2a-demo-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "o2a-demo"
+path = "src/main.rs"
+
+[dependencies]
+o2a-demo-core.workspace = true
+o2a-demo-rgb.workspace = true

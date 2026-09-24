@@ -1,0 +1,84 @@
+name: o2a-testnet-demo
+
+services:
+  toolchain:
+    profiles: ["tools"]
+    build:
+      context: ..
+      dockerfile: dev/Dockerfile.toolchain
+      args:
+        O2A_UID: "${O2A_UID:-1000}"
+        O2A_GID: "${O2A_GID:-1000}"
+    user: "${O2A_UID:-1000}:${O2A_GID:-1000}"
+    working_dir: /workspace
+    command: ["sleep", "infinity"]
+    volumes:
+      - ..:/workspace
+      - cargo-cache:/home/o2a/.cargo
+    networks: [build, regtest]
+    read_only: true
+    tmpfs:
+      - /tmp:size=1g,mode=1777
+    cap_drop: ["ALL"]
+    security_opt:
+      - no-new-privileges:true
+
+  bitcoin:
+    platform: linux/amd64
+    build:
+      context: ..
+      dockerfile: dev/Dockerfile.bitcoin
+    volumes:
+      - bitcoin-data:/var/lib/bitcoin
+    networks: [regtest]
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop: ["ALL"]
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "bitcoin-cli", "-regtest", "-datadir=/var/lib/bitcoin", "getblockchaininfo"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+      start_period: 5s
+
+  electrs:
+    profiles: ["rgb"]
+    build:
+      context: ..
+      dockerfile: dev/Dockerfile.electrs
+    command:
+      - --network=regtest
+      - --daemon-dir=/var/lib/bitcoin
+      - --daemon-rpc-addr=bitcoin:18443
+      - --electrum-rpc-addr=0.0.0.0:50001
+      - --monitoring-addr=0.0.0.0:4224
+      - --db-dir=/var/lib/electrs
+    depends_on:
+      bitcoin:
+        condition: service_healthy
+    volumes:
+      - bitcoin-data:/var/lib/bitcoin:ro
+      - electrs-data:/var/lib/electrs
+    networks: [regtest]
+    read_only: true
+    tmpfs:
+      - /tmp:size=256m,mode=1777
+    cap_drop: ["ALL"]
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  build:
+  regtest:
+    internal: true
+    ipam:
+      config:
+        - subnet: 172.30.30.0/24
+
+volumes:
+  bitcoin-data:
+  electrs-data:
+  cargo-cache:

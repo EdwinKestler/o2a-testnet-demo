@@ -1,0 +1,22 @@
+O2A Protocol licensing
+
+Copyright 2026 Edwin Kestler
+
+Except where a file or directory states a different license, O2A-authored
+specifications, documentation, and reference software in this repository are
+licensed at your option under either:
+
+1. the Apache License, Version 2.0, in LICENSE-APACHE; or
+2. the MIT License in LICENSE-MIT.
+
+SPDX-License-Identifier: MIT OR Apache-2.0
+
+You may select either license. The Apache-2.0 option, including its express
+patent grant and NOTICE conditions, remains available to every recipient.
+
+Conformance vectors, when added under tests/vectors/, are licensed separately
+under CC0-1.0 as stated in that directory. CC0-1.0 does not apply to other O2A
+material unless expressly stated.
+
+Third-party dependencies, copied material, and bundled artifacts retain their
+own licenses and notices. This file does not relicense them.

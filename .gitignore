@@ -1,0 +1,12 @@
+/target/
+/.env
+/dev/.env
+/.cargo/
+*.wallet
+*.cookie
+*.key
+*.seed
+*.sqlite*
+*.db
+*.log
+/evidence/*/work/
