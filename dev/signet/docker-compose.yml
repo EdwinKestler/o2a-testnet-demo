@@ -1,0 +1,72 @@
+name: signet-infra
+
+services:
+  bitcoind:
+    image: bitcoin/bitcoin:31.1@sha256:da25cedc66b1daefff9f412ee196c901a899c3fa68a33b20849c3e08b5c40d63
+    environment:
+      BITCOIN_DATA: /data
+    command:
+      - -signet=1
+      - -server=1
+      - -rest=1
+      - -txindex=1
+      - -disablewallet=1
+      - -listen=1
+      - -port=38333
+      - -rpcbind=0.0.0.0
+      - -rpcallowip=127.0.0.1
+      - -rpcallowip=172.30.31.0/24
+      - -rpcauth=${RPC_AUTH_LINE}
+      - -printtoconsole=1
+    volumes:
+      - signet-bitcoind:/data
+    ports:
+      - "127.0.0.1:38332:38332"
+    networks:
+      - signet
+    healthcheck:
+      test: ["CMD", "bitcoin-cli", "-signet", "-datadir=/data", "getblockchaininfo"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 20s
+
+  electrs:
+    image: getumbrel/electrs:v0.12.0@sha256:83cb57d7b23f553b3bb858f47e784018a723993777508f2299dc07c2fccb9db0
+    environment:
+      RPC_USER: ${RPC_USER}
+      RPC_PASSWORD: ${RPC_PASSWORD}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        umask 077
+        printf 'auth = "%s:%s"\n' "$$RPC_USER" "$$RPC_PASSWORD" > /tmp/electrs.toml
+        printf '%s\n' \
+          'network = "signet"' \
+          'db_dir = "/data"' \
+          'daemon_rpc_addr = "bitcoind:38332"' \
+          'electrum_rpc_addr = "0.0.0.0:60601"' \
+          'log_filters = "info"' >> /tmp/electrs.toml
+        exec electrs --skip-default-conf-files --conf /tmp/electrs.toml
+    sysctls:
+      net.ipv4.tcp_tw_reuse: "1"
+      net.ipv4.ip_local_port_range: "1024 65535"
+    volumes:
+      - signet-electrs:/data
+    ports:
+      - "127.0.0.1:60601:60601"
+    networks:
+      - signet
+    depends_on:
+      bitcoind:
+        condition: service_healthy
+
+networks:
+  signet:
+    ipam:
+      config:
+        - subnet: 172.30.31.0/24
+
+volumes:
+  signet-bitcoind:
+  signet-electrs:
