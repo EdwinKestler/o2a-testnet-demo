@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Public material for the disposable O2A demonstration on Bitcoin signet.">
+  <title>O2A — demonstration on Bitcoin signet</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to content</a>
+  <header class="hero shell">
+    <nav class="topbar" aria-label="Language">
+      <span class="brand">O2A / DEMO</span>
+      <span class="language"><a href="../" lang="es">ES</a><span aria-current="page">EN</span></span>
+    </nav>
+    <p class="eyebrow">Disposable demonstration · public test network</p>
+    <h1>O2A — demonstration on Bitcoin signet</h1>
+    <p class="lede">An artist creates an identity that depends on no platform, uses it to sign a live-event attestation, and two verifiers that do not trust each other reach the same result using only Bitcoin.</p>
+    <div class="claim-grid" aria-label="What we are not claiming">
+      <div class="claim"><strong>It is not in production.</strong> This demonstration is not a release, and mainnet is out of scope.</div>
+      <div class="claim"><strong>It creates no persistent identity.</strong> Today's identities are tests and will be discarded.</div>
+      <div class="claim"><strong>It does not replace ticketing.</strong> It makes no claim to replace today's ticket-sales systems.</div>
+    </div>
+    <p class="warning">Every identity created by this demonstration is disposable. Before creation, every participant is given this warning and must explicitly acknowledge it.</p>
+  </header>
+
+  <main id="content">
+    <section class="shell" aria-labelledby="see">
+      <p class="eyebrow">01 / The sequence</p>
+      <h2 id="see">What you will see</h2>
+      <p class="section-intro">Three acts make the identity, a signed statement, and independent verification visible. The Bitcoin, RGB, and O2A results remain separate during evaluation.</p>
+      <div class="acts">
+        <article class="act">
+          <div class="act-number">Act 1 · identity</div>
+          <div><h3>What you see</h3><p>An artist identity already anchored on signet, its identifier, and the containing block. If decision D5 permits it, a controller rotation appears in the explorer.</p></div>
+          <div class="underneath"><h3>What happens underneath</h3><p>The demo presents an RGB genesis and, optionally, a rotation transition together with its signed O2A object.</p></div>
+        </article>
+        <article class="act">
+          <div class="act-number">Act 2 · signing</div>
+          <div><h3>What you see</h3><p>The artist signs the object selected in D2. A transferable proof package is produced and its anchor is broadcast to signet.</p></div>
+          <div class="underneath"><h3>What happens underneath</h3><p>The demo encodes and signs an object, links it to this run's RGB state, and waits for Bitcoin confirmation.</p></div>
+        </article>
+        <article class="act">
+          <div class="act-number">Act 3 · agreement</div>
+          <div><h3>What you see</h3><p>Two verifiers receive the same package and display separate Bitcoin, RGB, and O2A authorization results side by side.</p></div>
+          <div class="underneath"><h3>What happens underneath</h3><p>Each process evaluates the supplied evidence with its own Bitcoin connection; the evaluation core does not query an O2A service.</p></div>
+        </article>
+      </div>
+
+      <aside class="pending-panel" aria-labelledby="pending">
+        <h3 id="pending">Pending script decisions</h3>
+        <p>Every bracketed item remains open. The text shown is an example, not a decision.</p>
+        <ul class="pending-list">
+          <li class="pending-chip" data-source="corchete">bracketed text</li>
+          <li class="pending-chip" data-source="una atestación de un evento">a live-event attestation</li>
+          <li class="pending-chip" data-source="artista real: nombre">D1 · real artist: name</li>
+          <li class="pending-chip" data-source="evento: nombre, fecha, venue">D2 · event: name, date, venue</li>
+          <li class="pending-chip" data-source="una nuestra + una de RGB-WG">D3 · one ours + one from RGB-WG</li>
+          <li class="pending-chip" data-source="12 minutos">D4 · 12 minutes</li>
+          <li class="pending-chip" data-source="génesis pre-anclada">D5 · pre-anchored genesis</li>
+          <li class="pending-chip" data-source="escenario">D6 · stage</li>
+          <li class="pending-chip" data-source="venue: nombre">D7 · venue: name</li>
+          <li class="pending-chip" data-source="3">3</li>
+          <li class="pending-chip" data-source="artista, D1">artist, D1</li>
+          <li class="pending-chip" data-source="opcional">optional</li>
+          <li class="pending-chip" data-source="5">5</li>
+          <li class="pending-chip" data-source="artista">artist</li>
+          <li class="pending-chip" data-source="la atestación del evento, D2">event attestation, D2</li>
+          <li class="pending-chip" data-source="venue, D7">venue, D7</li>
+          <li class="pending-chip" data-source="fecha">date</li>
+          <li class="pending-chip" data-source="si D7 = venue">if D7 = venue</li>
+          <li class="pending-chip" data-source="artista">artist</li>
+          <li class="pending-chip" data-source="attestation / event manifest">attestation / event manifest</li>
+          <li class="pending-chip" data-source="4">4</li>
+          <li class="pending-chip" data-source="los dos verificadores, D3">the two verifiers, D3</li>
+          <li class="pending-chip" data-source="N">N</li>
+          <li class="pending-chip" data-source="opcional, si sobra tiempo">optional, if time permits</li>
+          <li class="pending-chip" data-source="GCP, VM pequeña">GCP, small VM</li>
+          <li class="pending-chip" data-source="Ajustar a los dolores reales que el equipo ve en el mercado">Adjust to the team's real market pain points</li>
+          <li class="pending-chip" data-source="No se demuestra hoy">Not demonstrated today</li>
+          <li class="pending-chip" data-source="7">7</li>
+          <li class="pending-chip" data-source="GCP">GCP</li>
+          <li class="pending-chip" data-source="artista">artist</li>
+          <li class="pending-chip" data-source="venue">venue</li>
+          <li class="pending-chip" data-source="comercial + maintainer">commercial team + maintainer</li>
+          <li class="pending-chip" data-source="fecha">date</li>
+          <li class="pending-chip" data-source="maintainer con RGB-WG">maintainer with RGB-WG</li>
+          <li class="pending-chip" data-source="fecha">date</li>
+          <li class="pending-chip" data-source="comercial">commercial team</li>
+          <li class="pending-chip" data-source="fecha">date</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="shell" aria-labelledby="glossary">
+      <p class="eyebrow">02 / Shared language</p>
+      <h2 id="glossary">Glossary</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Technical term</th><th>How we say it in the demo</th></tr></thead>
+          <tbody>
+            <tr><td>EntityID</td><td>The artist's identity: a unique identifier controlled only by them.</td></tr>
+            <tr><td>Controller</td><td>The key the artist signs with today; it can rotate without losing the identity.</td></tr>
+            <tr><td>Attestation</td><td>A statement signed by the artist: “I confirm X.”</td></tr>
+            <tr><td>Bitcoin seal / anchor</td><td>The moment the statement is fixed in Bitcoin and can no longer be altered.</td></tr>
+            <tr><td>Proof package</td><td>The file anyone can verify without connecting to us.</td></tr>
+            <tr><td>Verifier</td><td>An independent program that reports “valid” or “invalid” without asking us.</td></tr>
+            <tr><td>Signet</td><td>Bitcoin's test network: blocks every 10 minutes and valueless test bitcoin.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="shell" aria-labelledby="matters">
+      <p class="eyebrow">03 / The case</p>
+      <h2 id="matters">Why it matters</h2>
+      <p class="section-intro">The exact commercial framing remains pending; these are the problems the script proposes making visible.</p>
+      <div class="three-grid">
+        <article class="card"><h3>Fake promoters</h3><p>A verifiable statement distinguishes something the artist signed from something they did not sign.</p></article>
+        <article class="card"><h3>Impersonation and direct sales</h3><p>The demo shows participant-controlled keys and a rotation without replacing the identifier being presented.</p></article>
+        <article class="card"><h3>Traceability</h3><p>Artists, venues, and promoters can present verifiable cross-signatures; the specific actors remain pending.</p></article>
+        <article class="card"><h3>Portability</h3><p>The package moves between verifiers; checking it does not depend on a central O2A interface.</p></article>
+      </div>
+    </section>
+
+    <section class="shell" aria-labelledby="evidence">
+      <p class="eyebrow">04 / Verifiable</p>
+      <h2 id="evidence">Evidence</h2>
+      <div class="evidence-grid">
+        <article class="evidence-card">
+          <span class="status">regtest · pre-demo</span>
+          <h3>Milestone 1</h3>
+          <p><strong>Anchor txid</strong></p>
+          <p class="mono">a703450cf1d0c427836537a3ad1ee8e928944b0e82ee36174303c0060fa6bed9</p>
+          <p><strong>Anchor block:</strong> 103.</p>
+          <p>Validators A and B produced identical results: <span class="mono">Mined(102)</span>, valid RGB history, and valid O2A authorization. That height was a known resolver defect; the later patched reproduction reported <span class="mono">Mined(103)</span>, matching Bitcoin Core.</p>
+        </article>
+        <article class="evidence-card">
+          <span class="status empty">signet · live demo</span>
+          <h3>Event record</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Date</th><th>Object</th><th>Txid</th><th>Block</th><th>Explorer</th></tr></thead>
+              <tbody><tr><td colspan="5">Intentionally empty. Filled after the event; no signet data has been invented.</td></tr></tbody>
+            </table>
+          </div>
+          <p><a href="https://mempool.space/signet" target="_blank" rel="noopener noreferrer">Open the public signet explorer<span aria-hidden="true"> ↗</span></a></p>
+        </article>
+      </div>
+    </section>
+
+    <section class="shell" aria-labelledby="verify">
+      <p class="eyebrow">05 / Try it</p>
+      <h2 id="verify">Verify it yourself</h2>
+      <div class="verify-box">
+        <p>Obtain the package from <strong>pending path:</strong> <span class="mono">EVIDENCE_PACKAGE_DIR</span>. The event has not yet produced a public signet package.</p>
+        <p>The exact interface advertised by the CLI is:</p>
+        <pre><code>o2a-demo verify-package VALIDATOR_DIR ELECTRUM_URL EVIDENCE_PACKAGE_DIR</code></pre>
+        <p>The verifier needs a fresh directory, an Electrum endpoint, and the package directory. This line comes directly from <span class="mono">crates/o2a-demo-cli/src/main.rs:361</span>.</p>
+      </div>
+    </section>
+
+    <section class="shell" aria-labelledby="questions">
+      <p class="eyebrow">06 / Conversation</p>
+      <h2 id="questions">Questions</h2>
+      <div class="questions">
+        <article class="question"><h3>Is this crypto or tokens?</h3><p>There is no O2A token. The demonstration uses Bitcoin to order and anchor evidence.</p></article>
+        <article class="question"><h3>What does each signature cost?</h3><p>Signing happens locally. Anchoring uses a signet transaction, whose test bitcoin has no value. Mainnet is out of scope.</p></article>
+        <article class="question"><h3>What if the artist loses their keys?</h3><p>Recovery is not demonstrated today. The specification—not this page—is the authority for that design.</p></article>
+        <article class="question"><h3>Why not use our database?</h3><p>Because the scene is meant to show two processes verifying the same package without querying an O2A service.</p></article>
+        <article class="question"><h3>When will this be in production?</h3><p>No date is promised. This work uses a release candidate of RGB and is disposable evidence.</p></article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell">
+      <nav class="footer-links" aria-label="Repositories and references">
+        <a href="https://github.com/EdwinKestler/o2a-testnet-demo">Demo repository</a>
+        <a href="https://github.com/EdwinKestler/o2a-protocol">O2A specification</a>
+        <a href="https://github.com/EdwinKestler/o2a-protocol/blob/main/docs/upstream-needs.md">Upstream needs</a>
+        <a href="https://github.com/EdwinKestler/rgb/tree/o2a/fix-witness-height-offbyone">RGB fix branch</a>
+      </nav>
+      <p>This site has the lowest authority level. The O2A specification repository governs; this page only presents demonstration material.</p>
+    </div>
+  </footer>
+</body>
+</html>

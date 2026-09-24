@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Material público para la demostración descartable de O2A sobre Bitcoin signet.">
+  <title>O2A — demostración en Bitcoin signet</title>
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#contenido">Ir al contenido</a>
+  <header class="hero shell">
+    <nav class="topbar" aria-label="Idioma">
+      <span class="brand">O2A / DEMO</span>
+      <span class="language"><span aria-current="page">ES</span><a href="en/" lang="en">EN</a></span>
+    </nav>
+    <p class="eyebrow">Demostración descartable · red pública de prueba</p>
+    <h1>O2A — demostración en Bitcoin signet</h1>
+    <p class="lede">Un artista crea una identidad que no depende de ninguna plataforma, la usa para firmar una atestación de un evento y dos verificadores que no confían entre sí llegan al mismo resultado usando solo Bitcoin.</p>
+    <div class="claim-grid" aria-label="Lo que no afirmamos">
+      <div class="claim"><strong>No está en producción.</strong> Esta demostración no es un lanzamiento y mainnet está fuera de alcance.</div>
+      <div class="claim"><strong>No crea identidades persistentes.</strong> Las identidades de hoy son pruebas y se descartan.</div>
+      <div class="claim"><strong>No reemplaza ticketing.</strong> No afirma sustituir el sistema actual de venta de entradas.</div>
+    </div>
+    <p class="warning">Toda identidad creada por esta demostración es descartable. Antes de crearla, cada participante recibe esta advertencia y debe aceptarla explícitamente.</p>
+  </header>
+
+  <main id="contenido">
+    <section class="shell" aria-labelledby="ver">
+      <p class="eyebrow">01 / La secuencia</p>
+      <h2 id="ver">Lo que vas a ver</h2>
+      <p class="section-intro">Tres actos hacen visible la identidad, una declaración firmada y la verificación independiente. Las capas Bitcoin, RGB y O2A se muestran por separado durante la evaluación.</p>
+      <div class="acts">
+        <article class="act">
+          <div class="act-number">Acto 1 · identidad</div>
+          <div><h3>Lo que ves</h3><p>Una identidad del artista ya anclada en signet, su identificador y el bloque que la contiene. Si la decisión D5 lo permite, una rotación de controlador aparece en el explorador.</p></div>
+          <div class="underneath"><h3>Qué ocurre debajo</h3><p>El demo presenta una génesis RGB y, opcionalmente, una transición de rotación junto con su objeto O2A firmado.</p></div>
+        </article>
+        <article class="act">
+          <div class="act-number">Acto 2 · firma</div>
+          <div><h3>Lo que ves</h3><p>El artista firma el objeto elegido en D2. Se genera un paquete de prueba transferible y el anclaje se transmite a signet.</p></div>
+          <div class="underneath"><h3>Qué ocurre debajo</h3><p>El demo codifica y firma un objeto, lo vincula con el estado RGB de esta ejecución y espera la confirmación de Bitcoin.</p></div>
+        </article>
+        <article class="act">
+          <div class="act-number">Acto 3 · acuerdo</div>
+          <div><h3>Lo que ves</h3><p>Dos verificadores reciben el mismo paquete y muestran, lado a lado, sus resultados separados para Bitcoin, RGB y autorización O2A.</p></div>
+          <div class="underneath"><h3>Qué ocurre debajo</h3><p>Cada proceso evalúa la evidencia recibida con su propia conexión a Bitcoin; el núcleo de evaluación no consulta servicios de O2A.</p></div>
+        </article>
+      </div>
+
+      <aside class="pending-panel" aria-labelledby="pendientes">
+        <h3 id="pendientes">Decisiones pendientes del guion</h3>
+        <p>Todo texto entre corchetes sigue abierto. Lo mostrado aquí es ejemplo, no decisión.</p>
+        <ul class="pending-list">
+          <li class="pending-chip" data-source="corchete">corchete</li>
+          <li class="pending-chip" data-source="una atestación de un evento">una atestación de un evento</li>
+          <li class="pending-chip" data-source="artista real: nombre">D1 · artista real: nombre</li>
+          <li class="pending-chip" data-source="evento: nombre, fecha, venue">D2 · evento: nombre, fecha, venue</li>
+          <li class="pending-chip" data-source="una nuestra + una de RGB-WG">D3 · una nuestra + una de RGB-WG</li>
+          <li class="pending-chip" data-source="12 minutos">D4 · 12 minutos</li>
+          <li class="pending-chip" data-source="génesis pre-anclada">D5 · génesis pre-anclada</li>
+          <li class="pending-chip" data-source="escenario">D6 · escenario</li>
+          <li class="pending-chip" data-source="venue: nombre">D7 · venue: nombre</li>
+          <li class="pending-chip" data-source="3">3</li>
+          <li class="pending-chip" data-source="artista, D1">artista, D1</li>
+          <li class="pending-chip" data-source="opcional">opcional</li>
+          <li class="pending-chip" data-source="5">5</li>
+          <li class="pending-chip" data-source="artista">artista</li>
+          <li class="pending-chip" data-source="la atestación del evento, D2">la atestación del evento, D2</li>
+          <li class="pending-chip" data-source="venue, D7">venue, D7</li>
+          <li class="pending-chip" data-source="fecha">fecha</li>
+          <li class="pending-chip" data-source="si D7 = venue">si D7 = venue</li>
+          <li class="pending-chip" data-source="artista">artista</li>
+          <li class="pending-chip" data-source="attestation / event manifest">attestation / event manifest</li>
+          <li class="pending-chip" data-source="4">4</li>
+          <li class="pending-chip" data-source="los dos verificadores, D3">los dos verificadores, D3</li>
+          <li class="pending-chip" data-source="N">N</li>
+          <li class="pending-chip" data-source="opcional, si sobra tiempo">opcional, si sobra tiempo</li>
+          <li class="pending-chip" data-source="GCP, VM pequeña">GCP, VM pequeña</li>
+          <li class="pending-chip" data-source="Ajustar a los dolores reales que el equipo ve en el mercado">Ajustar a los dolores reales que el equipo ve en el mercado</li>
+          <li class="pending-chip" data-source="No se demuestra hoy">No se demuestra hoy</li>
+          <li class="pending-chip" data-source="7">7</li>
+          <li class="pending-chip" data-source="GCP">GCP</li>
+          <li class="pending-chip" data-source="artista">artista</li>
+          <li class="pending-chip" data-source="venue">venue</li>
+          <li class="pending-chip" data-source="comercial + maintainer">comercial + maintainer</li>
+          <li class="pending-chip" data-source="fecha">fecha</li>
+          <li class="pending-chip" data-source="maintainer con RGB-WG">maintainer con RGB-WG</li>
+          <li class="pending-chip" data-source="fecha">fecha</li>
+          <li class="pending-chip" data-source="comercial">comercial</li>
+          <li class="pending-chip" data-source="fecha">fecha</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="shell" aria-labelledby="glosario">
+      <p class="eyebrow">02 / Lenguaje común</p>
+      <h2 id="glosario">Glosario</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Término técnico</th><th>Cómo lo decimos en la demo</th></tr></thead>
+          <tbody>
+            <tr><td>EntityID</td><td>La identidad del artista: un identificador único que solo él controla.</td></tr>
+            <tr><td>Controlador</td><td>La llave con la que el artista firma hoy; se puede rotar sin perder la identidad.</td></tr>
+            <tr><td>Atestación</td><td>Una declaración firmada por el artista: “yo confirmo X”.</td></tr>
+            <tr><td>Sello / anclaje en Bitcoin</td><td>El momento en que la declaración queda fijada en Bitcoin y ya no se puede alterar.</td></tr>
+            <tr><td>Paquete de prueba</td><td>El archivo que cualquiera puede verificar sin conectarse a nosotros.</td></tr>
+            <tr><td>Verificador</td><td>Un programa independiente que dice “válido” o “inválido” sin consultarnos.</td></tr>
+            <tr><td>Signet</td><td>Red de prueba de Bitcoin: bloques cada 10 minutos, bitcoins sin valor.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="shell" aria-labelledby="importa">
+      <p class="eyebrow">03 / El caso</p>
+      <h2 id="importa">Por qué importa</h2>
+      <p class="section-intro">El encuadre comercial exacto sigue pendiente; estos son los problemas que el guion propone hacer visibles.</p>
+      <div class="three-grid">
+        <article class="card"><h3>Promotores falsos</h3><p>Una declaración verificable permite distinguir entre algo que el artista firmó y algo que no firmó.</p></article>
+        <article class="card"><h3>Suplantación y venta directa</h3><p>El demo muestra llaves bajo control del participante y una rotación sin sustituir el identificador presentado.</p></article>
+        <article class="card"><h3>Trazabilidad</h3><p>Artista, venue y promotor pueden presentar firmas cruzadas verificables; los actores concretos siguen pendientes.</p></article>
+        <article class="card"><h3>Portabilidad</h3><p>El paquete se mueve entre verificadores; la comprobación no depende de una interfaz central de O2A.</p></article>
+      </div>
+    </section>
+
+    <section class="shell" aria-labelledby="evidencia">
+      <p class="eyebrow">04 / Comprobable</p>
+      <h2 id="evidencia">Evidencia</h2>
+      <div class="evidence-grid">
+        <article class="evidence-card">
+          <span class="status">regtest · pre-demo</span>
+          <h3>Milestone 1</h3>
+          <p><strong>Anchor txid</strong></p>
+          <p class="mono">a703450cf1d0c427836537a3ad1ee8e928944b0e82ee36174303c0060fa6bed9</p>
+          <p><strong>Bloque de anclaje:</strong> 103.</p>
+          <p>Los validadores A y B produjeron resultados idénticos: <span class="mono">Mined(102)</span>, historia RGB válida y autorización O2A válida. El valor de altura era un defecto conocido del resolver; la reproducción posterior con el parche reportó <span class="mono">Mined(103)</span>, igual a Bitcoin Core.</p>
+        </article>
+        <article class="evidence-card">
+          <span class="status empty">signet · demo en vivo</span>
+          <h3>Registro de evento</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Fecha</th><th>Objeto</th><th>Txid</th><th>Bloque</th><th>Explorador</th></tr></thead>
+              <tbody><tr><td colspan="5">Vacío intencionalmente. Se completa después del evento; no hay datos signet inventados.</td></tr></tbody>
+            </table>
+          </div>
+          <p><a href="https://mempool.space/signet" target="_blank" rel="noopener noreferrer">Abrir el explorador público de signet<span aria-hidden="true"> ↗</span></a></p>
+        </article>
+      </div>
+    </section>
+
+    <section class="shell" aria-labelledby="verificar">
+      <p class="eyebrow">05 / Haz la prueba</p>
+      <h2 id="verificar">Verifícalo tú mismo</h2>
+      <div class="verify-box">
+        <p>Obtén el paquete desde <strong>ruta pendiente:</strong> <span class="mono">EVIDENCE_PACKAGE_DIR</span>. El evento aún no ha producido un paquete público de signet.</p>
+        <p>La interfaz exacta anunciada por el CLI es:</p>
+        <pre><code>o2a-demo verify-package VALIDATOR_DIR ELECTRUM_URL EVIDENCE_PACKAGE_DIR</code></pre>
+        <p>El verificador necesita un directorio nuevo, un endpoint Electrum y la carpeta del paquete. Esta línea proviene directamente de <span class="mono">crates/o2a-demo-cli/src/main.rs:361</span>.</p>
+      </div>
+    </section>
+
+    <section class="shell" aria-labelledby="preguntas">
+      <p class="eyebrow">06 / Conversación</p>
+      <h2 id="preguntas">Preguntas</h2>
+      <div class="questions">
+        <article class="question"><h3>¿Esto es cripto o tokens?</h3><p>No hay un token O2A. La demostración usa Bitcoin para ordenar y anclar la evidencia.</p></article>
+        <article class="question"><h3>¿Cuánto cuesta cada firma?</h3><p>La firma ocurre localmente. El anclaje usa una transacción en signet, cuyos bitcoins de prueba no tienen valor. Mainnet está fuera de alcance.</p></article>
+        <article class="question"><h3>¿Y si el artista pierde sus llaves?</h3><p>La recuperación no se demuestra hoy. La especificación, no esta página, es la autoridad para ese diseño.</p></article>
+        <article class="question"><h3>¿Por qué no una base de datos nuestra?</h3><p>Porque la escena quiere mostrar que dos procesos pueden verificar el mismo paquete sin consultar un servicio de O2A.</p></article>
+        <article class="question"><h3>¿Cuándo estará en producción?</h3><p>No hay una fecha prometida. Este trabajo usa una versión candidata de RGB y es evidencia descartable.</p></article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell">
+      <nav class="footer-links" aria-label="Repositorios y referencias">
+        <a href="https://github.com/EdwinKestler/o2a-testnet-demo">Repositorio de la demo</a>
+        <a href="https://github.com/EdwinKestler/o2a-protocol">Especificación O2A</a>
+        <a href="https://github.com/EdwinKestler/o2a-protocol/blob/main/docs/upstream-needs.md">Necesidades upstream</a>
+        <a href="https://github.com/EdwinKestler/rgb/tree/o2a/fix-witness-height-offbyone">Rama del fix RGB</a>
+      </nav>
+      <p>Este sitio es el nivel de autoridad más bajo. El repositorio de especificación O2A gobierna; esta página solo presenta material de demostración.</p>
+    </div>
+  </footer>
+</body>
+</html>
