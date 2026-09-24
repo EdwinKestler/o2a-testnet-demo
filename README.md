@@ -4,6 +4,8 @@ This is the disposable O2A demonstration workspace permitted by the
 2026-09-24 demo-lineage entry in the O2A protocol specification. It is a
 separate repository and is not part of the normative specification.
 
+The static material in [`site/`](site/) supports the live demo and is not protocol authority.
+
 The workspace contains:
 
 - `o2a-demo-core`: deterministic O2A encoding, signing, and verification;
