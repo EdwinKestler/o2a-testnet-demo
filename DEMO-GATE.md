@@ -31,6 +31,7 @@ Specification authority: sibling `../o2a-protocol` at commit `3ca98ea9b60256f271
 7. Evidence is append-only. A run is never overwritten or deleted; a
    correction or rerun gets a new dated bundle and manifest.
 8. The demo site is the lowest authority level and never restates protocol rules; the O2A specification repository governs.
+   Publication channels: OpenAI Sites, configured in .openai/hosting.json, is a private preview for internal review.
 
 ## Demo relaxations
 
