@@ -12,7 +12,8 @@ extern crate strict_types;
 use aluvm::{aluasm, CoreConfig, Lib, LibSite};
 use amplify::confinement::SmallOrdMap;
 use bpstd::seals::WTxoSeal;
-use rgb::{Assignment, CallParams, Consensus, CoreParams, CreateParams, RgbSealDef};
+use bpstd::Outpoint;
+use rgb::{Assignment, CallParams, CoreParams, CreateParams, RgbSealDef};
 use sonicapi::{
     Aggregator, Api, GlobalApi, Issuer, OwnedApi, RawBuilder, RawConvertor, Semantics, StateArithm,
     StateAtom, StateBuilder, StateConvertor, SubAggregator,
@@ -84,7 +85,7 @@ pub struct GenesisInput {
     pub controller_xonly: [u8; 32],
     pub policy_hash: [u8; 32],
     pub state_commitment: [u8; 32],
-    pub seal: WTxoSeal,
+    pub seal: Outpoint,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -245,10 +246,9 @@ fn bytes32(value: [u8; 32]) -> StrictVal {
 }
 
 /// Builds RGB genesis parameters after O2A genesis authorization succeeds.
-pub fn genesis_params(input: GenesisInput) -> CreateParams<WTxoSeal> {
+pub fn genesis_params(input: GenesisInput) -> CreateParams<Outpoint> {
     let issuer = demo_issuer();
-    let mut params =
-        CreateParams::new_testnet(issuer.codex_id(), Consensus::Bitcoin, "O2AIdentity");
+    let mut params = CreateParams::new_bitcoin_testnet(issuer.codex_id(), "O2AIdentity");
     params = params
         .with_global_verified("root", bytes32(input.root_xonly))
         .with_global_verified("entityId", bytes32(input.entity_id))
@@ -296,15 +296,16 @@ mod tests {
     use strict_encoding::StrictDumb;
 
     use bpstd::seals::{TxoSealExt, WOutpoint};
-    use bpstd::Outpoint;
 
     const TXID: &str = "0000000000000000000000000000000000000000000000000000000000000001";
 
+    fn outpoint(vout: u32) -> Outpoint {
+        Outpoint::from_str(&format!("{TXID}:{vout}")).expect("test outpoint")
+    }
+
     fn seal(vout: u32) -> WTxoSeal {
         WTxoSeal {
-            primary: WOutpoint::Extern(
-                Outpoint::from_str(&format!("{TXID}:{vout}")).expect("test outpoint"),
-            ),
+            primary: WOutpoint::Extern(outpoint(vout)),
             secondary: TxoSealExt::strict_dumb(),
         }
     }
@@ -329,7 +330,7 @@ mod tests {
             controller_xonly: [3; 32],
             policy_hash: [4; 32],
             state_commitment: [5; 32],
-            seal: seal(0),
+            seal: outpoint(0),
         });
         assert_eq!(genesis.owned.len(), 1);
         assert_eq!(genesis.global.len(), 5);

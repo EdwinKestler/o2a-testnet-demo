@@ -16,11 +16,17 @@ publish = false
 [workspace.dependencies]
 aluvm = "=0.12.0"
 amplify = "=4.9.0"
-bp-std = "=0.12.0-rc.3"
+anyhow = "=1.0.104"
+bitcoin_hashes = "=0.14.101"
+bp-std = { version = "=0.12.0-rc.3", features = ["signers"] }
+hex = "=0.4.3"
 o2a-demo-core = { version = "=0.1.0", path = "crates/o2a-demo-core" }
 o2a-demo-rgb = { version = "=0.1.0", path = "crates/o2a-demo-rgb" }
+rgb-persist-fs = "=0.12.0-rc.3"
+rgb-psbt = { version = "=0.12.0-rc.3", git = "https://github.com/RGB-WG/rgb.git", rev = "a1e6b41524131f6d6f183b2235fdaacb5c1abb31" }
 rgb-std = "=0.12.0-rc.3"
 rgb-runtime = { version = "=0.12.0-rc.3", git = "https://github.com/RGB-WG/rgb.git", rev = "a1e6b41524131f6d6f183b2235fdaacb5c1abb31", default-features = false, features = ["resolver-electrum", "fs"] }
+secp256k1 = "=0.29.1"
 sonic-api = "=0.12.0"
 strict_encoding = "=2.9.1"
 strict_types = "=2.9.1"

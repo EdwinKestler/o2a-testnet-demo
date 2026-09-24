@@ -11,5 +11,15 @@ name = "o2a-demo"
 path = "src/main.rs"
 
 [dependencies]
+amplify.workspace = true
+anyhow.workspace = true
+bp-std.workspace = true
+hex.workspace = true
 o2a-demo-core.workspace = true
 o2a-demo-rgb.workspace = true
+rgb-persist-fs.workspace = true
+rgb-psbt.workspace = true
+rgb-runtime.workspace = true
+rgb-std.workspace = true
+strict_encoding.workspace = true
+strict_types.workspace = true

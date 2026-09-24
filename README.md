@@ -38,6 +38,16 @@ docker compose --file dev/compose.yaml --profile tools run --rm toolchain \
 
 See [dev/README.md](dev/README.md) for the complete workflow.
 
+## First execution milestone
+
+The append-only evidence bundle at
+`evidence/regtest-genesis-rotation-2026-09-24/` records one real RGB genesis
+and controller rotation on the isolated regtest network. Two fresh validator
+directories independently imported only the public consignment and signed O2A
+object, resolved the same chain through local electrs, and produced identical
+three-layer results. Read its `RUN.md` before interpreting the result: this is
+demo-lineage evidence, not a frozen RGB program or a persistent identity.
+
 ## License
 
 O2A-authored code and documentation are available under `MIT OR Apache-2.0`.

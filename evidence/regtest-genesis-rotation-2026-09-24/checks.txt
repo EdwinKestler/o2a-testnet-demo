@@ -1,0 +1,12 @@
+2026-09-24 isolated toolchain results
+rustc 1.98.1 (48a229cea 2026-09-01)
+cargo 1.98.1 (797e8a9bc 2026-08-05)
+Bitcoin Core /Satoshi:31.1.0/
+electrs 0.12.0
+cargo fmt --all -- --check: PASS
+cargo check --workspace --locked: PASS
+cargo test --workspace --locked: PASS (7 tests)
+cargo audit --ignore RUSTSEC-2024-0436: PASS; only the dated, approved paste compile-time advisory is ignored
+cargo deny check: PASS (advisories, bans, licenses, sources)
+validator output comparison: PASS (byte-identical)
+Cargo.lock SHA-256: abdaf06d25d61b773d272500304b97ef2ecc7ad28f610f277992991b24998d80

@@ -79,6 +79,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "anyhow"
+version = "1.0.104"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "330a5ed07fa54e4702c9d6c4174f74427fc0ef6e214bbd677ae50a5099946470"
+
+[[package]]
 name = "aora"
 version = "0.6.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -240,7 +246,7 @@ dependencies = [
  "commit_verify",
  "getrandom 0.2.17",
  "getrandom 0.3.4",
- "secp256k1",
+ "secp256k1 0.30.0",
  "serde",
  "strict_encoding",
  "wasm-bindgen",
@@ -275,7 +281,7 @@ dependencies = [
  "commit_verify",
  "getrandom 0.2.17",
  "getrandom 0.3.4",
- "secp256k1",
+ "secp256k1 0.30.0",
  "serde",
  "strict_encoding",
  "wasm-bindgen",
@@ -363,7 +369,7 @@ dependencies = [
  "getrandom 0.2.17",
  "getrandom 0.3.4",
  "psbt",
- "secp256k1",
+ "secp256k1 0.30.0",
  "serde",
  "wasm-bindgen",
 ]
@@ -663,6 +669,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
+name = "hex"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7f24254aa9a54b5c858eaee2f5bccdb46aaf0e486a595ed5fd8f86ba55232a70"
+
+[[package]]
 name = "hex-conservative"
 version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -817,13 +829,28 @@ dependencies = [
 name = "o2a-demo-cli"
 version = "0.1.0"
 dependencies = [
+ "amplify",
+ "anyhow",
+ "bp-std",
+ "hex",
  "o2a-demo-core",
  "o2a-demo-rgb",
+ "rgb-persist-fs",
+ "rgb-psbt",
+ "rgb-runtime",
+ "rgb-std",
+ "strict_encoding",
+ "strict_types",
 ]
 
 [[package]]
 name = "o2a-demo-core"
 version = "0.1.0"
+dependencies = [
+ "bitcoin_hashes",
+ "hex",
+ "secp256k1 0.29.1",
+]
 
 [[package]]
 name = "o2a-demo-rgb"
@@ -1194,6 +1221,15 @@ name = "ryu"
 version = "1.0.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9774ba4a74de5f7b1c1451ed6cd5285a32eddb5cccb8cc655a4e50009e06477f"
+
+[[package]]
+name = "secp256k1"
+version = "0.29.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9465315bc9d4566e1724f0fffcbcc446268cb522e60f9a27bcded6b19c108113"
+dependencies = [
+ "secp256k1-sys",
+]
 
 [[package]]
 name = "secp256k1"

@@ -1,0 +1,8 @@
+phase=after-genesis-before-rotation
+chain_height=102
+contract_id=contract:kmCwN~Co-omXaJq~-axMdmZI-k0HTJgX-G2yXCDK-9O~MjBk
+rgb_current_cell=bOFyMD63lZ4DxFaBadVN3VsUKDMSTwPMhfRzhTzY3Qs:0
+rgb_current_seal=ef571a9c947523ce0838f062529fcebca40b3adb2b264d48b2f75c4aaafcfb1f:1
+rgb_owned_state_digest=17466aee8c10042df5fabe247437fd7f77ed3b44a1f14ab51a423b34a5778b74
+genesis_seal_unspent=true
+successor_seal_unspent=true
