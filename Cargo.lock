@@ -829,8 +829,16 @@ version = "0.1.0"
 name = "o2a-demo-rgb"
 version = "0.1.0"
 dependencies = [
+ "aluvm",
+ "amplify",
+ "bp-std",
  "o2a-demo-core",
  "rgb-runtime",
+ "rgb-std",
+ "sonic-api",
+ "strict_encoding",
+ "strict_types",
+ "ultrasonic",
 ]
 
 [[package]]

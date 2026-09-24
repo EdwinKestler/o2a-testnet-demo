@@ -6,9 +6,21 @@ rust-version.workspace = true
 license.workspace = true
 publish.workspace = true
 
+[features]
+default = ["std"]
+std = []
+
 [dependencies]
+aluvm.workspace = true
+amplify.workspace = true
+bp-std.workspace = true
 o2a-demo-core.workspace = true
+rgb-std.workspace = true
 rgb-runtime.workspace = true
+sonic-api.workspace = true
+strict_encoding.workspace = true
+strict_types.workspace = true
+ultrasonic.workspace = true
 
 [lib]
 path = "src/lib.rs"
