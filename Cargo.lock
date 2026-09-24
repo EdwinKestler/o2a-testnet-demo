@@ -1049,7 +1049,7 @@ dependencies = [
 [[package]]
 name = "rgb-descriptors"
 version = "0.12.0-rc.3"
-source = "git+https://github.com/RGB-WG/rgb.git?rev=a1e6b41524131f6d6f183b2235fdaacb5c1abb31#a1e6b41524131f6d6f183b2235fdaacb5c1abb31"
+source = "git+https://github.com/EdwinKestler/rgb.git?rev=f1e5a68992700ce208da81682ff092c0d5576e82#f1e5a68992700ce208da81682ff092c0d5576e82"
 dependencies = [
  "amplify",
  "bp-std",
@@ -1093,7 +1093,7 @@ dependencies = [
 [[package]]
 name = "rgb-psbt"
 version = "0.12.0-rc.3"
-source = "git+https://github.com/RGB-WG/rgb.git?rev=a1e6b41524131f6d6f183b2235fdaacb5c1abb31#a1e6b41524131f6d6f183b2235fdaacb5c1abb31"
+source = "git+https://github.com/EdwinKestler/rgb.git?rev=f1e5a68992700ce208da81682ff092c0d5576e82#f1e5a68992700ce208da81682ff092c0d5576e82"
 dependencies = [
  "amplify",
  "bp-core",
@@ -1104,7 +1104,7 @@ dependencies = [
 [[package]]
 name = "rgb-runtime"
 version = "0.12.0-rc.3"
-source = "git+https://github.com/RGB-WG/rgb.git?rev=a1e6b41524131f6d6f183b2235fdaacb5c1abb31#a1e6b41524131f6d6f183b2235fdaacb5c1abb31"
+source = "git+https://github.com/EdwinKestler/rgb.git?rev=f1e5a68992700ce208da81682ff092c0d5576e82#f1e5a68992700ce208da81682ff092c0d5576e82"
 dependencies = [
  "amplify",
  "bp-electrum",

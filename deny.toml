@@ -34,5 +34,9 @@ wildcards = "deny"
 unknown-registry = "deny"
 unknown-git = "deny"
 allow-registry = ["https://github.com/rust-lang/crates.io-index"]
-allow-git = ["https://github.com/RGB-WG/rgb"]
+allow-git = [
+    "https://github.com/RGB-WG/rgb",
+    # Demo patch for upstream-needs item 5; remove with the patch override.
+    "https://github.com/EdwinKestler/rgb",
+]
 required-git-spec = "rev"

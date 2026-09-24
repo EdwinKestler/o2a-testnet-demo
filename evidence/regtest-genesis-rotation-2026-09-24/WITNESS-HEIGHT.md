@@ -64,3 +64,26 @@ This is an `rgb-runtime` Electrum-resolver off-by-one bug in the pinned RC3
 lineage. No O2A verifier rule or normative fixture is changed by this note.
 The upstream request is tracked as RGB-WG item 5 in the specification
 repository's `docs/upstream-needs.md`.
+
+## After patch — 2026-09-24
+
+The demo patch mechanism now resolves `rgb-runtime 0.12.0-rc.3` from fork
+revision `f1e5a68992700ce208da81682ff092c0d5576e82`, branch
+`o2a/fix-witness-height-offbyone`. The revision adds the missing `+ 1` to the
+Electrum resolver calculation and contains no other source change. The patch
+is retained as `patches/0001-witness-height-offbyone.patch`.
+
+A fresh validator process imported the same retained consignment and O2A
+object against the retained regtest chain:
+
+```text
+Bitcoin Core tip:             104
+Bitcoin Core anchor height:   103
+Bitcoin Core confirmations:   2
+RGB witness status:           Mined(103)
+RGB history:                  valid
+O2A authorization:            valid
+```
+
+The patched RGB height now agrees with Bitcoin Core's height for the anchor.
+No block was mined and no signet service was started during this verification.

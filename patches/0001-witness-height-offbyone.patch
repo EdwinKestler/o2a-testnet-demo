@@ -1,0 +1,13 @@
+diff --git a/src/resolvers/electrum.rs b/src/resolvers/electrum.rs
+index a551031..9b6658b 100644
+--- a/src/resolvers/electrum.rs
++++ b/src/resolvers/electrum.rs
+@@ -55,7 +55,7 @@ impl Resolver for ElectrumResolver {
+             return Ok(WitnessStatus::Tentative);
+         };
+         let last_height = self.last_block_height()?;
+-        let height = last_height - verbose.confirmations as u64;
++        let height = last_height - verbose.confirmations as u64 + 1;
+         let Some(height) = NonZeroU64::new(height) else {
+             return Ok(WitnessStatus::Genesis);
+         };
