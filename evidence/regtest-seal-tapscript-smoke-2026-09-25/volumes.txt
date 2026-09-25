@@ -1,0 +1,19 @@
+Project o2a-seal-smoke. Volumes left in place. None were deleted.
+
+o2a-seal-smoke_bitcoin-data   created 2026-09-25T12:23:58-06:00
+o2a-seal-smoke_electrs-data   created 2026-09-25T12:23:58-06:00
+o2a-seal-smoke_cargo-cache    created 2026-09-25T12:29:46-06:00
+
+Networks left in place:
+o2a-seal-smoke_regtest  172.30.32.0/24
+o2a-seal-smoke_build
+
+The regtest subnet in dev/compose.yaml was moved from 172.30.30.0/24 to
+172.30.32.0/24 on this branch only. Project o2a-testnet-demo was exited and
+still held 172.30.30.0/24. It was not stopped, removed, or modified.
+Signet project signet-infra was left running on 172.30.31.0/24.
+Project o2a-phase0 was not touched.
+
+Core wallets inside the bitcoin volume, also left in place:
+smoke       descriptor wallet used to mine and fund
+smoke-leaf  blank wallet used for the optional PSBT round-trip

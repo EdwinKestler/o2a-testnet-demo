@@ -1,0 +1,30 @@
+Bitcoin Core RPC client version v31.1.0
+Wallet: smoke (descriptor wallet, empty passphrase, not encrypted)
+
+seal A
+  checksum=dgd4kyqu
+  descriptor=tr(50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0,{pk(18337cde2f922fe1d941c15d0244407290f632de11efba0bc8ef3a2b2f8dad57),and_v(v:multi_a(2,94b8c1d1a72f0aea91b2401ab0fa7253e1f02c30f291d5c0a772fa8d0cca09c6,af1b0443e38638294cae5a39efa8ca66dd7a9ec00087fd9094bca46c872ae6d6,cca6e9c2cc532a19d02af531d0c0aa129500d4150255e5536df96ac5ea88490b),older(10))})#dgd4kyqu
+  address=bcrt1pc8s87r2sttgpcpetracc4ugt46nm40vvnuunzllznux0c5qdawaqas75hj
+  core_spk=5120c1e07f0d505ad01c072b1f718af10baea7babd8c9f39317fe29f0cfc500debba
+  ours_spk=5120c1e07f0d505ad01c072b1f718af10baea7babd8c9f39317fe29f0cfc500debba
+  match=True
+seal B
+  checksum=7yvamnhw
+  descriptor=tr(50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0,{{pk(18337cde2f922fe1d941c15d0244407290f632de11efba0bc8ef3a2b2f8dad57),pk(4fe93634dffbe7f391397acdec47bcd7a2aa5626d881350fcf56870d0801e6e8)},and_v(v:multi_a(2,94b8c1d1a72f0aea91b2401ab0fa7253e1f02c30f291d5c0a772fa8d0cca09c6,af1b0443e38638294cae5a39efa8ca66dd7a9ec00087fd9094bca46c872ae6d6,cca6e9c2cc532a19d02af531d0c0aa129500d4150255e5536df96ac5ea88490b),older(10))})#7yvamnhw
+  address=bcrt1pd6v68pexc7ttgmjnefg5xlp0rn8yl2m2ju0s337el2sm3v3z27rsjx6wac
+  core_spk=51206e99a38726c796b46e53ca51437c2f1cce4fab6a971f08c7d9faa1b8b2225787
+  ours_spk=51206e99a38726c796b46e53ca51437c2f1cce4fab6a971f08c7d9faa1b8b2225787
+  match=True
+seal C
+  checksum=fv836xdj
+  descriptor=tr(50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0,{pk(4fe93634dffbe7f391397acdec47bcd7a2aa5626d881350fcf56870d0801e6e8),and_v(v:multi_a(2,94b8c1d1a72f0aea91b2401ab0fa7253e1f02c30f291d5c0a772fa8d0cca09c6,af1b0443e38638294cae5a39efa8ca66dd7a9ec00087fd9094bca46c872ae6d6,cca6e9c2cc532a19d02af531d0c0aa129500d4150255e5536df96ac5ea88490b),older(10))})#fv836xdj
+  address=bcrt1p7fyfv5eefvdfz87c4z668xpm5vnaqs2zvnt8d4u5ha4cdjj3392qd9pdmr
+  core_spk=5120f2489653394b1a911fd8a8b5a3983ba327d0414264d676d794bf6b86ca518954
+  ours_spk=5120f2489653394b1a911fd8a8b5a3983ba327d0414264d676d794bf6b86ca518954
+  match=True
+
+Recovery leaf bytes, sorted R1 R2 R3:
+  OP_2 OP_NUMEQUALVERIFY OP_10 OP_CHECKSEQUENCEVERIFY
+  tail=529d5ab2
+Core 31.1 compiles and_v(v:multi_a(2,...),older(10)) to that tail.
+The v: wrapper is fused OP_NUMEQUALVERIFY. This older() form has no OP_DROP.

@@ -3,6 +3,7 @@ members = [
     "crates/o2a-demo-core",
     "crates/o2a-demo-rgb",
     "crates/o2a-demo-cli",
+    "crates/o2a-seal-smoke",
 ]
 resolver = "2"
 
@@ -22,6 +23,7 @@ bp-std = { version = "=0.12.0-rc.3", features = ["signers"] }
 hex = "=0.4.3"
 o2a-demo-core = { version = "=0.1.0", path = "crates/o2a-demo-core" }
 o2a-demo-rgb = { version = "=0.1.0", path = "crates/o2a-demo-rgb" }
+o2a-seal-smoke = { version = "=0.1.0", path = "crates/o2a-seal-smoke" }
 rgb-persist-fs = "=0.12.0-rc.3"
 rgb-psbt = { version = "=0.12.0-rc.3", git = "https://github.com/RGB-WG/rgb.git", rev = "a1e6b41524131f6d6f183b2235fdaacb5c1abb31" }
 rgb-std = "=0.12.0-rc.3"
