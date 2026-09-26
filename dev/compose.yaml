@@ -76,7 +76,7 @@ networks:
     internal: true
     ipam:
       config:
-        - subnet: 172.30.32.0/24
+        - subnet: 172.30.30.0/24
 
 volumes:
   bitcoin-data:

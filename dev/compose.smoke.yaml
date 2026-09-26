@@ -1,0 +1,6 @@
+# Smoke project only. Pair with dev/compose.yaml. Does not replace that file's subnet.
+networks:
+  regtest:
+    ipam:
+      config: !override
+        - subnet: 172.30.32.0/24
