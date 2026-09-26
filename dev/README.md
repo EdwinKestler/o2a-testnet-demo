@@ -35,6 +35,9 @@ Start the local evidence network:
 docker compose --file dev/compose.yaml --profile rgb up --detach --wait bitcoin electrs
 ```
 
+Smoke project: `docker compose -p o2a-seal-smoke --file dev/compose.yaml --file dev/compose.smoke.yaml --profile rgb up --detach --wait bitcoin electrs`
+2026-09-25: that override also passes `-rpcallowip=172.30.32.0/24` on the bitcoind command; `dev/bitcoin.conf` stays on `172.30.30.0/24`.
+
 The toolchain container can reach `electrs:50001` on the internal network.
 Regtest wallets, keys, identities, and values are disposable. Never mount real
 wallets or credentials. Do not delete Compose volumes unless the maintainer

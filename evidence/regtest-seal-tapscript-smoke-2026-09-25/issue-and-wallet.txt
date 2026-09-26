@@ -1,0 +1,25 @@
+issue on 46475f1eb02b18b99e9975dbfd833c6f403c3649ed4ef8b55f28541359e30878:0
+contract_id=contract:zf3wG3sS-CX225e8-ppsigBg-rOP4UrJ-XBGNp8e-Ab1HX5c
+genesis_cell=th8kp_wbJjiz3DgRsk5WARn3tjbVNFaYmzhPgKNq3_U:0
+genesis_seal=46475f1eb02b18b99e9975dbfd833c6f403c3649ed4ef8b55f28541359e30878:0/0bb50495dbccfaf436a88f2bc99d1a981497cc52df45fe04981cec6431abe9caffffffffffffffff
+o2a_digest=246b8b2c0f5377ddebdb285deb19da8f83a999b9119fd888f9e9d30519573164
+
+An earlier issue, contract:vxQyGKPR-KIYaYQo-ibssSXr-KiNZxva-8tVy9Sv-0sjW_IU,
+was deleted before broadcast. extract() panicked and no transaction was sent.
+See anchor-a-b.txt.
+
+=== UTXOS ===
+utxo_count=1
+utxo=46475f1eb02b18b99e9975dbfd833c6f403c3649ed4ef8b55f28541359e30878:1
+=== SELECT A ===
+wallet_contains=false
+construct_psbt_error=the input spending 46475f1eb02b18b99e9975dbfd833c6f403c3649ed4ef8b55f28541359e30878:0 is not known for the current wallet.
+=== SELECT B ===
+wallet_contains=false
+construct_psbt_error=the input spending 46475f1eb02b18b99e9975dbfd833c6f403c3649ed4ef8b55f28541359e30878:2 is not known for the current wallet.
+=== SELECT C ===
+wallet_contains=false
+construct_psbt_error=the input spending 46475f1eb02b18b99e9975dbfd833c6f403c3649ed4ef8b55f28541359e30878:3 is not known for the current wallet.
+=== SELECT FEE ===
+wallet_contains=true
+construct_psbt=accepted
