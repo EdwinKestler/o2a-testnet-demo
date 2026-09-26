@@ -64,6 +64,25 @@ Issuer id
 Methods are `issue`, `rotateController`, `revoke`, and `recover`. Each
 verifier is the same success program. RGB still validates no O2A semantics.
 
+## Recovery thresholds
+
+Vector objects keep the fixed spec inputs: recovery threshold 1 and
+`delay_blocks` 6. The demo lineage uses a 2-of-3 recovery set and
+`delay_blocks` 10. Phase B cross-checks every lineage seal address with
+Bitcoin Core `getdescriptorinfo` and `deriveaddresses`, and records that
+output.
+
+## Open demo operations
+
+These identity-transition operations are open. `o2a-demo-core` rejects each
+signed payload with `unsupported in demo`.
+
+- Operation 2, recovery-policy change.
+- Operation 4, custody transfer.
+
+Operation 3 remains the recovery-authorization operation. Inside an identity
+transition it is invalid.
+
 ## Networks
 
 - Regtest is used now for development and append-only evidence.

@@ -29,6 +29,21 @@ docker compose --file dev/compose.yaml --profile tools run --rm toolchain \
 The advisory exception is the dated maintainer decision recorded in
 `DEMO-GATE.md`; it does not generalize to other unmaintained dependencies.
 
+`o2a-demo-core` conformance reads the sibling specification with `git show`.
+Inside the toolchain image the repository is `/workspace`, so that relative
+path is `/o2a-protocol`. Mount the sibling read-only at that path. Run this
+from the demo repository root:
+
+```bash
+export DOCKER_CONTEXT=default
+docker compose -p o2a-testnet-demo --file dev/compose.yaml --profile tools run --rm \
+  -v "$(pwd)/../o2a-protocol:/o2a-protocol:ro" \
+  toolchain bash -lc 'cargo test -p o2a-demo-core'
+```
+
+`dev/compose.yaml` does not carry this mount. Use the same `-v` when a
+workspace gate runs `cargo test`, or the conformance tests fail closed.
+
 Start the local evidence network:
 
 ```bash

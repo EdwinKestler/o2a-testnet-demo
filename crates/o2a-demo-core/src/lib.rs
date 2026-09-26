@@ -4,6 +4,7 @@
 //! rules at [`SPEC_COMMIT`]. It accepts explicit state and chain evidence; it
 //! never reads the network, clock, or a database.
 
+mod decode;
 mod derive;
 mod encode;
 mod eval;
@@ -11,12 +12,19 @@ mod seal;
 
 use secp256k1::{schnorr::Signature, Keypair, Message, Secp256k1, SecretKey, XOnlyPublicKey};
 
+pub use decode::{decode_payload, evaluate_name_claim, ClaimAuthorization};
 pub use encode::{
     bytes_field, common_header, content_reference, encode_recovery_policy, encode_resulting_state,
     encode_seal_policy, entity_id as entity_id_on, key_id, list_items, option_fixed, text_field,
     ControllerEntry, RecoveryPolicy, ResultingState, SealBinding,
 };
-pub use eval::{header_role_allowed, recovery_policy_valid, seal_bindings_valid};
+pub use eval::{
+    adapter_key_distinct, adapter_scheme, capability_known, evidence_ids_valid, genesis_root_ok,
+    header_role_allowed, identity_history_state, increasing_expiry, manifest_binding,
+    observation_time_status, package_object_gap, recovery_policy_valid, recovery_witness_status,
+    revocation_target, seal_bindings_valid, seal_output_matches, seal_policy_valid,
+    state_authorizes, HistoryInput, RecoveryClock, SealWatch,
+};
 pub use seal::{recovery_leaf, script_num, seal_script, SealScript, NUMS_X};
 
 pub const SPEC_COMMIT: &str = "c7b08716d017d1f6125e6a728fb098673a09d433";
@@ -125,6 +133,19 @@ pub fn tagged_hash(tag: &str, payload: &[u8]) -> [u8; 32] {
 
 pub fn entity_id(root_xonly: [u8; 32]) -> [u8; 32] {
     entity_id_on(root_xonly, NETWORK_REGTEST)
+}
+
+/// EntityID for a known network and a BIP340 x-only root.
+///
+/// An unknown network or an unparsable root returns before any hash.
+pub fn entity_id_checked(network: u8, root: &[u8; 32]) -> Result<[u8; 32], &'static str> {
+    if !matches!(network, 0..=4) {
+        return Err("unknown Bitcoin network");
+    }
+    if XOnlyPublicKey::from_slice(root).is_err() {
+        return Err("root is not a BIP340 x-only public key");
+    }
+    Ok(entity_id_on(*root, network))
 }
 
 pub fn recovery_policy_hash(policy: &[u8]) -> [u8; 32] {
@@ -377,6 +398,12 @@ pub fn verify_controller_rotation(object: &SignedObject) -> Result<(), &'static 
         return Err("controller-rotation authorization fields do not match the demo profile");
     }
     let (role, capability, operation) = header_role_capability_operation(&object.payload)?;
+    // Operations 2 and 4 stay open. A signed payload must not pass through.
+    match operation {
+        Some(2) | Some(4) => return Err("unsupported in demo"),
+        Some(3) => return Err("operation 3 is invalid in the identity-transition domain"),
+        _ => {}
+    }
     header_role_allowed(role)?;
     if role != 1 || capability != 2 || operation != Some(1) {
         return Err("controller-rotation authorization fields do not match the demo profile");
@@ -531,6 +558,30 @@ mod tests {
         assert_eq!(
             verify_controller_rotation(&wrongly_authorized),
             Err("controller-rotation authorization fields do not match the demo profile")
+        );
+    }
+
+    #[test]
+    fn policy_change_and_custody_transfer_are_unsupported() {
+        let base = controller_rotation([2; 32], [1; 36], [3; 36]);
+        let end = header_end(&base.payload).expect("header");
+        assert_eq!(base.payload[end], 1);
+        for operation in [2u8, 4] {
+            let mut payload = base.payload.clone();
+            payload[end] = operation;
+            let signed = sign(TRANSITION_TAG, payload, demo_keys().controller_0);
+            verify(&signed).expect("the mutated operation is still signed");
+            assert_eq!(
+                verify_controller_rotation(&signed),
+                Err("unsupported in demo")
+            );
+        }
+        let mut payload = base.payload.clone();
+        payload[end] = 3;
+        let signed = sign(TRANSITION_TAG, payload, demo_keys().controller_0);
+        assert_eq!(
+            verify_controller_rotation(&signed),
+            Err("operation 3 is invalid in the identity-transition domain")
         );
     }
 
