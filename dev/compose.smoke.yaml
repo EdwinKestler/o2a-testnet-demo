@@ -1,4 +1,9 @@
-# Smoke project only. Pair with dev/compose.yaml. Does not replace that file's subnet.
+# Smoke project only. Pair with dev/compose.yaml.
+# bitcoind keeps the image ENTRYPOINT. This command is the image CMD plus the smoke subnet.
+services:
+  bitcoin:
+    command: ["-conf=/etc/bitcoin/bitcoin.conf", "-datadir=/var/lib/bitcoin", "-rpcallowip=172.30.32.0/24"]
+
 networks:
   regtest:
     ipam:
