@@ -1,40 +1,42 @@
 //! Deterministic, network-free O2A encoding and verification boundary.
 //!
 //! This is the demo's single implementation of the normative byte and signing
-//! rules referenced by [`CANONICAL_RULES`]. It accepts explicit state and chain
-//! evidence; it never reads the network, clock, or a database.
+//! rules at [`SPEC_COMMIT`]. It accepts explicit state and chain evidence; it
+//! never reads the network, clock, or a database.
 
-use bitcoin_hashes::{
-    hmac::{Hmac, HmacEngine},
-    sha256, sha512, Hash, HashEngine,
-};
-use secp256k1::{
-    schnorr::Signature, Keypair, Message, Scalar, Secp256k1, SecretKey, XOnlyPublicKey,
-};
+mod derive;
+mod encode;
+mod eval;
+mod seal;
 
-pub const SPEC_COMMIT: &str = "3ca98ea9b60256f271e71fa89caa09448e804e87";
-pub const CANONICAL_RULES: [&str; 2] = [
+use secp256k1::{schnorr::Signature, Keypair, Message, Secp256k1, SecretKey, XOnlyPublicKey};
+
+pub use encode::{
+    bytes_field, common_header, content_reference, encode_recovery_policy, encode_resulting_state,
+    encode_seal_policy, entity_id as entity_id_on, key_id, list_items, option_fixed, text_field,
+    ControllerEntry, RecoveryPolicy, ResultingState, SealBinding,
+};
+pub use eval::{header_role_allowed, recovery_policy_valid, seal_bindings_valid};
+pub use seal::{recovery_leaf, script_num, seal_script, SealScript, NUMS_X};
+
+pub const SPEC_COMMIT: &str = "c7b08716d017d1f6125e6a728fb098673a09d433";
+pub const CANONICAL_RULES: [&str; 4] = [
     "../o2a-protocol/specs/canonical-encoding.md",
     "../o2a-protocol/specs/cryptographic-profile.md",
+    "../o2a-protocol/specs/key-derivation-profile.md",
+    "../o2a-protocol/specs/rgb-identity-contract.md",
 ];
 pub const UNSAFE_BIP39_SEED_HEX: &str = concat!(
     "c55257c360c07c72029aebc1b53c05ed0362ada38ead3e3e9efa3708e5349553",
     "1f09a6987599d18264c1e1c92f2cf141630c7a3c4ab7c81b2f001698e7463b04"
 );
 pub const NETWORK_REGTEST: u8 = 4;
+pub const DEMO_RECOVERY_THRESHOLD: u16 = 2;
+pub const DEMO_DELAY_BLOCKS: u32 = 10;
 
-const HARDENED: u32 = 1 << 31;
-const O2A_INDEX: u32 = 998_536_622;
-const ENTITY_TAG: &str = "O2A/v0.1/entity-id";
-const KEY_TAG: &str = "O2A/v0.1/key-id";
 const GENESIS_TAG: &str = "O2A/v0.1/entity-genesis";
 const TRANSITION_TAG: &str = "O2A/v0.1/identity-transition";
-
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-struct Xprv {
-    secret: [u8; 32],
-    chain_code: [u8; 32],
-}
+const RECOVERY_TAG: &str = "O2A/v0.1/recovery";
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct DemoKey {
@@ -42,12 +44,24 @@ pub struct DemoKey {
     pub xonly: [u8; 32],
 }
 
+/// Disposable regtest entity 0.
+///
+/// Seal indexes on `m/1'/0'/4'/index'` are paired in this order: controller 0,
+/// controller 1, recovery 0, recovery 1, recovery 2. That allocation is a demo
+/// default, not a second derivation rule.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct DemoKeys {
     pub root: DemoKey,
     pub controller_0: DemoKey,
     pub controller_1: DemoKey,
     pub recovery_0: DemoKey,
+    pub recovery_1: DemoKey,
+    pub recovery_2: DemoKey,
+    pub seal_controller_0: DemoKey,
+    pub seal_controller_1: DemoKey,
+    pub seal_recovery_0: DemoKey,
+    pub seal_recovery_1: DemoKey,
+    pub seal_recovery_2: DemoKey,
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -63,90 +77,44 @@ pub fn evaluation_boundary() -> &'static str {
     "explicit evidence in; deterministic three-layer result out; no network fetch"
 }
 
-fn hmac_sha512(key: &[u8], data: &[u8]) -> [u8; 64] {
-    let mut engine = HmacEngine::<sha512::Hash>::new(key);
-    engine.input(data);
-    Hmac::<sha512::Hash>::from_engine(engine).to_byte_array()
-}
-
-fn master(seed: &[u8]) -> Xprv {
-    let digest = hmac_sha512(b"Bitcoin seed", seed);
-    Xprv {
-        secret: digest[..32].try_into().expect("fixed hash length"),
-        chain_code: digest[32..].try_into().expect("fixed hash length"),
-    }
-}
-
-fn child(parent: Xprv, child_number: u32) -> Xprv {
-    let mut data = [0u8; 37];
-    if child_number >= HARDENED {
-        data[1..33].copy_from_slice(&parent.secret);
-    } else {
-        let key = SecretKey::from_slice(&parent.secret).expect("valid parent key");
-        data[..33].copy_from_slice(
-            &secp256k1::PublicKey::from_secret_key(&Secp256k1::new(), &key).serialize(),
-        );
-    }
-    data[33..].copy_from_slice(&child_number.to_be_bytes());
-    let digest = hmac_sha512(&parent.chain_code, &data);
-    let tweak = Scalar::from_be_bytes(digest[..32].try_into().expect("fixed hash length"))
-        .expect("demo derivation tweak must be in range");
-    let parent = SecretKey::from_slice(&parent.secret).expect("valid parent key");
-    let derived = parent
-        .add_tweak(&tweak)
-        .expect("demo child key must be nonzero");
-    Xprv {
-        secret: derived.secret_bytes(),
-        chain_code: digest[32..].try_into().expect("fixed hash length"),
-    }
-}
-
-fn hard(index: u32) -> u32 {
-    assert!(index < HARDENED, "demo index must fit in 31 bits");
-    index | HARDENED
-}
-
-fn derive(mut key: Xprv, path: &[u32]) -> Xprv {
-    for index in path {
-        key = child(key, *index);
-    }
-    key
-}
-
-fn bip85_o2a(master: Xprv) -> Xprv {
-    let key = derive(master, &[hard(83_696_968), hard(32), hard(O2A_INDEX)]);
-    let digest = hmac_sha512(b"bip-entropy-from-k", &key.secret);
-    Xprv {
-        chain_code: digest[..32].try_into().expect("fixed hash length"),
-        secret: digest[32..].try_into().expect("fixed hash length"),
-    }
-}
-
-fn demo_key(xprv: Xprv) -> DemoKey {
-    let secret = SecretKey::from_slice(&xprv.secret).expect("valid derived key");
-    let pair = Keypair::from_secret_key(&Secp256k1::new(), &secret);
-    let (xonly, _) = XOnlyPublicKey::from_keypair(&pair);
-    DemoKey {
-        secret: xprv.secret,
-        xonly: xonly.serialize(),
-    }
+pub fn unsafe_seed() -> Vec<u8> {
+    hex::decode(UNSAFE_BIP39_SEED_HEX).expect("published seed hex")
 }
 
 /// Derives the disposable regtest entity 0 keys from the published unsafe seed.
 pub fn demo_keys() -> DemoKeys {
-    let seed = hex::decode(UNSAFE_BIP39_SEED_HEX).expect("published seed hex");
-    let o2a = bip85_o2a(master(&seed));
-    let key =
-        |role: u32, index: u32| demo_key(derive(o2a, &[hard(1), hard(0), hard(role), hard(index)]));
+    let seed = unsafe_seed();
+    let key = |role: u32, index: u32| derive::identity_key(&seed, 1, 0, role, index);
     DemoKeys {
         root: key(0, 0),
         controller_0: key(1, 0),
         controller_1: key(1, 1),
         recovery_0: key(2, 0),
+        recovery_1: key(2, 1),
+        recovery_2: key(2, 2),
+        seal_controller_0: key(4, 0),
+        seal_controller_1: key(4, 1),
+        seal_recovery_0: key(4, 2),
+        seal_recovery_1: key(4, 3),
+        seal_recovery_2: key(4, 4),
     }
 }
 
+pub fn identity_key(coin: u32, entity: u32, role: u32, index: u32) -> DemoKey {
+    derive::identity_key(&unsafe_seed(), coin, entity, role, index)
+}
+
+pub fn accept_identity_key(
+    profile_version: u16,
+    network: &str,
+    path: &str,
+    candidate: &[u8; 32],
+) -> Result<(), &'static str> {
+    derive::accept_identity_key(profile_version, network, path, candidate, &unsafe_seed())
+}
+
 pub fn tagged_hash(tag: &str, payload: &[u8]) -> [u8; 32] {
+    use bitcoin_hashes::{sha256, Hash, HashEngine};
     let tag_hash = sha256::Hash::hash(tag.as_bytes()).to_byte_array();
     let mut engine = sha256::Hash::engine();
     engine.input(&tag_hash);
@@ -156,101 +124,100 @@ pub fn tagged_hash(tag: &str, payload: &[u8]) -> [u8; 32] {
 }
 
 pub fn entity_id(root_xonly: [u8; 32]) -> [u8; 32] {
-    let mut preimage = Vec::with_capacity(35);
-    preimage.extend_from_slice(&1u16.to_le_bytes());
-    preimage.push(NETWORK_REGTEST);
-    preimage.extend_from_slice(&root_xonly);
-    tagged_hash(ENTITY_TAG, &preimage)
+    entity_id_on(root_xonly, NETWORK_REGTEST)
 }
 
-pub fn key_id(role: u8, xonly: [u8; 32]) -> [u8; 32] {
-    let mut preimage = Vec::with_capacity(33);
-    preimage.push(role);
-    preimage.extend_from_slice(&xonly);
-    tagged_hash(KEY_TAG, &preimage)
+pub fn recovery_policy_hash(policy: &[u8]) -> [u8; 32] {
+    tagged_hash("O2A/v0.1/recovery-policy", policy)
 }
 
-pub fn recovery_policy_hash(recovery_xonly: [u8; 32]) -> [u8; 32] {
-    let mut policy = Vec::new();
-    recovery_policy(&mut policy, recovery_xonly);
-    tagged_hash("O2A/v0.1/recovery-policy", &policy)
-}
-
-fn option_fixed(out: &mut Vec<u8>, value: Option<&[u8]>) {
-    match value {
-        None => out.push(0),
-        Some(value) => {
-            out.push(1);
-            out.extend_from_slice(value);
-        }
+pub fn demo_recovery_policy() -> RecoveryPolicy {
+    let keys = demo_keys();
+    let mut key_ids = [
+        key_id(2, keys.recovery_0.xonly),
+        key_id(2, keys.recovery_1.xonly),
+        key_id(2, keys.recovery_2.xonly),
+    ];
+    key_ids.sort();
+    RecoveryPolicy {
+        version: 1,
+        sequence: 1,
+        threshold: DEMO_RECOVERY_THRESHOLD,
+        key_ids: key_ids.to_vec(),
+        delay_blocks: DEMO_DELAY_BLOCKS,
+        cancellation_rule: 1,
     }
 }
 
-fn controller(out: &mut Vec<u8>, xonly: [u8; 32]) {
-    out.extend_from_slice(&key_id(1, xonly));
-    out.extend_from_slice(&xonly);
-    out.push(1);
-    const CAPS: [u16; 10] = [2, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-    out.extend_from_slice(&(CAPS.len() as u32).to_le_bytes());
-    for cap in CAPS {
-        out.extend_from_slice(&cap.to_le_bytes());
+pub fn demo_recovery_policy_bytes() -> Vec<u8> {
+    encode_recovery_policy(&demo_recovery_policy())
+}
+
+fn binding(role: u8, authorizer: [u8; 32], seal: [u8; 32]) -> SealBinding {
+    SealBinding {
+        authorizing_key_id: key_id(role, authorizer),
+        seal_xonly: seal,
     }
 }
 
-fn recovery_policy(out: &mut Vec<u8>, recovery_xonly: [u8; 32]) {
-    out.extend_from_slice(&1u16.to_le_bytes());
-    out.extend_from_slice(&1u64.to_le_bytes());
-    out.extend_from_slice(&1u16.to_le_bytes());
-    out.extend_from_slice(&1u32.to_le_bytes());
-    out.extend_from_slice(&key_id(2, recovery_xonly));
-    out.extend_from_slice(&6u32.to_le_bytes());
-    out.push(1);
+fn sort_bindings(bindings: &mut [SealBinding]) {
+    bindings.sort_by_key(|binding| binding.bytes());
 }
 
-fn resulting_state(
+/// Genesis names controller 0 and the three recovery keys.
+pub fn demo_genesis_state(next_seal: [u8; 36]) -> ResultingState {
+    let keys = demo_keys();
+    let mut controller_bindings = [binding(
+        1,
+        keys.controller_0.xonly,
+        keys.seal_controller_0.xonly,
+    )];
+    sort_bindings(&mut controller_bindings);
+    let mut recovery_bindings = [
+        binding(2, keys.recovery_0.xonly, keys.seal_recovery_0.xonly),
+        binding(2, keys.recovery_1.xonly, keys.seal_recovery_1.xonly),
+        binding(2, keys.recovery_2.xonly, keys.seal_recovery_2.xonly),
+    ];
+    sort_bindings(&mut recovery_bindings);
+    ResultingState {
+        sequence: 0,
+        previous_state: None,
+        previous_seal: None,
+        next_seal,
+        controllers: vec![ControllerEntry {
+            xonly: keys.controller_0.xonly,
+            capabilities: encode::demo_controller_capabilities(),
+        }],
+        recovery: demo_recovery_policy(),
+        controller_bindings: controller_bindings.to_vec(),
+        recovery_bindings: recovery_bindings.to_vec(),
+        lifecycle_status: 1,
+    }
+}
+
+/// Controller rotation replaces the controller set with controller 1.
+pub fn demo_rotation_state(
     sequence: u64,
-    previous_state: Option<[u8; 32]>,
-    previous_seal: Option<[u8; 36]>,
+    previous_state: [u8; 32],
+    previous_seal: [u8; 36],
     next_seal: [u8; 36],
-    controller_xonly: [u8; 32],
-    recovery_xonly: [u8; 32],
-) -> Vec<u8> {
-    let mut out = Vec::new();
-    out.extend_from_slice(&sequence.to_le_bytes());
-    option_fixed(&mut out, previous_state.as_ref().map(<[u8; 32]>::as_slice));
-    option_fixed(&mut out, previous_seal.as_ref().map(<[u8; 36]>::as_slice));
-    out.extend_from_slice(&next_seal);
-    out.extend_from_slice(&1u32.to_le_bytes());
-    controller(&mut out, controller_xonly);
-    recovery_policy(&mut out, recovery_xonly);
-    out.push(0);
-    out.push(1);
-    out.push(0);
-    out.push(0);
-    out
-}
-
-fn header(
-    object_type: u16,
-    signer_entity: [u8; 32],
-    authorizing_state: Option<[u8; 32]>,
-    signing_key_id: [u8; 32],
-    role: u8,
-    capability: u16,
-) -> Vec<u8> {
-    let mut out = Vec::new();
-    out.extend_from_slice(&1u16.to_le_bytes());
-    out.push(NETWORK_REGTEST);
-    out.extend_from_slice(&object_type.to_le_bytes());
-    out.extend_from_slice(&signer_entity);
-    option_fixed(
-        &mut out,
-        authorizing_state.as_ref().map(<[u8; 32]>::as_slice),
-    );
-    out.extend_from_slice(&signing_key_id);
-    out.push(role);
-    out.extend_from_slice(&capability.to_le_bytes());
-    out
+) -> ResultingState {
+    let keys = demo_keys();
+    let mut state = demo_genesis_state(next_seal);
+    state.sequence = sequence;
+    state.previous_state = Some(previous_state);
+    state.previous_seal = Some(previous_seal);
+    state.controllers = vec![ControllerEntry {
+        xonly: keys.controller_1.xonly,
+        capabilities: encode::demo_controller_capabilities(),
+    }];
+    state.controller_bindings = vec![binding(
+        1,
+        keys.controller_1.xonly,
+        keys.seal_controller_1.xonly,
+    )];
+    sort_bindings(&mut state.controller_bindings);
+    state
 }
 
 fn sign(tag: &'static str, payload: Vec<u8>, key: DemoKey) -> SignedObject {
@@ -268,21 +235,47 @@ fn sign(tag: &'static str, payload: Vec<u8>, key: DemoKey) -> SignedObject {
     }
 }
 
+pub fn genesis_with(root: DemoKey, state: &ResultingState) -> SignedObject {
+    let entity = entity_id(root.xonly);
+    let mut payload = common_header(
+        NETWORK_REGTEST,
+        1,
+        entity,
+        None,
+        key_id(0, root.xonly),
+        0,
+        1,
+    );
+    payload.extend_from_slice(&2u16.to_le_bytes());
+    payload.extend_from_slice(&root.xonly);
+    payload.extend_from_slice(&encode_resulting_state(state));
+    sign(GENESIS_TAG, payload, root)
+}
+
 pub fn genesis(next_seal: [u8; 36]) -> SignedObject {
     let keys = demo_keys();
-    let entity = entity_id(keys.root.xonly);
-    let mut payload = header(1, entity, None, key_id(0, keys.root.xonly), 0, 1);
-    payload.extend_from_slice(&2u16.to_le_bytes());
-    payload.extend_from_slice(&keys.root.xonly);
-    payload.extend_from_slice(&resulting_state(
-        0,
-        None,
-        None,
-        next_seal,
-        keys.controller_0.xonly,
-        keys.recovery_0.xonly,
-    ));
-    sign(GENESIS_TAG, payload, keys.root)
+    genesis_with(keys.root, &demo_genesis_state(next_seal))
+}
+
+pub fn controller_rotation_with(
+    signer: DemoKey,
+    entity_root: [u8; 32],
+    prior_state: [u8; 32],
+    state: &ResultingState,
+) -> SignedObject {
+    let entity = entity_id(entity_root);
+    let mut payload = common_header(
+        NETWORK_REGTEST,
+        2,
+        entity,
+        Some(prior_state),
+        key_id(1, signer.xonly),
+        1,
+        2,
+    );
+    payload.push(1);
+    payload.extend_from_slice(&encode_resulting_state(state));
+    sign(TRANSITION_TAG, payload, signer)
 }
 
 pub fn controller_rotation(
@@ -291,25 +284,77 @@ pub fn controller_rotation(
     next_seal: [u8; 36],
 ) -> SignedObject {
     let keys = demo_keys();
-    let entity = entity_id(keys.root.xonly);
-    let mut payload = header(
-        2,
-        entity,
-        Some(prior_state),
-        key_id(1, keys.controller_0.xonly),
-        1,
-        2,
-    );
-    payload.push(1);
-    payload.extend_from_slice(&resulting_state(
-        1,
-        Some(prior_state),
-        Some(previous_seal),
-        next_seal,
-        keys.controller_1.xonly,
-        keys.recovery_0.xonly,
-    ));
-    sign(TRANSITION_TAG, payload, keys.controller_0)
+    controller_rotation_with(
+        keys.controller_0,
+        keys.root.xonly,
+        prior_state,
+        &demo_rotation_state(1, prior_state, previous_seal, next_seal),
+    )
+}
+
+/// Signs one recovery payload per signer. Signers are emitted in key-id order.
+pub fn recovery_authorizations(
+    entity_root: [u8; 32],
+    prior_state: [u8; 32],
+    policy_bytes: &[u8],
+    not_before_height: u32,
+    state: &ResultingState,
+    signers: &[DemoKey],
+) -> Result<Vec<SignedObject>, &'static str> {
+    if signers.is_empty() {
+        return Err("recovery requires at least one signer");
+    }
+    let mut ordered = signers.to_vec();
+    ordered.sort_by_key(|key| key_id(2, key.xonly));
+    if ordered
+        .windows(2)
+        .any(|pair| pair[0].xonly == pair[1].xonly)
+    {
+        return Err("duplicate recovery signer");
+    }
+    let entity = entity_id(entity_root);
+    let policy_hash = recovery_policy_hash(policy_bytes);
+    let mut body = vec![3];
+    body.extend_from_slice(&policy_hash);
+    body.extend_from_slice(&not_before_height.to_le_bytes());
+    body.extend_from_slice(&encode_resulting_state(state));
+    Ok(ordered
+        .into_iter()
+        .map(|signer| {
+            let mut payload = common_header(
+                NETWORK_REGTEST,
+                3,
+                entity,
+                Some(prior_state),
+                key_id(2, signer.xonly),
+                2,
+                3,
+            );
+            payload.extend_from_slice(&body);
+            sign(RECOVERY_TAG, payload, signer)
+        })
+        .collect())
+}
+
+pub fn signature_accepts(
+    tag: &str,
+    payload: &[u8],
+    signature: [u8; 64],
+    signer_xonly: [u8; 32],
+) -> bool {
+    let Ok(public) = XOnlyPublicKey::from_slice(&signer_xonly) else {
+        return false;
+    };
+    let Ok(signature) = Signature::from_slice(&signature) else {
+        return false;
+    };
+    Secp256k1::verification_only()
+        .verify_schnorr(
+            &signature,
+            &Message::from_digest(tagged_hash(tag, payload)),
+            &public,
+        )
+        .is_ok()
 }
 
 pub fn verify(object: &SignedObject) -> Result<(), &'static str> {
@@ -324,53 +369,113 @@ pub fn verify(object: &SignedObject) -> Result<(), &'static str> {
         .map_err(|_| "BIP340 verification failed")
 }
 
-/// Verifies the exact demo-stable v0.1 controller-rotation envelope.
-///
-/// This is intentionally stricter than signature verification: it rejects a
-/// correctly signed object if the network, object type, entity, authorizing
-/// state, key role, capability, or operation is not the controller-rotation
-/// profile used by this evidence run.
+/// Checks the demo controller-rotation envelope: role, capability, operation,
+/// and a signature by the header's controller key.
 pub fn verify_controller_rotation(object: &SignedObject) -> Result<(), &'static str> {
     verify(object)?;
-    if object.tag != TRANSITION_TAG || object.payload.len() != 370 {
-        return Err("not an exact v0.1 controller rotation payload");
-    }
-    let keys = demo_keys();
-    let entity = entity_id(keys.root.xonly);
-    if object.payload[0..2] != 1u16.to_le_bytes()
-        || object.payload[2] != NETWORK_REGTEST
-        || object.payload[3..5] != 2u16.to_le_bytes()
-        || object.payload[5..37] != entity
-        || object.payload[37] != 1
-        || object.payload[70..102] != key_id(1, keys.controller_0.xonly)
-        || object.payload[102] != 1
-        || object.payload[103..105] != 2u16.to_le_bytes()
-        || object.payload[105] != 1
-        || object.signer_xonly != keys.controller_0.xonly
-    {
+    if object.tag != TRANSITION_TAG {
         return Err("controller-rotation authorization fields do not match the demo profile");
     }
-    if object.payload[38..70] != object.payload[115..147] {
-        return Err("authorizing state and previous state differ");
+    let (role, capability, operation) = header_role_capability_operation(&object.payload)?;
+    header_role_allowed(role)?;
+    if role != 1 || capability != 2 || operation != Some(1) {
+        return Err("controller-rotation authorization fields do not match the demo profile");
     }
-    if object.payload[114] != 1 || object.payload[147] != 1 {
-        return Err("controller rotation omits required prior state or seal");
+    if key_id(1, object.signer_xonly) != signing_key_id(&object.payload)? {
+        return Err("controller-rotation authorization fields do not match the demo profile");
     }
     Ok(())
 }
 
-/// Returns the exact successor outpoint committed by a v0.1 controller rotation.
+fn signing_key_id(payload: &[u8]) -> Result<[u8; 32], &'static str> {
+    // version u16, network, type u16, entity 32, option state.
+    if payload.len() < 40 {
+        return Err("truncated header");
+    }
+    let mut index = 2 + 1 + 2 + 32;
+    let present = *payload.get(index).ok_or("truncated header")?;
+    index += 1;
+    if present == 1 {
+        index += 32;
+    } else if present != 0 {
+        return Err("invalid authorizing-state option");
+    }
+    payload
+        .get(index..index + 32)
+        .ok_or("truncated signing key id")?
+        .try_into()
+        .map_err(|_| "truncated signing key id")
+}
+
+fn header_role_capability_operation(payload: &[u8]) -> Result<(u8, u16, Option<u8>), &'static str> {
+    let mut index = 2 + 1 + 2 + 32;
+    let present = *payload.get(index).ok_or("truncated header")?;
+    index += 1;
+    if present == 1 {
+        index += 32;
+    }
+    index += 32;
+    let role = *payload.get(index).ok_or("truncated header")?;
+    index += 1;
+    let capability = u16::from_le_bytes(
+        payload
+            .get(index..index + 2)
+            .ok_or("truncated header")?
+            .try_into()
+            .map_err(|_| "truncated header")?,
+    );
+    index += 2;
+    let object_type = u16::from_le_bytes(payload[3..5].try_into().map_err(|_| "truncated header")?);
+    let operation = if object_type == 2 || object_type == 3 {
+        Some(*payload.get(index).ok_or("truncated operation")?)
+    } else {
+        None
+    };
+    Ok((role, capability, operation))
+}
+
+/// Returns the successor outpoint committed by a v0.1 controller rotation.
 pub fn transition_next_seal(object: &SignedObject) -> Result<[u8; 36], &'static str> {
-    if object.tag != TRANSITION_TAG || object.payload.len() < 220 {
+    if object.tag != TRANSITION_TAG {
         return Err("not a complete v0.1 controller rotation payload");
     }
-    if object.payload[105] != 1 {
+    let mut index = header_end(&object.payload)?;
+    if object.payload.get(index) != Some(&1) {
         return Err("not a controller-rotation operation");
     }
-    object.payload[184..220]
+    index += 1;
+    index += 8;
+    index = skip_option(&object.payload, index, 32)?;
+    index = skip_option(&object.payload, index, 36)?;
+    object
+        .payload
+        .get(index..index + 36)
+        .ok_or("invalid successor seal length")?
         .try_into()
         .map_err(|_| "invalid successor seal length")
 }
+
+fn header_end(payload: &[u8]) -> Result<usize, &'static str> {
+    let mut index = 2 + 1 + 2 + 32;
+    let present = *payload.get(index).ok_or("truncated header")?;
+    index += 1;
+    if present == 1 {
+        index += 32;
+    }
+    index += 32 + 1 + 2;
+    Ok(index)
+}
+
+fn skip_option(payload: &[u8], index: usize, fixed: usize) -> Result<usize, &'static str> {
+    match payload.get(index) {
+        Some(0) => Ok(index + 1),
+        Some(1) => Ok(index + 1 + fixed),
+        _ => Err("invalid option"),
+    }
+}
+
+#[cfg(test)]
+mod conformance;
 
 #[cfg(test)]
 mod tests {
@@ -379,11 +484,11 @@ mod tests {
     #[test]
     fn authority_is_pinned() {
         assert_eq!(SPEC_COMMIT.len(), 40);
-        assert_eq!(CANONICAL_RULES.len(), 2);
+        assert_eq!(CANONICAL_RULES.len(), 4);
     }
 
     #[test]
-    fn published_demo_keys_match_the_spec_vectors() {
+    fn published_demo_keys_match_the_regtest_vectors() {
         let keys = demo_keys();
         assert_eq!(
             hex::encode(keys.root.xonly),
@@ -403,6 +508,18 @@ mod tests {
         verify_controller_rotation(&transition).expect("transition authorization");
         assert_eq!(transition_next_seal(&transition), Ok([3; 36]));
         assert_ne!(genesis.digest, transition.digest);
+        let recovery = recovery_authorizations(
+            demo_keys().root.xonly,
+            [2; 32],
+            &demo_recovery_policy_bytes(),
+            112,
+            &demo_rotation_state(2, [2; 32], [3; 36], [4; 36]),
+            &[demo_keys().recovery_0, demo_keys().recovery_2],
+        )
+        .expect("recovery signatures");
+        assert_eq!(recovery.len(), 2);
+        verify(&recovery[0]).expect("first recovery signature");
+        assert_ne!(recovery[0].digest, recovery[1].digest);
     }
 
     #[test]
@@ -414,6 +531,39 @@ mod tests {
         assert_eq!(
             verify_controller_rotation(&wrongly_authorized),
             Err("controller-rotation authorization fields do not match the demo profile")
+        );
+    }
+
+    #[test]
+    fn seal_role_and_stale_binding_are_rejected() {
+        assert_eq!(
+            header_role_allowed(4),
+            Err("seal role rejected in signed headers")
+        );
+        let keys = demo_keys();
+        let current = [key_id(1, keys.controller_1.xonly)];
+        let stale = [binding(
+            1,
+            keys.controller_0.xonly,
+            keys.seal_controller_0.xonly,
+        )];
+        let recovery_ids = demo_recovery_policy().key_ids;
+        let recovery = demo_genesis_state([0; 36]).recovery_bindings;
+        assert_eq!(
+            seal_bindings_valid(&stale, &recovery, &current, &recovery_ids, &[]),
+            Err("controller seal bindings do not cover the transition key set")
+        );
+        let mut reused = recovery.clone();
+        reused[0].seal_xonly = keys.controller_0.xonly;
+        assert_eq!(
+            seal_bindings_valid(
+                &demo_genesis_state([0; 36]).controller_bindings,
+                &reused,
+                &[key_id(1, keys.controller_0.xonly)],
+                &recovery_ids,
+                &[keys.controller_0.xonly],
+            ),
+            Err("cross-role x-only reuse")
         );
     }
 }

@@ -1,7 +1,7 @@
 # O2A Demo Gate
 
 **Status:** mandatory boundary for the disposable testnet demonstration.
-Specification authority: sibling `../o2a-protocol` at commit `3ca98ea9b60256f271e71fa89caa09448e804e87`.
+Specification authority: sibling `../o2a-protocol` at commit `c7b08716d017d1f6125e6a728fb098673a09d433`.
 
 ## Rules carried from the specification
 
@@ -13,8 +13,10 @@ Specification authority: sibling `../o2a-protocol` at commit `3ca98ea9b60256f271
    one layer never substitutes for another.
 2. `o2a-demo-core` is the only signing and serialization implementation. Its
    rule is taken by reference from
-   `../o2a-protocol/specs/canonical-encoding.md` and
-   `../o2a-protocol/specs/cryptographic-profile.md` at the authority commit
+   `../o2a-protocol/specs/canonical-encoding.md`,
+   `../o2a-protocol/specs/cryptographic-profile.md`,
+   `../o2a-protocol/specs/key-derivation-profile.md`, and
+   `../o2a-protocol/specs/rgb-identity-contract.md` at the authority commit
    above. The CLI and RGB adapter call that implementation; they do not carry
    a second codec, hash, or signature rule.
 3. Core evaluation is deterministic and never fetches the network, database,
@@ -42,11 +44,25 @@ Specification authority: sibling `../o2a-protocol` at commit `3ca98ea9b60256f271
   `rgb-wallet` is not a dependency.
 - Upstream patches are allowed only through `[patch.crates-io]` pointing to a
   named branch. Every patch must be recorded in `PATCHES.md` and cite the
-  matching item in `../o2a-protocol/docs/upstream-needs.md`.
+  matching item in `../o2a-protocol/docs/upstream-needs.md`. The two `bp-std`
+  script-path issues stay unpatched. A seal spend uses the smoke-proven
+  workarounds: manual script-path finalization, and an explicit empty
+  `final_script_sig`. See `../o2a-protocol/docs/upstream-needs.md`, BP-WG
+  `bp-std` items 1 and 2.
 - Custody-acceptance and recovery fixtures may use real RGB prior state
   produced on regtest. Synthetic authorizing state is never accepted.
 - The derivation profile is used as **demo-stable v0.1**. It is not frozen and
   creates no production-compatible identity commitment.
+
+## Seal-policy contract type
+
+The seal-policy lineage is a new RGB contract type. Codex name
+`O2ASealPolicyDemo`. Codex id
+`21NiO7HR-YJ7lZHf-QqU5lFX-~hZoADX-_~cM26a-NeJbFdg#history-paper-polka`.
+Issuer id
+`21NiO7HR-YJ7lZHf-QqU5lFX-~hZoADX-_~cM26a-NeJbFdg/0#kq5rkg`.
+Methods are `issue`, `rotateController`, `revoke`, and `recover`. Each
+verifier is the same success program. RGB still validates no O2A semantics.
 
 ## Networks
 

@@ -25,6 +25,12 @@ use ultrasonic::{CellAddr, Codex, Identity};
 
 pub const RGB_RUNTIME_REV: &str = "a1e6b41524131f6d6f183b2235fdaacb5c1abb31";
 pub const DEMO_PROFILE_VERSION: u16 = 1;
+/// Display form of the seal-policy Codex. The recover method changes the
+/// Codex, so this is a new contract type.
+pub const SEAL_POLICY_CODEX_ID: &str =
+    "21NiO7HR-YJ7lZHf-QqU5lFX-~hZoADX-_~cM26a-NeJbFdg#history-paper-polka";
+/// Display form of the matching issuer. Version 0, API checksum `kq5rkg`.
+pub const SEAL_POLICY_ISSUER_ID: &str = "21NiO7HR-YJ7lZHf-QqU5lFX-~hZoADX-_~cM26a-NeJbFdg/0#kq5rkg";
 const LIB_NAME_O2A_DEMO: &str = "O2ADemo";
 
 #[derive(
@@ -117,7 +123,7 @@ fn codex() -> Codex {
     let lib = success_lib();
     let lib_id = lib.lib_id();
     Codex {
-        name: tiny_s!("O2AIdentityDemo"),
+        name: tiny_s!("O2ASealPolicyDemo"),
         developer: Identity::default(),
         version: default!(),
         timestamp: 1_790_208_000,
@@ -129,6 +135,7 @@ fn codex() -> Codex {
             0 => LibSite::new(lib_id, 0),
             1 => LibSite::new(lib_id, 0),
             2 => LibSite::new(lib_id, 0),
+            3 => LibSite::new(lib_id, 0),
         },
     }
 }
@@ -222,6 +229,7 @@ fn api() -> Api {
             vname!("issue") => 0,
             vname!("rotateController") => 1,
             vname!("revoke") => 2,
+            vname!("recover") => 3,
         },
         errors: Default::default(),
     }
@@ -262,11 +270,21 @@ pub fn genesis_params(input: GenesisInput) -> CreateParams<Outpoint> {
     params
 }
 
+/// Builds a recovery call. RGB accepts the seal history; O2A recovery
+/// semantics stay in `o2a-demo-core`.
+pub fn recover(input: RotationInput) -> RotationCall {
+    operation(vname!("recover"), input)
+}
+
 /// Builds the only controller-rotation shape accepted by the demo adapter.
 pub fn controller_rotation(input: RotationInput) -> RotationCall {
+    operation(vname!("rotateController"), input)
+}
+
+fn operation(method: sonicapi::MethodName, input: RotationInput) -> RotationCall {
     let mut params = CallParams {
         core: CoreParams {
-            method: vname!("rotateController"),
+            method,
             global: none!(),
             owned: none!(),
         },
@@ -318,8 +336,20 @@ mod tests {
 
     #[test]
     fn issuer_is_deterministic() {
-        assert_eq!(demo_issuer().codex_id(), demo_issuer().codex_id());
-        assert_eq!(demo_issuer().codex_name().as_str(), "O2AIdentityDemo");
+        let issuer = demo_issuer();
+        assert_eq!(issuer.codex_id(), demo_issuer().codex_id());
+        assert_eq!(issuer.issuer_id(), demo_issuer().issuer_id());
+        assert_eq!(issuer.codex_id().to_string(), SEAL_POLICY_CODEX_ID);
+        assert_eq!(issuer.issuer_id().to_string(), SEAL_POLICY_ISSUER_ID);
+        assert_eq!(issuer.codex_name().as_str(), "O2ASealPolicyDemo");
+        assert_eq!(issuer.default_api().verifier("recover"), Some(3));
+        let recover = recover(RotationInput {
+            previous_cell: CellAddr::strict_dumb(),
+            controller_xonly: [6; 32],
+            state_commitment: [7; 32],
+            next_seal: seal(1),
+        });
+        assert_eq!(recover.params.core.method.as_str(), "recover");
     }
 
     #[test]
