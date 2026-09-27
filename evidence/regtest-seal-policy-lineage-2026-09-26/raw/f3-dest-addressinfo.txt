@@ -1,0 +1,22 @@
+{
+  "address": "bcrt1q5z8khzuq0mexv3h8hzyx2quzqu6um77tfhngzf",
+  "scriptPubKey": "0014a08f6b8b807ef26646e7b8886503820735cdfbcb",
+  "ismine": true,
+  "solvable": true,
+  "desc": "wpkh([06298287/84h/1h/0h/0/7]0324d631dae16f4de9e5ab9eb6056c4b22a1af942bb65b43c03fe392f3b78a5aa6)#klw2guda",
+  "parent_desc": "wpkh([06298287/84h/1h/0h]tpubDD4RskWE9S4fktz5sJCxKknjfpufLU1QN7wG89y2LKrcpsVLzNNr7EPtMo85bA6WbFh2GxNgwzLKtprgpVX8WSs92G1Zb2NcC63HSSUnyN1/0/*)#4dg0j06j",
+  "iswatchonly": false,
+  "isscript": false,
+  "iswitness": true,
+  "witness_version": 0,
+  "witness_program": "a08f6b8b807ef26646e7b8886503820735cdfbcb",
+  "pubkey": "0324d631dae16f4de9e5ab9eb6056c4b22a1af942bb65b43c03fe392f3b78a5aa6",
+  "ischange": false,
+  "timestamp": 1790262926,
+  "hdkeypath": "m/84h/1h/0h/0/7",
+  "hdseedid": "0000000000000000000000000000000000000000",
+  "hdmasterfingerprint": "06298287",
+  "labels": [
+    ""
+  ]
+}

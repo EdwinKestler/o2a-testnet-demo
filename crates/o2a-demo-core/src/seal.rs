@@ -19,8 +19,11 @@ pub struct SealScript {
     pub policy: Vec<u8>,
     pub scripts: Vec<Vec<u8>>,
     pub leaf_hashes: Vec<[u8; 32]>,
+    /// Sibling hashes from each leaf up to the root.
+    pub paths: Vec<Vec<[u8; 32]>>,
     pub merkle_root: [u8; 32],
     pub output_key: [u8; 32],
+    pub output_parity_odd: bool,
     pub script_pubkey: Vec<u8>,
 }
 
@@ -84,34 +87,60 @@ pub fn tapleaf_hash(script: &[u8]) -> [u8; 32] {
     tagged_hash("TapLeaf", &preimage)
 }
 
-pub fn taproot_root(leaves: &[[u8; 32]]) -> Result<[u8; 32], &'static str> {
+struct TapPart {
+    hash: [u8; 32],
+    members: Vec<usize>,
+}
+
+pub fn taproot_paths(leaves: &[[u8; 32]]) -> Result<([u8; 32], Vec<Vec<[u8; 32]>>), &'static str> {
     if leaves.is_empty() {
-        return Err("empty seal tree");
+        return Err("seal tree is empty");
     }
-    let mut current = leaves.to_vec();
-    while current.len() > 1 {
+    let mut paths = vec![Vec::new(); leaves.len()];
+    let mut level = leaves
+        .iter()
+        .enumerate()
+        .map(|(index, hash)| TapPart {
+            hash: *hash,
+            members: vec![index],
+        })
+        .collect::<Vec<_>>();
+    while level.len() > 1 {
         let mut next = Vec::new();
         let mut index = 0;
-        while index < current.len() {
-            if index + 1 == current.len() {
-                next.push(current[index]);
-                index += 1;
-                continue;
-            }
-            let (left, right) = if current[index] <= current[index + 1] {
-                (current[index], current[index + 1])
+        while index + 1 < level.len() {
+            let (left, right) = if level[index].hash <= level[index + 1].hash {
+                (&level[index], &level[index + 1])
             } else {
-                (current[index + 1], current[index])
+                (&level[index + 1], &level[index])
             };
             let mut preimage = [0u8; 64];
-            preimage[..32].copy_from_slice(&left);
-            preimage[32..].copy_from_slice(&right);
-            next.push(tagged_hash("TapBranch", &preimage));
+            preimage[..32].copy_from_slice(&left.hash);
+            preimage[32..].copy_from_slice(&right.hash);
+            let parent = tagged_hash("TapBranch", &preimage);
+            for member in &left.members {
+                paths[*member].push(right.hash);
+            }
+            for member in &right.members {
+                paths[*member].push(left.hash);
+            }
+            let mut members = left.members.clone();
+            members.extend(right.members.iter().copied());
+            next.push(TapPart {
+                hash: parent,
+                members,
+            });
             index += 2;
         }
-        current = next;
+        if index < level.len() {
+            next.push(TapPart {
+                hash: level[index].hash,
+                members: level[index].members.clone(),
+            });
+        }
+        level = next;
     }
-    Ok(current[0])
+    Ok((level[0].hash, paths))
 }
 
 pub fn seal_script(
@@ -145,7 +174,7 @@ pub fn seal_script(
         .iter()
         .map(|script| tapleaf_hash(script))
         .collect::<Vec<_>>();
-    let merkle_root = taproot_root(&leaf_hashes)?;
+    let (merkle_root, paths) = taproot_paths(&leaf_hashes)?;
     let mut tweak_preimage = NUMS_X.to_vec();
     tweak_preimage.extend_from_slice(&merkle_root);
     let tweak = tagged_hash("TapTweak", &tweak_preimage);
@@ -156,7 +185,7 @@ pub fn seal_script(
     let tweaked = point
         .add_exp_tweak(&secp, &scalar)
         .map_err(|_| "taproot tweak produced the point at infinity")?;
-    let (output_key, _) = tweaked.x_only_public_key();
+    let (output_key, parity) = tweaked.x_only_public_key();
     let output_key = output_key.serialize();
     let mut script_pubkey = vec![0x51, 0x20];
     script_pubkey.extend_from_slice(&output_key);
@@ -164,8 +193,10 @@ pub fn seal_script(
         policy,
         scripts,
         leaf_hashes,
+        paths,
         merkle_root,
         output_key,
+        output_parity_odd: parity == Parity::Odd,
         script_pubkey,
     })
 }

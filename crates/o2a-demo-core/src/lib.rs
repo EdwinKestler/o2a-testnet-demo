@@ -4,6 +4,7 @@
 //! rules at [`SPEC_COMMIT`]. It accepts explicit state and chain evidence; it
 //! never reads the network, clock, or a database.
 
+mod chain;
 mod decode;
 mod derive;
 mod encode;
@@ -12,6 +13,10 @@ mod seal;
 
 use secp256k1::{schnorr::Signature, Keypair, Message, Secp256k1, SecretKey, XOnlyPublicKey};
 
+pub use chain::{
+    evaluate_lineage, format_lineage_report, inclusion_matches, merkle_root, CurrentSealView,
+    InclusionProof, LineageEvidence, LineageReport, SealFact,
+};
 pub use decode::{decode_payload, evaluate_name_claim, ClaimAuthorization};
 pub use encode::{
     bytes_field, common_header, content_reference, encode_recovery_policy, encode_resulting_state,
@@ -50,6 +55,16 @@ const RECOVERY_TAG: &str = "O2A/v0.1/recovery";
 pub struct DemoKey {
     secret: [u8; 32],
     pub xonly: [u8; 32],
+}
+
+impl DemoKey {
+    pub fn sign_schnorr(&self, message: [u8; 32]) -> [u8; 64] {
+        let secret = SecretKey::from_slice(&self.secret).expect("published demo key");
+        let secp = Secp256k1::new();
+        let pair = Keypair::from_secret_key(&secp, &secret);
+        let signature = secp.sign_schnorr_no_aux_rand(&Message::from_digest(message), &pair);
+        *signature.as_ref()
+    }
 }
 
 /// Disposable regtest entity 0.
@@ -271,6 +286,17 @@ pub fn genesis_with(root: DemoKey, state: &ResultingState) -> SignedObject {
     payload.extend_from_slice(&root.xonly);
     payload.extend_from_slice(&encode_resulting_state(state));
     sign(GENESIS_TAG, payload, root)
+}
+
+pub fn seal_for_state(state: &ResultingState) -> Result<SealScript, &'static str> {
+    let policy = encode_seal_policy(&state.controller_bindings, &state.recovery_bindings);
+    seal_script(
+        &state.controller_bindings,
+        &state.recovery_bindings,
+        u64::from(state.recovery.threshold),
+        u64::from(state.recovery.delay_blocks),
+        policy,
+    )
 }
 
 pub fn genesis(next_seal: [u8; 36]) -> SignedObject {

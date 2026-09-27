@@ -1,0 +1,7 @@
+{
+  "descriptor": "tr(50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0,{pk(7675232df7caadff46a04021f6bd949d5baf61fe960db777aa8ebd294eb41552),and_v(v:multi_a(2,81b0866eb856ef602267ecbe48a3bcc4797f0d5ce6b41a901e5e3413f79160d3,d3dbe75937d696d53dcb79c0998eea0951e018a3f06fec72766c3e139f0a4313,ed7a8beb25efb4b833d6f3f79cc3225eb4fb84d73d6d05b54f3f09a72c965717),older(10))})#x82k5ny2",
+  "checksum": "x82k5ny2",
+  "isrange": false,
+  "issolvable": true,
+  "hasprivatekeys": false
+}

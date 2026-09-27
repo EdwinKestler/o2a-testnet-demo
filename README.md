@@ -50,6 +50,10 @@ object, resolved the same chain through local electrs, and produced identical
 three-layer results. Read its `RUN.md` before interpreting the result: this is
 demo-lineage evidence, not a frozen RGB program or a persistent identity.
 
+The 2026-09-24 bundles and signet-acceptance are the superseded pre-seal-policy lineage.
+`evidence/regtest-seal-policy-lineage-2026-09-26/` is disposable demo-lineage evidence.
+It closes no Phase 0 gate.
+
 ## License
 
 O2A-authored code and documentation are available under `MIT OR Apache-2.0`.

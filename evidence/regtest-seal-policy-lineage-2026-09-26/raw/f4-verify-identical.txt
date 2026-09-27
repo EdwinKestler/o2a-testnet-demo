@@ -1,0 +1,13 @@
+byte_identical=true
+best_height=121
+best_block_hash=428b9114a3c274c18316c1fcf0821c44e3e20fc0bcd35651c06f30c88a279eac
+source_url=tcp://electrs:50001
+required_depth=1
+anchor_txid=b51c83e6ab36d426eb6054e9b0a436365db043d8f668cf637106f150b6a7e1a7
+anchor_height=121
+current_outpoint=217c29edd7837960c439df5cebc5272a2f3ca6f013f473caca726bc9c7840476:1
+identity_history_state=CURRENT
+bitcoin=current seal is unspent and the supplied proofs meet the header
+rgb=consignment imported
+o2a=objects accepted
+header_trust=headers come from one electrs instance; this is a trust assumption, not a light client

@@ -1,0 +1,3 @@
+fee_address=bcrt1pwxj5jlwelufzxptwn2gprq7kvacqvj850wl07mk47gy5xcl6h8gqdx2kc0
+ Container o2a-testnet-demo-toolchain-run-94fa8a83869c Creating 
+ Container o2a-testnet-demo-toolchain-run-94fa8a83869c Created 

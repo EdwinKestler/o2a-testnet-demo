@@ -1,0 +1,4 @@
+exit=26
+error code: -26
+error message:
+non-BIP68-final

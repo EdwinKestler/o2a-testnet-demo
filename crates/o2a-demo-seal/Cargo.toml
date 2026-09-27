@@ -1,0 +1,16 @@
+[package]
+name = "o2a-demo-seal"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+amplify.workspace = true
+anyhow.workspace = true
+bitcoin_hashes.workspace = true
+bp-std.workspace = true
+hex.workspace = true
+o2a-demo-core.workspace = true
+secp256k1.workspace = true

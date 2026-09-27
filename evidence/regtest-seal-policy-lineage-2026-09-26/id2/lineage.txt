@@ -1,0 +1,9 @@
+contract_id=contract:nKjqQ5l_-3qOUD_J-vlzHvQ0-0eCNyZq-Lf0xdrX-9G4K3m8
+cell=J9bvelY42hbNxGcuaB4fANIg52AJLTgMVEMEL6pfUmo:0
+seal=481ec137b39a68d4843e36198cfd5bf50ab90074a5e3a91267da4ef37dacd8c3:0
+digest=b81ee01dace39778fe17edd68d3f113199545412af903e9d7766e4710755ca55
+name=B
+current=B
+anchor_txid=d262bd240ae84604cd41229e4a1154a8da5b5279edad4fe8760e8a1a5f245501
+consignment=rotate.rgb
+sequence=1

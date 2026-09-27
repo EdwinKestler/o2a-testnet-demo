@@ -1,0 +1,25 @@
+best_height=105
+best_block_hash=1ff368c0d3c809858d721f4495fdfff41231802b93f5136c23e4ab23e3be3970
+source_url=tcp://electrs:50001
+required_depth=1
+anchor_txid=49dfd7c8626a6cd524e26f2dc1d5357b8725ae62fc61611f5b3139bbdd7dfa3e
+anchor_height=105
+current_outpoint=49dfd7c8626a6cd524e26f2dc1d5357b8725ae62fc61611f5b3139bbdd7dfa3e:0
+identity_history_state=CURRENT
+bitcoin=current seal is unspent and the supplied proofs meet the header
+rgb=consignment imported
+o2a=objects accepted
+header_trust=headers come from one electrs instance; this is a trust assumption, not a light client
+
+best_height=105
+best_block_hash=1ff368c0d3c809858d721f4495fdfff41231802b93f5136c23e4ab23e3be3970
+source_url=tcp://electrs:50001
+required_depth=1
+anchor_txid=49dfd7c8626a6cd524e26f2dc1d5357b8725ae62fc61611f5b3139bbdd7dfa3e
+anchor_height=105
+current_outpoint=49dfd7c8626a6cd524e26f2dc1d5357b8725ae62fc61611f5b3139bbdd7dfa3e:0
+identity_history_state=CURRENT
+bitcoin=current seal is unspent and the supplied proofs meet the header
+rgb=consignment imported
+o2a=objects accepted
+header_trust=headers come from one electrs instance; this is a trust assumption, not a light client

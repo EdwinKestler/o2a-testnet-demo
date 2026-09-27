@@ -24,6 +24,8 @@ use rgpsbt::RgbPsbt;
 use strict_encoding::StrictDumb;
 use strict_types::StrictVal;
 
+mod seal_lineage;
+
 const ACK: &str = "--ack-disposable";
 
 fn unsafe_seed() -> Vec<u8> {
@@ -355,11 +357,23 @@ fn verify_package(validator_dir: &Path, electrum: &str, package_dir: &Path) -> R
 }
 
 fn help() {
-    println!("o2a-demo create-identity prepare DATA_DIR {ACK}");
-    println!("o2a-demo create-identity issue DATA_DIR ELECTRUM_URL {ACK}");
-    println!("o2a-demo rotate-controller DATA_DIR ELECTRUM_URL CONSIGNMENT {ACK}");
-    println!("o2a-demo verify-package VALIDATOR_DIR ELECTRUM_URL EVIDENCE_PACKAGE_DIR");
-    println!("issue-attestation is intentionally out of scope for this pass");
+    println!("pre-seal-policy: o2a-demo create-identity prepare DATA_DIR {ACK}");
+    println!("pre-seal-policy: o2a-demo create-identity issue DATA_DIR ELECTRUM_URL {ACK}");
+    println!("pre-seal-policy: o2a-demo rotate-controller DATA_DIR ELECTRUM_URL CONSIGNMENT {ACK}");
+    println!(
+        "pre-seal-policy: o2a-demo verify-package VALIDATOR_DIR ELECTRUM_URL EVIDENCE_PACKAGE_DIR"
+    );
+    println!("seal prepare STAGE {ACK}");
+    println!("seal record DATA NAME OUTPOINT TXID HEIGHT VALUE STAGE {ACK}");
+    println!("seal issue DATA ELECTRUM NAME {ACK}");
+    println!("seal transition DATA ELECTRUM FROM TO FEE FEE_VALUE FEE_SCRIPT KIND BROADCAST {ACK}");
+    println!("seal close-plain DATA NAME DEST_SCRIPT {ACK}");
+    println!("seal verify ELECTRUM DATA NAME [VALIDATOR] [--no-observation]");
+    println!("seal fee-address DATA");
+    println!("seal export DATA ELECTRUM FILE");
+    println!("seal presign-recovery DATA NAME DEST_SCRIPT {ACK}");
+    println!("seal stale");
+    println!("seal wallet DATA ELECTRUM OUTPOINT");
 }
 
 fn run() -> Result<()> {
@@ -385,6 +399,103 @@ fn run() -> Result<()> {
         }
         [command, validator, electrum, package] if command == "verify-package" => {
             verify_package(Path::new(validator), electrum, Path::new(package))
+        }
+        [command, action, data, stage, ack]
+            if command == "seal" && action == "prepare" && ack == ACK =>
+        {
+            require_ack(&args)?;
+            seal_lineage::prepare(Path::new(data), stage)
+        }
+        [command, action, data, name, outpoint, txid, height, value, stage, ack]
+            if command == "seal" && action == "record" && ack == ACK =>
+        {
+            require_ack(&args)?;
+            seal_lineage::record(
+                Path::new(data),
+                name,
+                outpoint,
+                txid,
+                height.parse()?,
+                value.parse()?,
+                stage,
+            )
+        }
+        [command, action, data, electrum, name, ack]
+            if command == "seal" && action == "issue" && ack == ACK =>
+        {
+            require_ack(&args)?;
+            seal_lineage::issue(Path::new(data), electrum, name)
+        }
+        [command, action, data, electrum, from, to, fee, fee_value, fee_script, kind, broadcast, ack]
+            if command == "seal" && action == "transition" && ack == ACK =>
+        {
+            require_ack(&args)?;
+            seal_lineage::transition(
+                Path::new(data),
+                electrum,
+                from,
+                to,
+                fee,
+                fee_value.parse()?,
+                fee_script,
+                kind,
+                broadcast == "broadcast",
+            )
+        }
+        [command, action, data, name, dest, ack]
+            if command == "seal" && action == "close-plain" && ack == ACK =>
+        {
+            require_ack(&args)?;
+            seal_lineage::close_plain(Path::new(data), name, dest)
+        }
+        [command, action, electrum, data, name] if command == "seal" && action == "verify" => {
+            seal_lineage::verify(electrum, Path::new(data), name, None, false)
+        }
+        [command, action, electrum, data, name, flag]
+            if command == "seal" && action == "verify" && flag == "--no-observation" =>
+        {
+            seal_lineage::verify(electrum, Path::new(data), name, None, true)
+        }
+        [command, action, electrum, data, name, validator, flag]
+            if command == "seal" && action == "verify" && flag == "--no-observation" =>
+        {
+            seal_lineage::verify(
+                electrum,
+                Path::new(data),
+                name,
+                Some(Path::new(validator)),
+                true,
+            )
+        }
+        [command, action, electrum, data, name, validator]
+            if command == "seal" && action == "verify" =>
+        {
+            seal_lineage::verify(
+                electrum,
+                Path::new(data),
+                name,
+                Some(Path::new(validator)),
+                false,
+            )
+        }
+        [command, action, data] if command == "seal" && action == "fee-address" => {
+            seal_lineage::fee_address(Path::new(data))
+        }
+        [command, action, data, electrum, file] if command == "seal" && action == "export" => {
+            seal_lineage::export_consignment(Path::new(data), electrum, Path::new(file))
+        }
+        [command, action, data, name, dest, ack]
+            if command == "seal" && action == "presign-recovery" && ack == ACK =>
+        {
+            require_ack(&args)?;
+            seal_lineage::presign_recovery(Path::new(data), name, dest)
+        }
+        [command, action, outpoint] if command == "seal" && action == "mismatch" => {
+            seal_lineage::mismatched_genesis(outpoint)
+        }
+        [command, action] if command == "seal" && action == "stale" => seal_lineage::show_stale(),
+        [command, action, data, electrum, outpoint] if command == "seal" && action == "wallet" => {
+            seal_lineage::wallet_sees(Path::new(data), electrum, outpoint)
         }
         [command, ..] if command == "issue-attestation" => {
             bail!("attestations are out of scope for this pass")

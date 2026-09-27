@@ -835,6 +835,7 @@ dependencies = [
  "hex",
  "o2a-demo-core",
  "o2a-demo-rgb",
+ "o2a-demo-seal",
  "rgb-persist-fs",
  "rgb-psbt",
  "rgb-runtime",
@@ -866,6 +867,19 @@ dependencies = [
  "strict_encoding",
  "strict_types",
  "ultrasonic",
+]
+
+[[package]]
+name = "o2a-demo-seal"
+version = "0.1.0"
+dependencies = [
+ "amplify",
+ "anyhow",
+ "bitcoin_hashes",
+ "bp-std",
+ "hex",
+ "o2a-demo-core",
+ "secp256k1 0.29.1",
 ]
 
 [[package]]
