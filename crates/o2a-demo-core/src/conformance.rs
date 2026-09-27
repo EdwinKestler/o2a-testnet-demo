@@ -14,8 +14,8 @@ use crate::encode::{
 };
 use crate::seal::seal_script;
 use crate::{
-    accept_identity_key, entity_id, entity_id_checked, identity_key, signature_accepts,
-    tagged_hash, SPEC_COMMIT, UNSAFE_BIP39_SEED_HEX,
+    accept_identity_key, entity_id, entity_id_checked, identity_key, recovery_policy_hash,
+    signature_accepts, tagged_hash, SPEC_COMMIT, UNSAFE_BIP39_SEED_HEX,
 };
 use crate::{
     adapter_key_distinct, adapter_scheme, capability_known, evidence_ids_valid, genesis_root_ok,
@@ -562,6 +562,29 @@ const JSON_REJECTS: &[(&str, &str)] = &[
     ("wrong_network", "wrong verifier network"),
     ("wrong_role", "wrong signing-key role"),
 ];
+
+#[test]
+fn recovery_policy_hash_matches_the_authority_vector() {
+    let recovery = hx32("dd308afec5777e13121fa72b9cc1b7cc0139715309b086c960e18fd969774eb8");
+    let policy = RecoveryPolicy {
+        version: 1,
+        sequence: 1,
+        threshold: 1,
+        key_ids: vec![key_id(2, recovery)],
+        delay_blocks: 6,
+        cancellation_rule: 1,
+    };
+    let encoded = encode_recovery_policy(&policy);
+    let hashed = recovery_policy_hash(&policy);
+    assert_eq!(hashed, tagged_hash("O2A/v0.1/recovery-policy", &encoded));
+    let fixture = parse_json(&git_show("tests/vectors/protocol-objects-v0.1.json"));
+    let payload = hx(fixture
+        .obj("cases")
+        .obj("recovery_authorization")
+        .string("payload_hex"));
+    assert_eq!(payload.get(105), Some(&3), "recovery operation");
+    assert_eq!(&payload[106..138], &hashed);
+}
 
 #[test]
 fn every_json_reject_case_maps_to_one_reason() {

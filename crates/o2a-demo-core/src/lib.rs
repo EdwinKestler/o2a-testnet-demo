@@ -148,8 +148,8 @@ pub fn entity_id_checked(network: u8, root: &[u8; 32]) -> Result<[u8; 32], &'sta
     Ok(entity_id_on(*root, network))
 }
 
-pub fn recovery_policy_hash(policy: &[u8]) -> [u8; 32] {
-    tagged_hash("O2A/v0.1/recovery-policy", policy)
+pub fn recovery_policy_hash(policy: &RecoveryPolicy) -> [u8; 32] {
+    tagged_hash("O2A/v0.1/recovery-policy", &encode_recovery_policy(policy))
 }
 
 pub fn demo_recovery_policy() -> RecoveryPolicy {
@@ -317,7 +317,7 @@ pub fn controller_rotation(
 pub fn recovery_authorizations(
     entity_root: [u8; 32],
     prior_state: [u8; 32],
-    policy_bytes: &[u8],
+    policy: &RecoveryPolicy,
     not_before_height: u32,
     state: &ResultingState,
     signers: &[DemoKey],
@@ -334,7 +334,7 @@ pub fn recovery_authorizations(
         return Err("duplicate recovery signer");
     }
     let entity = entity_id(entity_root);
-    let policy_hash = recovery_policy_hash(policy_bytes);
+    let policy_hash = recovery_policy_hash(policy);
     let mut body = vec![3];
     body.extend_from_slice(&policy_hash);
     body.extend_from_slice(&not_before_height.to_le_bytes());
@@ -538,7 +538,7 @@ mod tests {
         let recovery = recovery_authorizations(
             demo_keys().root.xonly,
             [2; 32],
-            &demo_recovery_policy_bytes(),
+            &demo_recovery_policy(),
             112,
             &demo_rotation_state(2, [2; 32], [3; 36], [4; 36]),
             &[demo_keys().recovery_0, demo_keys().recovery_2],

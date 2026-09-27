@@ -154,9 +154,7 @@ fn issue(data_dir: &Path, electrum: &str) -> Result<()> {
         root_xonly: keys.root.xonly,
         entity_id: o2a_demo_core::entity_id(keys.root.xonly),
         controller_xonly: keys.controller_0.xonly,
-        policy_hash: o2a_demo_core::recovery_policy_hash(
-            &o2a_demo_core::demo_recovery_policy_bytes(),
-        ),
+        policy_hash: o2a_demo_core::recovery_policy_hash(&o2a_demo_core::demo_recovery_policy()),
         state_commitment: object.digest,
         seal: genesis_seal,
     }))?;
