@@ -1,0 +1,17 @@
+generatetoaddress 101 -> tip height 101
+tip block 4e1b5ecb8925c6e205d692a3a6d3abfb109e711cb2c32ab3b1f25ebfb4f80dd8
+
+sendmany 0.001 BTC to A, B, C, and the RGB fee address
+funding txid 46475f1eb02b18b99e9975dbfd833c6f403c3649ed4ef8b55f28541359e30878
+confirmations 1
+block hash 3ad4fdaf34ea77e4b44d2c7221e066394f96ab0bf08146d1aa44af2333188c97
+block height 102
+
+vout 0 A   0.001 BTC  5120c1e07f0d505ad01c072b1f718af10baea7babd8c9f39317fe29f0cfc500debba
+vout 1 FEE 0.001 BTC  5120ef43737b661dae124539fbcf62e928e7ce55fe83719d9bf9954e598f2b7d6790
+           address bcrt1paaphx7mxrkhpy3fel08k96fgul89tl5rwxweh7v4fevc72mav7gqphcvvt
+vout 2 B   0.001 BTC  51206e99a38726c796b46e53ca51437c2f1cce4fab6a971f08c7d9faa1b8b2225787
+vout 3 C   0.001 BTC  5120f2489653394b1a911fd8a8b5a3983ba327d0414264d676d794bf6b86ca518954
+vout 4 change back to the Core smoke wallet
+
+electrs blockchain.headers.subscribe height=102

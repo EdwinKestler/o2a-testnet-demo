@@ -869,6 +869,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "o2a-seal-smoke"
+version = "0.1.0"
+dependencies = [
+ "amplify",
+ "anyhow",
+ "bitcoin_hashes",
+ "bp-std",
+ "hex",
+ "o2a-demo-core",
+ "o2a-demo-rgb",
+ "rgb-persist-fs",
+ "rgb-psbt",
+ "rgb-runtime",
+ "rgb-std",
+ "secp256k1 0.29.1",
+ "strict_encoding",
+ "strict_types",
+]
+
+[[package]]
 name = "once_cell"
 version = "1.21.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"

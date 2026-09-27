@@ -1,0 +1,2032 @@
+=== cargo check ===
+    Checking o2a-seal-smoke v0.1.0 (/workspace/crates/o2a-seal-smoke)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.20s
+=== cargo audit ===
+    Fetching advisory database from `https://github.com/RustSec/advisory-db.git`
+      Loaded 1271 security advisories (from /home/o2a/.cargo/advisory-db)
+    Updating crates.io index
+    Scanning Cargo.lock for vulnerabilities (191 crate dependencies)
+=== cargo deny ===
+warning[unmatched-source]: allowed source was not encountered
+   ┌─ /workspace/deny.toml:38:6
+   │
+38 │     "https://github.com/RGB-WG/rgb",
+   │      ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ no crate source matched these criteria
+
+warning[license-not-encountered]: license was not encountered
+   ┌─ /workspace/deny.toml:22:6
+   │
+22 │     "Zlib",
+   │      ━━━━ unmatched license allowance
+
+warning[duplicate]: found 3 duplicate entries for crate 'getrandom'
+   ┌─ /workspace/Cargo.lock:53:1
+   │  
+53 │ ╭ getrandom 0.2.17 registry+https://github.com/rust-lang/crates.io-index
+54 │ │ getrandom 0.3.4 registry+https://github.com/rust-lang/crates.io-index
+55 │ │ getrandom 0.4.3 registry+https://github.com/rust-lang/crates.io-index
+   │ ╰─────────────────────────────────────────────────────────────────────┘ lock entries
+   │  
+   ├ getrandom v0.2.17
+     ├── aluvm v0.12.0
+     │   ├── hypersonic v0.12.0
+     │   │   ├── rgb-invoice v0.12.0-rc.3
+     │   │   │   └── rgb-std v0.12.0-rc.3
+     │   │   │       ├── o2a-demo-cli v0.1.0
+     │   │   │       ├── o2a-demo-rgb v0.1.0
+     │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+     │   │   │       │   └── o2a-seal-smoke v0.1.0
+     │   │   │       ├── o2a-seal-smoke v0.1.0 (*)
+     │   │   │       ├── rgb-descriptors v0.12.0-rc.3
+     │   │   │       │   └── rgb-runtime v0.12.0-rc.3
+     │   │   │       │       ├── o2a-demo-cli v0.1.0 (*)
+     │   │   │       │       ├── o2a-demo-rgb v0.1.0 (*)
+     │   │   │       │       └── o2a-seal-smoke v0.1.0 (*)
+     │   │   │       ├── rgb-persist-fs v0.12.0-rc.3
+     │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+     │   │   │       │   ├── o2a-seal-smoke v0.1.0 (*)
+     │   │   │       │   └── rgb-runtime v0.12.0-rc.3 (*)
+     │   │   │       ├── rgb-psbt v0.12.0-rc.3
+     │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+     │   │   │       │   ├── o2a-seal-smoke v0.1.0 (*)
+     │   │   │       │   └── rgb-runtime v0.12.0-rc.3 (*)
+     │   │   │       └── rgb-runtime v0.12.0-rc.3 (*)
+     │   │   ├── rgb-std v0.12.0-rc.3 (*)
+     │   │   └── sonic-persist-fs v0.12.0
+     │   │       └── rgb-persist-fs v0.12.0-rc.3 (*)
+     │   ├── o2a-demo-rgb v0.1.0 (*)
+     │   ├── sonic-api v0.12.0
+     │   │   ├── hypersonic v0.12.0 (*)
+     │   │   └── o2a-demo-rgb v0.1.0 (*)
+     │   └── zk-aluvm v0.12.0
+     │       └── ultrasonic v0.12.0
+     │           ├── hypersonic v0.12.0 (*)
+     │           ├── o2a-demo-rgb v0.1.0 (*)
+     │           ├── rgb-core v0.12.0
+     │           │   ├── rgb-invoice v0.12.0-rc.3 (*)
+     │           │   └── rgb-std v0.12.0-rc.3 (*)
+     │           ├── sonic-api v0.12.0 (*)
+     │           └── sonic-callreq v0.12.0
+     │               ├── hypersonic v0.12.0 (*)
+     │               ├── rgb-invoice v0.12.0-rc.3 (*)
+     │               └── sonic-api v0.12.0 (*)
+     ├── amplify v4.9.0
+     │   ├── aluvm v0.12.0 (*)
+     │   ├── aora v0.6.4
+     │   │   ├── rgb-persist-fs v0.12.0-rc.3 (*)
+     │   │   ├── rgb-std v0.12.0-rc.3 (*)
+     │   │   └── sonic-persist-fs v0.12.0 (*)
+     │   ├── baid64 v0.4.2
+     │   │   ├── aluvm v0.12.0 (*)
+     │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+     │   │   ├── sonic-api v0.12.0 (*)
+     │   │   ├── sonic-callreq v0.12.0 (*)
+     │   │   ├── strict_types v2.9.1
+     │   │   │   ├── commit_verify v0.12.1
+     │   │   │   │   ├── aluvm v0.12.0 (*)
+     │   │   │   │   ├── bp-consensus v0.12.0
+     │   │   │   │   │   ├── bp-core v0.12.0
+     │   │   │   │   │   │   ├── bp-electrum v0.12.0-rc.1
+     │   │   │   │   │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   ├── bp-std v0.12.0-rc.3
+     │   │   │   │   │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+     │   │   │   │   │   │   │   ├── o2a-demo-rgb v0.1.0 (*)
+     │   │   │   │   │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+     │   │   │   │   │   │   │   ├── rgb-descriptors v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   │   ├── rgb-psbt v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   ├── psbt v0.12.0-rc.3
+     │   │   │   │   │   │   │   └── bp-std v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   ├── rgb-core v0.12.0 (*)
+     │   │   │   │   │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   ├── rgb-psbt v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   └── rgb-std v0.12.0-rc.3 (*)
+     │   │   │   │   │   ├── bp-dbc v0.12.0
+     │   │   │   │   │   │   ├── bp-core v0.12.0 (*)
+     │   │   │   │   │   │   └── bp-seals v0.12.0
+     │   │   │   │   │   │       └── bp-core v0.12.0 (*)
+     │   │   │   │   │   ├── bp-derive v0.12.0-rc.3
+     │   │   │   │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   ├── descriptors v0.12.0-rc.3
+     │   │   │   │   │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   │   └── psbt v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   └── psbt v0.12.0-rc.3 (*)
+     │   │   │   │   │   ├── bp-invoice v0.12.0-rc.3
+     │   │   │   │   │   │   ├── bp-derive v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   └── rgb-std v0.12.0-rc.3 (*)
+     │   │   │   │   │   ├── bp-seals v0.12.0 (*)
+     │   │   │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+     │   │   │   │   │   └── psbt v0.12.0-rc.3 (*)
+     │   │   │   │   ├── bp-core v0.12.0 (*)
+     │   │   │   │   ├── bp-dbc v0.12.0 (*)
+     │   │   │   │   ├── bp-derive v0.12.0-rc.3 (*)
+     │   │   │   │   ├── bp-invoice v0.12.0-rc.3 (*)
+     │   │   │   │   ├── bp-seals v0.12.0 (*)
+     │   │   │   │   ├── descriptors v0.12.0-rc.3 (*)
+     │   │   │   │   ├── hypersonic v0.12.0 (*)
+     │   │   │   │   ├── psbt v0.12.0-rc.3 (*)
+     │   │   │   │   ├── rgb-core v0.12.0 (*)
+     │   │   │   │   ├── rgb-descriptors v0.12.0-rc.3 (*)
+     │   │   │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+     │   │   │   │   ├── rgb-runtime v0.12.0-rc.3 (*)
+     │   │   │   │   ├── rgb-std v0.12.0-rc.3 (*)
+     │   │   │   │   ├── sonic-api v0.12.0 (*)
+     │   │   │   │   ├── sonic-persist-fs v0.12.0 (*)
+     │   │   │   │   └── ultrasonic v0.12.0 (*)
+     │   │   │   ├── hypersonic v0.12.0 (*)
+     │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+     │   │   │   ├── o2a-demo-rgb v0.1.0 (*)
+     │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+     │   │   │   ├── rgb-runtime v0.12.0-rc.3 (*)
+     │   │   │   ├── rgb-std v0.12.0-rc.3 (*)
+     │   │   │   ├── sonic-api v0.12.0 (*)
+     │   │   │   └── sonic-callreq v0.12.0 (*)
+     │   │   └── ultrasonic v0.12.0 (*)
+     │   ├── binfile v0.2.0
+     │   │   ├── aora v0.6.4 (*)
+     │   │   ├── hypersonic v0.12.0 (*)
+     │   │   ├── rgb-std v0.12.0-rc.3 (*)
+     │   │   ├── sonic-api v0.12.0 (*)
+     │   │   └── sonic-persist-fs v0.12.0 (*)
+     │   ├── bp-consensus v0.12.0 (*)
+     │   ├── bp-dbc v0.12.0 (*)
+     │   ├── bp-derive v0.12.0-rc.3 (*)
+     │   ├── bp-electrum v0.12.0-rc.1 (*)
+     │   ├── bp-invoice v0.12.0-rc.3 (*)
+     │   ├── bp-seals v0.12.0 (*)
+     │   ├── bp-std v0.12.0-rc.3 (*)
+     │   ├── commit_encoding_derive v0.12.0
+     │   │   └── commit_verify v0.12.1 (*)
+     │   ├── commit_verify v0.12.1 (*)
+     │   ├── descriptors v0.12.0-rc.3 (*)
+     │   ├── hypersonic v0.12.0 (*)
+     │   ├── o2a-demo-cli v0.1.0 (*)
+     │   ├── o2a-demo-rgb v0.1.0 (*)
+     │   ├── o2a-seal-smoke v0.1.0 (*)
+     │   ├── psbt v0.12.0-rc.3 (*)
+     │   ├── rgb-core v0.12.0 (*)
+     │   ├── rgb-descriptors v0.12.0-rc.3 (*)
+     │   ├── rgb-invoice v0.12.0-rc.3 (*)
+     │   ├── rgb-persist-fs v0.12.0-rc.3 (*)
+     │   ├── rgb-psbt v0.12.0-rc.3 (*)
+     │   ├── rgb-runtime v0.12.0-rc.3 (*)
+     │   ├── rgb-std v0.12.0-rc.3 (*)
+     │   ├── sonic-api v0.12.0 (*)
+     │   ├── sonic-callreq v0.12.0 (*)
+     │   ├── sonic-persist-fs v0.12.0 (*)
+     │   ├── strict_encoding v2.9.1
+     │   │   ├── aluvm v0.12.0 (*)
+     │   │   ├── aora v0.6.4 (*)
+     │   │   ├── bp-consensus v0.12.0 (*)
+     │   │   ├── bp-core v0.12.0 (*)
+     │   │   ├── bp-dbc v0.12.0 (*)
+     │   │   ├── bp-invoice v0.12.0-rc.3 (*)
+     │   │   ├── bp-seals v0.12.0 (*)
+     │   │   ├── commit_verify v0.12.1 (*)
+     │   │   ├── hypersonic v0.12.0 (*)
+     │   │   ├── o2a-demo-cli v0.1.0 (*)
+     │   │   ├── o2a-demo-rgb v0.1.0 (*)
+     │   │   ├── o2a-seal-smoke v0.1.0 (*)
+     │   │   ├── psbt v0.12.0-rc.3 (*)
+     │   │   ├── rgb-core v0.12.0 (*)
+     │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+     │   │   ├── rgb-persist-fs v0.12.0-rc.3 (*)
+     │   │   ├── rgb-std v0.12.0-rc.3 (*)
+     │   │   ├── single_use_seals v0.12.0
+     │   │   │   ├── bp-seals v0.12.0 (*)
+     │   │   │   ├── rgb-core v0.12.0 (*)
+     │   │   │   └── rgb-std v0.12.0-rc.3 (*)
+     │   │   ├── sonic-api v0.12.0 (*)
+     │   │   ├── sonic-callreq v0.12.0 (*)
+     │   │   ├── sonic-persist-fs v0.12.0 (*)
+     │   │   ├── strict_types v2.9.1 (*)
+     │   │   ├── ultrasonic v0.12.0 (*)
+     │   │   ├── vesper-lang v0.2.3
+     │   │   │   ├── commit_verify v0.12.1 (*)
+     │   │   │   └── strict_types v2.9.1 (*)
+     │   │   └── zk-aluvm v0.12.0 (*)
+     │   ├── strict_types v2.9.1 (*)
+     │   ├── ultrasonic v0.12.0 (*)
+     │   ├── vesper-lang v0.2.3 (*)
+     │   └── zk-aluvm v0.12.0 (*)
+     ├── aora v0.6.4 (*)
+     ├── bp-consensus v0.12.0 (*)
+     ├── bp-core v0.12.0 (*)
+     ├── bp-dbc v0.12.0 (*)
+     ├── bp-seals v0.12.0 (*)
+     ├── bp-std v0.12.0-rc.3 (*)
+     ├── commit_verify v0.12.1 (*)
+     ├── hypersonic v0.12.0 (*)
+     ├── rand_core v0.6.4
+     │   ├── rand v0.8.8
+     │   │   └── secp256k1 v0.30.0
+     │   │       ├── bp-consensus v0.12.0 (*)
+     │   │       ├── bp-dbc v0.12.0 (*)
+     │   │       └── bp-std v0.12.0-rc.3 (*)
+     │   └── rand_chacha v0.3.1
+     │       └── rand v0.8.8 (*)
+     ├── rgb-core v0.12.0 (*)
+     ├── rgb-runtime v0.12.0-rc.3 (*)
+     ├── rgb-std v0.12.0-rc.3 (*)
+     ├── sonic-api v0.12.0 (*)
+     ├── sonic-callreq v0.12.0 (*)
+     ├── strict_encoding v2.9.1 (*)
+     ├── strict_types v2.9.1 (*)
+     ├── ultrasonic v0.12.0 (*)
+     └── zk-aluvm v0.12.0 (*)
+   ├ getrandom v0.3.4
+     ├── aluvm v0.12.0
+     │   ├── hypersonic v0.12.0
+     │   │   ├── rgb-invoice v0.12.0-rc.3
+     │   │   │   └── rgb-std v0.12.0-rc.3
+     │   │   │       ├── o2a-demo-cli v0.1.0
+     │   │   │       ├── o2a-demo-rgb v0.1.0
+     │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+     │   │   │       │   └── o2a-seal-smoke v0.1.0
+     │   │   │       ├── o2a-seal-smoke v0.1.0 (*)
+     │   │   │       ├── rgb-descriptors v0.12.0-rc.3
+     │   │   │       │   └── rgb-runtime v0.12.0-rc.3
+     │   │   │       │       ├── o2a-demo-cli v0.1.0 (*)
+     │   │   │       │       ├── o2a-demo-rgb v0.1.0 (*)
+     │   │   │       │       └── o2a-seal-smoke v0.1.0 (*)
+     │   │   │       ├── rgb-persist-fs v0.12.0-rc.3
+     │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+     │   │   │       │   ├── o2a-seal-smoke v0.1.0 (*)
+     │   │   │       │   └── rgb-runtime v0.12.0-rc.3 (*)
+     │   │   │       ├── rgb-psbt v0.12.0-rc.3
+     │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+     │   │   │       │   ├── o2a-seal-smoke v0.1.0 (*)
+     │   │   │       │   └── rgb-runtime v0.12.0-rc.3 (*)
+     │   │   │       └── rgb-runtime v0.12.0-rc.3 (*)
+     │   │   ├── rgb-std v0.12.0-rc.3 (*)
+     │   │   └── sonic-persist-fs v0.12.0
+     │   │       └── rgb-persist-fs v0.12.0-rc.3 (*)
+     │   ├── o2a-demo-rgb v0.1.0 (*)
+     │   ├── sonic-api v0.12.0
+     │   │   ├── hypersonic v0.12.0 (*)
+     │   │   └── o2a-demo-rgb v0.1.0 (*)
+     │   └── zk-aluvm v0.12.0
+     │       └── ultrasonic v0.12.0
+     │           ├── hypersonic v0.12.0 (*)
+     │           ├── o2a-demo-rgb v0.1.0 (*)
+     │           ├── rgb-core v0.12.0
+     │           │   ├── rgb-invoice v0.12.0-rc.3 (*)
+     │           │   └── rgb-std v0.12.0-rc.3 (*)
+     │           ├── sonic-api v0.12.0 (*)
+     │           └── sonic-callreq v0.12.0
+     │               ├── hypersonic v0.12.0 (*)
+     │               ├── rgb-invoice v0.12.0-rc.3 (*)
+     │               └── sonic-api v0.12.0 (*)
+     ├── amplify v4.9.0
+     │   ├── aluvm v0.12.0 (*)
+     │   ├── aora v0.6.4
+     │   │   ├── rgb-persist-fs v0.12.0-rc.3 (*)
+     │   │   ├── rgb-std v0.12.0-rc.3 (*)
+     │   │   └── sonic-persist-fs v0.12.0 (*)
+     │   ├── baid64 v0.4.2
+     │   │   ├── aluvm v0.12.0 (*)
+     │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+     │   │   ├── sonic-api v0.12.0 (*)
+     │   │   ├── sonic-callreq v0.12.0 (*)
+     │   │   ├── strict_types v2.9.1
+     │   │   │   ├── commit_verify v0.12.1
+     │   │   │   │   ├── aluvm v0.12.0 (*)
+     │   │   │   │   ├── bp-consensus v0.12.0
+     │   │   │   │   │   ├── bp-core v0.12.0
+     │   │   │   │   │   │   ├── bp-electrum v0.12.0-rc.1
+     │   │   │   │   │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   ├── bp-std v0.12.0-rc.3
+     │   │   │   │   │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+     │   │   │   │   │   │   │   ├── o2a-demo-rgb v0.1.0 (*)
+     │   │   │   │   │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+     │   │   │   │   │   │   │   ├── rgb-descriptors v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   │   ├── rgb-psbt v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   ├── psbt v0.12.0-rc.3
+     │   │   │   │   │   │   │   └── bp-std v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   ├── rgb-core v0.12.0 (*)
+     │   │   │   │   │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   ├── rgb-psbt v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   └── rgb-std v0.12.0-rc.3 (*)
+     │   │   │   │   │   ├── bp-dbc v0.12.0
+     │   │   │   │   │   │   ├── bp-core v0.12.0 (*)
+     │   │   │   │   │   │   └── bp-seals v0.12.0
+     │   │   │   │   │   │       └── bp-core v0.12.0 (*)
+     │   │   │   │   │   ├── bp-derive v0.12.0-rc.3
+     │   │   │   │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   ├── descriptors v0.12.0-rc.3
+     │   │   │   │   │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   │   └── psbt v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   └── psbt v0.12.0-rc.3 (*)
+     │   │   │   │   │   ├── bp-invoice v0.12.0-rc.3
+     │   │   │   │   │   │   ├── bp-derive v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+     │   │   │   │   │   │   └── rgb-std v0.12.0-rc.3 (*)
+     │   │   │   │   │   ├── bp-seals v0.12.0 (*)
+     │   │   │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+     │   │   │   │   │   └── psbt v0.12.0-rc.3 (*)
+     │   │   │   │   ├── bp-core v0.12.0 (*)
+     │   │   │   │   ├── bp-dbc v0.12.0 (*)
+     │   │   │   │   ├── bp-derive v0.12.0-rc.3 (*)
+     │   │   │   │   ├── bp-invoice v0.12.0-rc.3 (*)
+     │   │   │   │   ├── bp-seals v0.12.0 (*)
+     │   │   │   │   ├── descriptors v0.12.0-rc.3 (*)
+     │   │   │   │   ├── hypersonic v0.12.0 (*)
+     │   │   │   │   ├── psbt v0.12.0-rc.3 (*)
+     │   │   │   │   ├── rgb-core v0.12.0 (*)
+     │   │   │   │   ├── rgb-descriptors v0.12.0-rc.3 (*)
+     │   │   │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+     │   │   │   │   ├── rgb-runtime v0.12.0-rc.3 (*)
+     │   │   │   │   ├── rgb-std v0.12.0-rc.3 (*)
+     │   │   │   │   ├── sonic-api v0.12.0 (*)
+     │   │   │   │   ├── sonic-persist-fs v0.12.0 (*)
+     │   │   │   │   └── ultrasonic v0.12.0 (*)
+     │   │   │   ├── hypersonic v0.12.0 (*)
+     │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+     │   │   │   ├── o2a-demo-rgb v0.1.0 (*)
+     │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+     │   │   │   ├── rgb-runtime v0.12.0-rc.3 (*)
+     │   │   │   ├── rgb-std v0.12.0-rc.3 (*)
+     │   │   │   ├── sonic-api v0.12.0 (*)
+     │   │   │   └── sonic-callreq v0.12.0 (*)
+     │   │   └── ultrasonic v0.12.0 (*)
+     │   ├── binfile v0.2.0
+     │   │   ├── aora v0.6.4 (*)
+     │   │   ├── hypersonic v0.12.0 (*)
+     │   │   ├── rgb-std v0.12.0-rc.3 (*)
+     │   │   ├── sonic-api v0.12.0 (*)
+     │   │   └── sonic-persist-fs v0.12.0 (*)
+     │   ├── bp-consensus v0.12.0 (*)
+     │   ├── bp-dbc v0.12.0 (*)
+     │   ├── bp-derive v0.12.0-rc.3 (*)
+     │   ├── bp-electrum v0.12.0-rc.1 (*)
+     │   ├── bp-invoice v0.12.0-rc.3 (*)
+     │   ├── bp-seals v0.12.0 (*)
+     │   ├── bp-std v0.12.0-rc.3 (*)
+     │   ├── commit_encoding_derive v0.12.0
+     │   │   └── commit_verify v0.12.1 (*)
+     │   ├── commit_verify v0.12.1 (*)
+     │   ├── descriptors v0.12.0-rc.3 (*)
+     │   ├── hypersonic v0.12.0 (*)
+     │   ├── o2a-demo-cli v0.1.0 (*)
+     │   ├── o2a-demo-rgb v0.1.0 (*)
+     │   ├── o2a-seal-smoke v0.1.0 (*)
+     │   ├── psbt v0.12.0-rc.3 (*)
+     │   ├── rgb-core v0.12.0 (*)
+     │   ├── rgb-descriptors v0.12.0-rc.3 (*)
+     │   ├── rgb-invoice v0.12.0-rc.3 (*)
+     │   ├── rgb-persist-fs v0.12.0-rc.3 (*)
+     │   ├── rgb-psbt v0.12.0-rc.3 (*)
+     │   ├── rgb-runtime v0.12.0-rc.3 (*)
+     │   ├── rgb-std v0.12.0-rc.3 (*)
+     │   ├── sonic-api v0.12.0 (*)
+     │   ├── sonic-callreq v0.12.0 (*)
+     │   ├── sonic-persist-fs v0.12.0 (*)
+     │   ├── strict_encoding v2.9.1
+     │   │   ├── aluvm v0.12.0 (*)
+     │   │   ├── aora v0.6.4 (*)
+     │   │   ├── bp-consensus v0.12.0 (*)
+     │   │   ├── bp-core v0.12.0 (*)
+     │   │   ├── bp-dbc v0.12.0 (*)
+     │   │   ├── bp-invoice v0.12.0-rc.3 (*)
+     │   │   ├── bp-seals v0.12.0 (*)
+     │   │   ├── commit_verify v0.12.1 (*)
+     │   │   ├── hypersonic v0.12.0 (*)
+     │   │   ├── o2a-demo-cli v0.1.0 (*)
+     │   │   ├── o2a-demo-rgb v0.1.0 (*)
+     │   │   ├── o2a-seal-smoke v0.1.0 (*)
+     │   │   ├── psbt v0.12.0-rc.3 (*)
+     │   │   ├── rgb-core v0.12.0 (*)
+     │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+     │   │   ├── rgb-persist-fs v0.12.0-rc.3 (*)
+     │   │   ├── rgb-std v0.12.0-rc.3 (*)
+     │   │   ├── single_use_seals v0.12.0
+     │   │   │   ├── bp-seals v0.12.0 (*)
+     │   │   │   ├── rgb-core v0.12.0 (*)
+     │   │   │   └── rgb-std v0.12.0-rc.3 (*)
+     │   │   ├── sonic-api v0.12.0 (*)
+     │   │   ├── sonic-callreq v0.12.0 (*)
+     │   │   ├── sonic-persist-fs v0.12.0 (*)
+     │   │   ├── strict_types v2.9.1 (*)
+     │   │   ├── ultrasonic v0.12.0 (*)
+     │   │   ├── vesper-lang v0.2.3
+     │   │   │   ├── commit_verify v0.12.1 (*)
+     │   │   │   └── strict_types v2.9.1 (*)
+     │   │   └── zk-aluvm v0.12.0 (*)
+     │   ├── strict_types v2.9.1 (*)
+     │   ├── ultrasonic v0.12.0 (*)
+     │   ├── vesper-lang v0.2.3 (*)
+     │   └── zk-aluvm v0.12.0 (*)
+     ├── bp-consensus v0.12.0 (*)
+     ├── bp-core v0.12.0 (*)
+     ├── bp-dbc v0.12.0 (*)
+     ├── bp-seals v0.12.0 (*)
+     ├── bp-std v0.12.0-rc.3 (*)
+     ├── commit_verify v0.12.1 (*)
+     ├── hypersonic v0.12.0 (*)
+     ├── rand_core v0.9.5
+     │   ├── rand v0.9.5
+     │   │   └── commit_verify v0.12.1 (*)
+     │   └── rand_chacha v0.9.0
+     │       └── rand v0.9.5 (*)
+     ├── rgb-core v0.12.0 (*)
+     ├── rgb-runtime v0.12.0-rc.3 (*)
+     ├── rgb-std v0.12.0-rc.3 (*)
+     ├── sonic-api v0.12.0 (*)
+     ├── sonic-callreq v0.12.0 (*)
+     ├── strict_encoding v2.9.1 (*)
+     ├── strict_types v2.9.1 (*)
+     ├── ultrasonic v0.12.0 (*)
+     └── zk-aluvm v0.12.0 (*)
+   ├ getrandom v0.4.3
+     └── jobserver v0.1.35
+         └── cc v1.4.7
+             ├── (build) aws-lc-sys v0.45.0
+             │   └── aws-lc-rs v1.18.1
+             │       ├── rustls v0.23.45
+             │       │   └── bp-electrum v0.12.0-rc.1
+             │       │       └── rgb-runtime v0.12.0-rc.3
+             │       │           ├── o2a-demo-cli v0.1.0
+             │       │           ├── o2a-demo-rgb v0.1.0
+             │       │           │   ├── o2a-demo-cli v0.1.0 (*)
+             │       │           │   └── o2a-seal-smoke v0.1.0
+             │       │           └── o2a-seal-smoke v0.1.0 (*)
+             │       └── rustls-webpki v0.103.15
+             │           └── rustls v0.23.45 (*)
+             ├── cmake v0.1.58
+             │   └── (build) aws-lc-sys v0.45.0 (*)
+             ├── (build) iana-time-zone-haiku v0.1.2
+             │   └── iana-time-zone v0.1.65
+             │       └── chrono v0.4.45
+             │           ├── bp-consensus v0.12.0
+             │           │   ├── bp-core v0.12.0
+             │           │   │   ├── bp-electrum v0.12.0-rc.1 (*)
+             │           │   │   ├── bp-std v0.12.0-rc.3
+             │           │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+             │           │   │   │   ├── o2a-demo-rgb v0.1.0 (*)
+             │           │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+             │           │   │   │   ├── rgb-descriptors v0.12.0-rc.3
+             │           │   │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+             │           │   │   │   ├── rgb-psbt v0.12.0-rc.3
+             │           │   │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+             │           │   │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+             │           │   │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+             │           │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+             │           │   │   ├── psbt v0.12.0-rc.3
+             │           │   │   │   └── bp-std v0.12.0-rc.3 (*)
+             │           │   │   ├── rgb-core v0.12.0
+             │           │   │   │   ├── rgb-invoice v0.12.0-rc.3
+             │           │   │   │   │   └── rgb-std v0.12.0-rc.3
+             │           │   │   │   │       ├── o2a-demo-cli v0.1.0 (*)
+             │           │   │   │   │       ├── o2a-demo-rgb v0.1.0 (*)
+             │           │   │   │   │       ├── o2a-seal-smoke v0.1.0 (*)
+             │           │   │   │   │       ├── rgb-descriptors v0.12.0-rc.3 (*)
+             │           │   │   │   │       ├── rgb-persist-fs v0.12.0-rc.3
+             │           │   │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+             │           │   │   │   │       │   ├── o2a-seal-smoke v0.1.0 (*)
+             │           │   │   │   │       │   └── rgb-runtime v0.12.0-rc.3 (*)
+             │           │   │   │   │       ├── rgb-psbt v0.12.0-rc.3 (*)
+             │           │   │   │   │       └── rgb-runtime v0.12.0-rc.3 (*)
+             │           │   │   │   └── rgb-std v0.12.0-rc.3 (*)
+             │           │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+             │           │   │   ├── rgb-psbt v0.12.0-rc.3 (*)
+             │           │   │   └── rgb-std v0.12.0-rc.3 (*)
+             │           │   ├── bp-dbc v0.12.0
+             │           │   │   ├── bp-core v0.12.0 (*)
+             │           │   │   └── bp-seals v0.12.0
+             │           │   │       └── bp-core v0.12.0 (*)
+             │           │   ├── bp-derive v0.12.0-rc.3
+             │           │   │   ├── bp-std v0.12.0-rc.3 (*)
+             │           │   │   ├── descriptors v0.12.0-rc.3
+             │           │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+             │           │   │   │   └── psbt v0.12.0-rc.3 (*)
+             │           │   │   └── psbt v0.12.0-rc.3 (*)
+             │           │   ├── bp-invoice v0.12.0-rc.3
+             │           │   │   ├── bp-derive v0.12.0-rc.3 (*)
+             │           │   │   ├── bp-std v0.12.0-rc.3 (*)
+             │           │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+             │           │   │   └── rgb-std v0.12.0-rc.3 (*)
+             │           │   ├── bp-seals v0.12.0 (*)
+             │           │   ├── bp-std v0.12.0-rc.3 (*)
+             │           │   └── psbt v0.12.0-rc.3 (*)
+             │           ├── rgb-runtime v0.12.0-rc.3 (*)
+             │           ├── rgb-std v0.12.0-rc.3 (*)
+             │           ├── sonic-api v0.12.0
+             │           │   ├── hypersonic v0.12.0
+             │           │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+             │           │   │   ├── rgb-std v0.12.0-rc.3 (*)
+             │           │   │   └── sonic-persist-fs v0.12.0
+             │           │   │       └── rgb-persist-fs v0.12.0-rc.3 (*)
+             │           │   └── o2a-demo-rgb v0.1.0 (*)
+             │           └── sonic-callreq v0.12.0
+             │               ├── hypersonic v0.12.0 (*)
+             │               ├── rgb-invoice v0.12.0-rc.3 (*)
+             │               └── sonic-api v0.12.0 (*)
+             └── (build) secp256k1-sys v0.10.1
+                 ├── secp256k1 v0.29.1
+                 │   ├── o2a-demo-core v0.1.0
+                 │   │   ├── o2a-demo-cli v0.1.0 (*)
+                 │   │   ├── o2a-demo-rgb v0.1.0 (*)
+                 │   │   └── o2a-seal-smoke v0.1.0 (*)
+                 │   └── o2a-seal-smoke v0.1.0 (*)
+                 └── secp256k1 v0.30.0
+                     ├── bp-consensus v0.12.0 (*)
+                     ├── bp-dbc v0.12.0 (*)
+                     └── bp-std v0.12.0-rc.3 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'r-efi'
+   ┌─ /workspace/Cargo.lock:85:1
+   │  
+85 │ ╭ r-efi 5.3.0 registry+https://github.com/rust-lang/crates.io-index
+86 │ │ r-efi 6.0.0 registry+https://github.com/rust-lang/crates.io-index
+   │ ╰─────────────────────────────────────────────────────────────────┘ lock entries
+   │  
+   ├ r-efi v5.3.0
+     └── getrandom v0.3.4
+         ├── aluvm v0.12.0
+         │   ├── hypersonic v0.12.0
+         │   │   ├── rgb-invoice v0.12.0-rc.3
+         │   │   │   └── rgb-std v0.12.0-rc.3
+         │   │   │       ├── o2a-demo-cli v0.1.0
+         │   │   │       ├── o2a-demo-rgb v0.1.0
+         │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+         │   │   │       │   └── o2a-seal-smoke v0.1.0
+         │   │   │       ├── o2a-seal-smoke v0.1.0 (*)
+         │   │   │       ├── rgb-descriptors v0.12.0-rc.3
+         │   │   │       │   └── rgb-runtime v0.12.0-rc.3
+         │   │   │       │       ├── o2a-demo-cli v0.1.0 (*)
+         │   │   │       │       ├── o2a-demo-rgb v0.1.0 (*)
+         │   │   │       │       └── o2a-seal-smoke v0.1.0 (*)
+         │   │   │       ├── rgb-persist-fs v0.12.0-rc.3
+         │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+         │   │   │       │   ├── o2a-seal-smoke v0.1.0 (*)
+         │   │   │       │   └── rgb-runtime v0.12.0-rc.3 (*)
+         │   │   │       ├── rgb-psbt v0.12.0-rc.3
+         │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+         │   │   │       │   ├── o2a-seal-smoke v0.1.0 (*)
+         │   │   │       │   └── rgb-runtime v0.12.0-rc.3 (*)
+         │   │   │       └── rgb-runtime v0.12.0-rc.3 (*)
+         │   │   ├── rgb-std v0.12.0-rc.3 (*)
+         │   │   └── sonic-persist-fs v0.12.0
+         │   │       └── rgb-persist-fs v0.12.0-rc.3 (*)
+         │   ├── o2a-demo-rgb v0.1.0 (*)
+         │   ├── sonic-api v0.12.0
+         │   │   ├── hypersonic v0.12.0 (*)
+         │   │   └── o2a-demo-rgb v0.1.0 (*)
+         │   └── zk-aluvm v0.12.0
+         │       └── ultrasonic v0.12.0
+         │           ├── hypersonic v0.12.0 (*)
+         │           ├── o2a-demo-rgb v0.1.0 (*)
+         │           ├── rgb-core v0.12.0
+         │           │   ├── rgb-invoice v0.12.0-rc.3 (*)
+         │           │   └── rgb-std v0.12.0-rc.3 (*)
+         │           ├── sonic-api v0.12.0 (*)
+         │           └── sonic-callreq v0.12.0
+         │               ├── hypersonic v0.12.0 (*)
+         │               ├── rgb-invoice v0.12.0-rc.3 (*)
+         │               └── sonic-api v0.12.0 (*)
+         ├── amplify v4.9.0
+         │   ├── aluvm v0.12.0 (*)
+         │   ├── aora v0.6.4
+         │   │   ├── rgb-persist-fs v0.12.0-rc.3 (*)
+         │   │   ├── rgb-std v0.12.0-rc.3 (*)
+         │   │   └── sonic-persist-fs v0.12.0 (*)
+         │   ├── baid64 v0.4.2
+         │   │   ├── aluvm v0.12.0 (*)
+         │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+         │   │   ├── sonic-api v0.12.0 (*)
+         │   │   ├── sonic-callreq v0.12.0 (*)
+         │   │   ├── strict_types v2.9.1
+         │   │   │   ├── commit_verify v0.12.1
+         │   │   │   │   ├── aluvm v0.12.0 (*)
+         │   │   │   │   ├── bp-consensus v0.12.0
+         │   │   │   │   │   ├── bp-core v0.12.0
+         │   │   │   │   │   │   ├── bp-electrum v0.12.0-rc.1
+         │   │   │   │   │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+         │   │   │   │   │   │   ├── bp-std v0.12.0-rc.3
+         │   │   │   │   │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+         │   │   │   │   │   │   │   ├── o2a-demo-rgb v0.1.0 (*)
+         │   │   │   │   │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+         │   │   │   │   │   │   │   ├── rgb-descriptors v0.12.0-rc.3 (*)
+         │   │   │   │   │   │   │   ├── rgb-psbt v0.12.0-rc.3 (*)
+         │   │   │   │   │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+         │   │   │   │   │   │   ├── psbt v0.12.0-rc.3
+         │   │   │   │   │   │   │   └── bp-std v0.12.0-rc.3 (*)
+         │   │   │   │   │   │   ├── rgb-core v0.12.0 (*)
+         │   │   │   │   │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+         │   │   │   │   │   │   ├── rgb-psbt v0.12.0-rc.3 (*)
+         │   │   │   │   │   │   └── rgb-std v0.12.0-rc.3 (*)
+         │   │   │   │   │   ├── bp-dbc v0.12.0
+         │   │   │   │   │   │   ├── bp-core v0.12.0 (*)
+         │   │   │   │   │   │   └── bp-seals v0.12.0
+         │   │   │   │   │   │       └── bp-core v0.12.0 (*)
+         │   │   │   │   │   ├── bp-derive v0.12.0-rc.3
+         │   │   │   │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+         │   │   │   │   │   │   ├── descriptors v0.12.0-rc.3
+         │   │   │   │   │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+         │   │   │   │   │   │   │   └── psbt v0.12.0-rc.3 (*)
+         │   │   │   │   │   │   └── psbt v0.12.0-rc.3 (*)
+         │   │   │   │   │   ├── bp-invoice v0.12.0-rc.3
+         │   │   │   │   │   │   ├── bp-derive v0.12.0-rc.3 (*)
+         │   │   │   │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+         │   │   │   │   │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+         │   │   │   │   │   │   └── rgb-std v0.12.0-rc.3 (*)
+         │   │   │   │   │   ├── bp-seals v0.12.0 (*)
+         │   │   │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+         │   │   │   │   │   └── psbt v0.12.0-rc.3 (*)
+         │   │   │   │   ├── bp-core v0.12.0 (*)
+         │   │   │   │   ├── bp-dbc v0.12.0 (*)
+         │   │   │   │   ├── bp-derive v0.12.0-rc.3 (*)
+         │   │   │   │   ├── bp-invoice v0.12.0-rc.3 (*)
+         │   │   │   │   ├── bp-seals v0.12.0 (*)
+         │   │   │   │   ├── descriptors v0.12.0-rc.3 (*)
+         │   │   │   │   ├── hypersonic v0.12.0 (*)
+         │   │   │   │   ├── psbt v0.12.0-rc.3 (*)
+         │   │   │   │   ├── rgb-core v0.12.0 (*)
+         │   │   │   │   ├── rgb-descriptors v0.12.0-rc.3 (*)
+         │   │   │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+         │   │   │   │   ├── rgb-runtime v0.12.0-rc.3 (*)
+         │   │   │   │   ├── rgb-std v0.12.0-rc.3 (*)
+         │   │   │   │   ├── sonic-api v0.12.0 (*)
+         │   │   │   │   ├── sonic-persist-fs v0.12.0 (*)
+         │   │   │   │   └── ultrasonic v0.12.0 (*)
+         │   │   │   ├── hypersonic v0.12.0 (*)
+         │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+         │   │   │   ├── o2a-demo-rgb v0.1.0 (*)
+         │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+         │   │   │   ├── rgb-runtime v0.12.0-rc.3 (*)
+         │   │   │   ├── rgb-std v0.12.0-rc.3 (*)
+         │   │   │   ├── sonic-api v0.12.0 (*)
+         │   │   │   └── sonic-callreq v0.12.0 (*)
+         │   │   └── ultrasonic v0.12.0 (*)
+         │   ├── binfile v0.2.0
+         │   │   ├── aora v0.6.4 (*)
+         │   │   ├── hypersonic v0.12.0 (*)
+         │   │   ├── rgb-std v0.12.0-rc.3 (*)
+         │   │   ├── sonic-api v0.12.0 (*)
+         │   │   └── sonic-persist-fs v0.12.0 (*)
+         │   ├── bp-consensus v0.12.0 (*)
+         │   ├── bp-dbc v0.12.0 (*)
+         │   ├── bp-derive v0.12.0-rc.3 (*)
+         │   ├── bp-electrum v0.12.0-rc.1 (*)
+         │   ├── bp-invoice v0.12.0-rc.3 (*)
+         │   ├── bp-seals v0.12.0 (*)
+         │   ├── bp-std v0.12.0-rc.3 (*)
+         │   ├── commit_encoding_derive v0.12.0
+         │   │   └── commit_verify v0.12.1 (*)
+         │   ├── commit_verify v0.12.1 (*)
+         │   ├── descriptors v0.12.0-rc.3 (*)
+         │   ├── hypersonic v0.12.0 (*)
+         │   ├── o2a-demo-cli v0.1.0 (*)
+         │   ├── o2a-demo-rgb v0.1.0 (*)
+         │   ├── o2a-seal-smoke v0.1.0 (*)
+         │   ├── psbt v0.12.0-rc.3 (*)
+         │   ├── rgb-core v0.12.0 (*)
+         │   ├── rgb-descriptors v0.12.0-rc.3 (*)
+         │   ├── rgb-invoice v0.12.0-rc.3 (*)
+         │   ├── rgb-persist-fs v0.12.0-rc.3 (*)
+         │   ├── rgb-psbt v0.12.0-rc.3 (*)
+         │   ├── rgb-runtime v0.12.0-rc.3 (*)
+         │   ├── rgb-std v0.12.0-rc.3 (*)
+         │   ├── sonic-api v0.12.0 (*)
+         │   ├── sonic-callreq v0.12.0 (*)
+         │   ├── sonic-persist-fs v0.12.0 (*)
+         │   ├── strict_encoding v2.9.1
+         │   │   ├── aluvm v0.12.0 (*)
+         │   │   ├── aora v0.6.4 (*)
+         │   │   ├── bp-consensus v0.12.0 (*)
+         │   │   ├── bp-core v0.12.0 (*)
+         │   │   ├── bp-dbc v0.12.0 (*)
+         │   │   ├── bp-invoice v0.12.0-rc.3 (*)
+         │   │   ├── bp-seals v0.12.0 (*)
+         │   │   ├── commit_verify v0.12.1 (*)
+         │   │   ├── hypersonic v0.12.0 (*)
+         │   │   ├── o2a-demo-cli v0.1.0 (*)
+         │   │   ├── o2a-demo-rgb v0.1.0 (*)
+         │   │   ├── o2a-seal-smoke v0.1.0 (*)
+         │   │   ├── psbt v0.12.0-rc.3 (*)
+         │   │   ├── rgb-core v0.12.0 (*)
+         │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+         │   │   ├── rgb-persist-fs v0.12.0-rc.3 (*)
+         │   │   ├── rgb-std v0.12.0-rc.3 (*)
+         │   │   ├── single_use_seals v0.12.0
+         │   │   │   ├── bp-seals v0.12.0 (*)
+         │   │   │   ├── rgb-core v0.12.0 (*)
+         │   │   │   └── rgb-std v0.12.0-rc.3 (*)
+         │   │   ├── sonic-api v0.12.0 (*)
+         │   │   ├── sonic-callreq v0.12.0 (*)
+         │   │   ├── sonic-persist-fs v0.12.0 (*)
+         │   │   ├── strict_types v2.9.1 (*)
+         │   │   ├── ultrasonic v0.12.0 (*)
+         │   │   ├── vesper-lang v0.2.3
+         │   │   │   ├── commit_verify v0.12.1 (*)
+         │   │   │   └── strict_types v2.9.1 (*)
+         │   │   └── zk-aluvm v0.12.0 (*)
+         │   ├── strict_types v2.9.1 (*)
+         │   ├── ultrasonic v0.12.0 (*)
+         │   ├── vesper-lang v0.2.3 (*)
+         │   └── zk-aluvm v0.12.0 (*)
+         ├── bp-consensus v0.12.0 (*)
+         ├── bp-core v0.12.0 (*)
+         ├── bp-dbc v0.12.0 (*)
+         ├── bp-seals v0.12.0 (*)
+         ├── bp-std v0.12.0-rc.3 (*)
+         ├── commit_verify v0.12.1 (*)
+         ├── hypersonic v0.12.0 (*)
+         ├── rand_core v0.9.5
+         │   ├── rand v0.9.5
+         │   │   └── commit_verify v0.12.1 (*)
+         │   └── rand_chacha v0.9.0
+         │       └── rand v0.9.5 (*)
+         ├── rgb-core v0.12.0 (*)
+         ├── rgb-runtime v0.12.0-rc.3 (*)
+         ├── rgb-std v0.12.0-rc.3 (*)
+         ├── sonic-api v0.12.0 (*)
+         ├── sonic-callreq v0.12.0 (*)
+         ├── strict_encoding v2.9.1 (*)
+         ├── strict_types v2.9.1 (*)
+         ├── ultrasonic v0.12.0 (*)
+         └── zk-aluvm v0.12.0 (*)
+   ├ r-efi v6.0.0
+     └── getrandom v0.4.3
+         └── jobserver v0.1.35
+             └── cc v1.4.7
+                 ├── (build) aws-lc-sys v0.45.0
+                 │   └── aws-lc-rs v1.18.1
+                 │       ├── rustls v0.23.45
+                 │       │   └── bp-electrum v0.12.0-rc.1
+                 │       │       └── rgb-runtime v0.12.0-rc.3
+                 │       │           ├── o2a-demo-cli v0.1.0
+                 │       │           ├── o2a-demo-rgb v0.1.0
+                 │       │           │   ├── o2a-demo-cli v0.1.0 (*)
+                 │       │           │   └── o2a-seal-smoke v0.1.0
+                 │       │           └── o2a-seal-smoke v0.1.0 (*)
+                 │       └── rustls-webpki v0.103.15
+                 │           └── rustls v0.23.45 (*)
+                 ├── cmake v0.1.58
+                 │   └── (build) aws-lc-sys v0.45.0 (*)
+                 ├── (build) iana-time-zone-haiku v0.1.2
+                 │   └── iana-time-zone v0.1.65
+                 │       └── chrono v0.4.45
+                 │           ├── bp-consensus v0.12.0
+                 │           │   ├── bp-core v0.12.0
+                 │           │   │   ├── bp-electrum v0.12.0-rc.1 (*)
+                 │           │   │   ├── bp-std v0.12.0-rc.3
+                 │           │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+                 │           │   │   │   ├── o2a-demo-rgb v0.1.0 (*)
+                 │           │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+                 │           │   │   │   ├── rgb-descriptors v0.12.0-rc.3
+                 │           │   │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+                 │           │   │   │   ├── rgb-psbt v0.12.0-rc.3
+                 │           │   │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+                 │           │   │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+                 │           │   │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+                 │           │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+                 │           │   │   ├── psbt v0.12.0-rc.3
+                 │           │   │   │   └── bp-std v0.12.0-rc.3 (*)
+                 │           │   │   ├── rgb-core v0.12.0
+                 │           │   │   │   ├── rgb-invoice v0.12.0-rc.3
+                 │           │   │   │   │   └── rgb-std v0.12.0-rc.3
+                 │           │   │   │   │       ├── o2a-demo-cli v0.1.0 (*)
+                 │           │   │   │   │       ├── o2a-demo-rgb v0.1.0 (*)
+                 │           │   │   │   │       ├── o2a-seal-smoke v0.1.0 (*)
+                 │           │   │   │   │       ├── rgb-descriptors v0.12.0-rc.3 (*)
+                 │           │   │   │   │       ├── rgb-persist-fs v0.12.0-rc.3
+                 │           │   │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+                 │           │   │   │   │       │   ├── o2a-seal-smoke v0.1.0 (*)
+                 │           │   │   │   │       │   └── rgb-runtime v0.12.0-rc.3 (*)
+                 │           │   │   │   │       ├── rgb-psbt v0.12.0-rc.3 (*)
+                 │           │   │   │   │       └── rgb-runtime v0.12.0-rc.3 (*)
+                 │           │   │   │   └── rgb-std v0.12.0-rc.3 (*)
+                 │           │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+                 │           │   │   ├── rgb-psbt v0.12.0-rc.3 (*)
+                 │           │   │   └── rgb-std v0.12.0-rc.3 (*)
+                 │           │   ├── bp-dbc v0.12.0
+                 │           │   │   ├── bp-core v0.12.0 (*)
+                 │           │   │   └── bp-seals v0.12.0
+                 │           │   │       └── bp-core v0.12.0 (*)
+                 │           │   ├── bp-derive v0.12.0-rc.3
+                 │           │   │   ├── bp-std v0.12.0-rc.3 (*)
+                 │           │   │   ├── descriptors v0.12.0-rc.3
+                 │           │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+                 │           │   │   │   └── psbt v0.12.0-rc.3 (*)
+                 │           │   │   └── psbt v0.12.0-rc.3 (*)
+                 │           │   ├── bp-invoice v0.12.0-rc.3
+                 │           │   │   ├── bp-derive v0.12.0-rc.3 (*)
+                 │           │   │   ├── bp-std v0.12.0-rc.3 (*)
+                 │           │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+                 │           │   │   └── rgb-std v0.12.0-rc.3 (*)
+                 │           │   ├── bp-seals v0.12.0 (*)
+                 │           │   ├── bp-std v0.12.0-rc.3 (*)
+                 │           │   └── psbt v0.12.0-rc.3 (*)
+                 │           ├── rgb-runtime v0.12.0-rc.3 (*)
+                 │           ├── rgb-std v0.12.0-rc.3 (*)
+                 │           ├── sonic-api v0.12.0
+                 │           │   ├── hypersonic v0.12.0
+                 │           │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+                 │           │   │   ├── rgb-std v0.12.0-rc.3 (*)
+                 │           │   │   └── sonic-persist-fs v0.12.0
+                 │           │   │       └── rgb-persist-fs v0.12.0-rc.3 (*)
+                 │           │   └── o2a-demo-rgb v0.1.0 (*)
+                 │           └── sonic-callreq v0.12.0
+                 │               ├── hypersonic v0.12.0 (*)
+                 │               ├── rgb-invoice v0.12.0-rc.3 (*)
+                 │               └── sonic-api v0.12.0 (*)
+                 └── (build) secp256k1-sys v0.10.1
+                     ├── secp256k1 v0.29.1
+                     │   ├── o2a-demo-core v0.1.0
+                     │   │   ├── o2a-demo-cli v0.1.0 (*)
+                     │   │   ├── o2a-demo-rgb v0.1.0 (*)
+                     │   │   └── o2a-seal-smoke v0.1.0 (*)
+                     │   └── o2a-seal-smoke v0.1.0 (*)
+                     └── secp256k1 v0.30.0
+                         ├── bp-consensus v0.12.0 (*)
+                         ├── bp-dbc v0.12.0 (*)
+                         └── bp-std v0.12.0-rc.3 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'rand'
+   ┌─ /workspace/Cargo.lock:87:1
+   │  
+87 │ ╭ rand 0.8.8 registry+https://github.com/rust-lang/crates.io-index
+88 │ │ rand 0.9.5 registry+https://github.com/rust-lang/crates.io-index
+   │ ╰────────────────────────────────────────────────────────────────┘ lock entries
+   │  
+   ├ rand v0.8.8
+     └── secp256k1 v0.30.0
+         ├── bp-consensus v0.12.0
+         │   ├── bp-core v0.12.0
+         │   │   ├── bp-electrum v0.12.0-rc.1
+         │   │   │   └── rgb-runtime v0.12.0-rc.3
+         │   │   │       ├── o2a-demo-cli v0.1.0
+         │   │   │       ├── o2a-demo-rgb v0.1.0
+         │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+         │   │   │       │   └── o2a-seal-smoke v0.1.0
+         │   │   │       └── o2a-seal-smoke v0.1.0 (*)
+         │   │   ├── bp-std v0.12.0-rc.3
+         │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+         │   │   │   ├── o2a-demo-rgb v0.1.0 (*)
+         │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+         │   │   │   ├── rgb-descriptors v0.12.0-rc.3
+         │   │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+         │   │   │   ├── rgb-psbt v0.12.0-rc.3
+         │   │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+         │   │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+         │   │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+         │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+         │   │   ├── psbt v0.12.0-rc.3
+         │   │   │   └── bp-std v0.12.0-rc.3 (*)
+         │   │   ├── rgb-core v0.12.0
+         │   │   │   ├── rgb-invoice v0.12.0-rc.3
+         │   │   │   │   └── rgb-std v0.12.0-rc.3
+         │   │   │   │       ├── o2a-demo-cli v0.1.0 (*)
+         │   │   │   │       ├── o2a-demo-rgb v0.1.0 (*)
+         │   │   │   │       ├── o2a-seal-smoke v0.1.0 (*)
+         │   │   │   │       ├── rgb-descriptors v0.12.0-rc.3 (*)
+         │   │   │   │       ├── rgb-persist-fs v0.12.0-rc.3
+         │   │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+         │   │   │   │       │   ├── o2a-seal-smoke v0.1.0 (*)
+         │   │   │   │       │   └── rgb-runtime v0.12.0-rc.3 (*)
+         │   │   │   │       ├── rgb-psbt v0.12.0-rc.3 (*)
+         │   │   │   │       └── rgb-runtime v0.12.0-rc.3 (*)
+         │   │   │   └── rgb-std v0.12.0-rc.3 (*)
+         │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+         │   │   ├── rgb-psbt v0.12.0-rc.3 (*)
+         │   │   └── rgb-std v0.12.0-rc.3 (*)
+         │   ├── bp-dbc v0.12.0
+         │   │   ├── bp-core v0.12.0 (*)
+         │   │   └── bp-seals v0.12.0
+         │   │       └── bp-core v0.12.0 (*)
+         │   ├── bp-derive v0.12.0-rc.3
+         │   │   ├── bp-std v0.12.0-rc.3 (*)
+         │   │   ├── descriptors v0.12.0-rc.3
+         │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+         │   │   │   └── psbt v0.12.0-rc.3 (*)
+         │   │   └── psbt v0.12.0-rc.3 (*)
+         │   ├── bp-invoice v0.12.0-rc.3
+         │   │   ├── bp-derive v0.12.0-rc.3 (*)
+         │   │   ├── bp-std v0.12.0-rc.3 (*)
+         │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+         │   │   └── rgb-std v0.12.0-rc.3 (*)
+         │   ├── bp-seals v0.12.0 (*)
+         │   ├── bp-std v0.12.0-rc.3 (*)
+         │   └── psbt v0.12.0-rc.3 (*)
+         ├── bp-dbc v0.12.0 (*)
+         └── bp-std v0.12.0-rc.3 (*)
+   ├ rand v0.9.5
+     └── commit_verify v0.12.1
+         ├── aluvm v0.12.0
+         │   ├── hypersonic v0.12.0
+         │   │   ├── rgb-invoice v0.12.0-rc.3
+         │   │   │   └── rgb-std v0.12.0-rc.3
+         │   │   │       ├── o2a-demo-cli v0.1.0
+         │   │   │       ├── o2a-demo-rgb v0.1.0
+         │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+         │   │   │       │   └── o2a-seal-smoke v0.1.0
+         │   │   │       ├── o2a-seal-smoke v0.1.0 (*)
+         │   │   │       ├── rgb-descriptors v0.12.0-rc.3
+         │   │   │       │   └── rgb-runtime v0.12.0-rc.3
+         │   │   │       │       ├── o2a-demo-cli v0.1.0 (*)
+         │   │   │       │       ├── o2a-demo-rgb v0.1.0 (*)
+         │   │   │       │       └── o2a-seal-smoke v0.1.0 (*)
+         │   │   │       ├── rgb-persist-fs v0.12.0-rc.3
+         │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+         │   │   │       │   ├── o2a-seal-smoke v0.1.0 (*)
+         │   │   │       │   └── rgb-runtime v0.12.0-rc.3 (*)
+         │   │   │       ├── rgb-psbt v0.12.0-rc.3
+         │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+         │   │   │       │   ├── o2a-seal-smoke v0.1.0 (*)
+         │   │   │       │   └── rgb-runtime v0.12.0-rc.3 (*)
+         │   │   │       └── rgb-runtime v0.12.0-rc.3 (*)
+         │   │   ├── rgb-std v0.12.0-rc.3 (*)
+         │   │   └── sonic-persist-fs v0.12.0
+         │   │       └── rgb-persist-fs v0.12.0-rc.3 (*)
+         │   ├── o2a-demo-rgb v0.1.0 (*)
+         │   ├── sonic-api v0.12.0
+         │   │   ├── hypersonic v0.12.0 (*)
+         │   │   └── o2a-demo-rgb v0.1.0 (*)
+         │   └── zk-aluvm v0.12.0
+         │       └── ultrasonic v0.12.0
+         │           ├── hypersonic v0.12.0 (*)
+         │           ├── o2a-demo-rgb v0.1.0 (*)
+         │           ├── rgb-core v0.12.0
+         │           │   ├── rgb-invoice v0.12.0-rc.3 (*)
+         │           │   └── rgb-std v0.12.0-rc.3 (*)
+         │           ├── sonic-api v0.12.0 (*)
+         │           └── sonic-callreq v0.12.0
+         │               ├── hypersonic v0.12.0 (*)
+         │               ├── rgb-invoice v0.12.0-rc.3 (*)
+         │               └── sonic-api v0.12.0 (*)
+         ├── bp-consensus v0.12.0
+         │   ├── bp-core v0.12.0
+         │   │   ├── bp-electrum v0.12.0-rc.1
+         │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+         │   │   ├── bp-std v0.12.0-rc.3
+         │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+         │   │   │   ├── o2a-demo-rgb v0.1.0 (*)
+         │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+         │   │   │   ├── rgb-descriptors v0.12.0-rc.3 (*)
+         │   │   │   ├── rgb-psbt v0.12.0-rc.3 (*)
+         │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+         │   │   ├── psbt v0.12.0-rc.3
+         │   │   │   └── bp-std v0.12.0-rc.3 (*)
+         │   │   ├── rgb-core v0.12.0 (*)
+         │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+         │   │   ├── rgb-psbt v0.12.0-rc.3 (*)
+         │   │   └── rgb-std v0.12.0-rc.3 (*)
+         │   ├── bp-dbc v0.12.0
+         │   │   ├── bp-core v0.12.0 (*)
+         │   │   └── bp-seals v0.12.0
+         │   │       └── bp-core v0.12.0 (*)
+         │   ├── bp-derive v0.12.0-rc.3
+         │   │   ├── bp-std v0.12.0-rc.3 (*)
+         │   │   ├── descriptors v0.12.0-rc.3
+         │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+         │   │   │   └── psbt v0.12.0-rc.3 (*)
+         │   │   └── psbt v0.12.0-rc.3 (*)
+         │   ├── bp-invoice v0.12.0-rc.3
+         │   │   ├── bp-derive v0.12.0-rc.3 (*)
+         │   │   ├── bp-std v0.12.0-rc.3 (*)
+         │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+         │   │   └── rgb-std v0.12.0-rc.3 (*)
+         │   ├── bp-seals v0.12.0 (*)
+         │   ├── bp-std v0.12.0-rc.3 (*)
+         │   └── psbt v0.12.0-rc.3 (*)
+         ├── bp-core v0.12.0 (*)
+         ├── bp-dbc v0.12.0 (*)
+         ├── bp-derive v0.12.0-rc.3 (*)
+         ├── bp-invoice v0.12.0-rc.3 (*)
+         ├── bp-seals v0.12.0 (*)
+         ├── descriptors v0.12.0-rc.3 (*)
+         ├── hypersonic v0.12.0 (*)
+         ├── psbt v0.12.0-rc.3 (*)
+         ├── rgb-core v0.12.0 (*)
+         ├── rgb-descriptors v0.12.0-rc.3 (*)
+         ├── rgb-invoice v0.12.0-rc.3 (*)
+         ├── rgb-runtime v0.12.0-rc.3 (*)
+         ├── rgb-std v0.12.0-rc.3 (*)
+         ├── sonic-api v0.12.0 (*)
+         ├── sonic-persist-fs v0.12.0 (*)
+         └── ultrasonic v0.12.0 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'rand_chacha'
+   ┌─ /workspace/Cargo.lock:89:1
+   │  
+89 │ ╭ rand_chacha 0.3.1 registry+https://github.com/rust-lang/crates.io-index
+90 │ │ rand_chacha 0.9.0 registry+https://github.com/rust-lang/crates.io-index
+   │ ╰───────────────────────────────────────────────────────────────────────┘ lock entries
+   │  
+   ├ rand_chacha v0.3.1
+     └── rand v0.8.8
+         └── secp256k1 v0.30.0
+             ├── bp-consensus v0.12.0
+             │   ├── bp-core v0.12.0
+             │   │   ├── bp-electrum v0.12.0-rc.1
+             │   │   │   └── rgb-runtime v0.12.0-rc.3
+             │   │   │       ├── o2a-demo-cli v0.1.0
+             │   │   │       ├── o2a-demo-rgb v0.1.0
+             │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+             │   │   │       │   └── o2a-seal-smoke v0.1.0
+             │   │   │       └── o2a-seal-smoke v0.1.0 (*)
+             │   │   ├── bp-std v0.12.0-rc.3
+             │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+             │   │   │   ├── o2a-demo-rgb v0.1.0 (*)
+             │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+             │   │   │   ├── rgb-descriptors v0.12.0-rc.3
+             │   │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+             │   │   │   ├── rgb-psbt v0.12.0-rc.3
+             │   │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+             │   │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+             │   │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+             │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+             │   │   ├── psbt v0.12.0-rc.3
+             │   │   │   └── bp-std v0.12.0-rc.3 (*)
+             │   │   ├── rgb-core v0.12.0
+             │   │   │   ├── rgb-invoice v0.12.0-rc.3
+             │   │   │   │   └── rgb-std v0.12.0-rc.3
+             │   │   │   │       ├── o2a-demo-cli v0.1.0 (*)
+             │   │   │   │       ├── o2a-demo-rgb v0.1.0 (*)
+             │   │   │   │       ├── o2a-seal-smoke v0.1.0 (*)
+             │   │   │   │       ├── rgb-descriptors v0.12.0-rc.3 (*)
+             │   │   │   │       ├── rgb-persist-fs v0.12.0-rc.3
+             │   │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+             │   │   │   │       │   ├── o2a-seal-smoke v0.1.0 (*)
+             │   │   │   │       │   └── rgb-runtime v0.12.0-rc.3 (*)
+             │   │   │   │       ├── rgb-psbt v0.12.0-rc.3 (*)
+             │   │   │   │       └── rgb-runtime v0.12.0-rc.3 (*)
+             │   │   │   └── rgb-std v0.12.0-rc.3 (*)
+             │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+             │   │   ├── rgb-psbt v0.12.0-rc.3 (*)
+             │   │   └── rgb-std v0.12.0-rc.3 (*)
+             │   ├── bp-dbc v0.12.0
+             │   │   ├── bp-core v0.12.0 (*)
+             │   │   └── bp-seals v0.12.0
+             │   │       └── bp-core v0.12.0 (*)
+             │   ├── bp-derive v0.12.0-rc.3
+             │   │   ├── bp-std v0.12.0-rc.3 (*)
+             │   │   ├── descriptors v0.12.0-rc.3
+             │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+             │   │   │   └── psbt v0.12.0-rc.3 (*)
+             │   │   └── psbt v0.12.0-rc.3 (*)
+             │   ├── bp-invoice v0.12.0-rc.3
+             │   │   ├── bp-derive v0.12.0-rc.3 (*)
+             │   │   ├── bp-std v0.12.0-rc.3 (*)
+             │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+             │   │   └── rgb-std v0.12.0-rc.3 (*)
+             │   ├── bp-seals v0.12.0 (*)
+             │   ├── bp-std v0.12.0-rc.3 (*)
+             │   └── psbt v0.12.0-rc.3 (*)
+             ├── bp-dbc v0.12.0 (*)
+             └── bp-std v0.12.0-rc.3 (*)
+   ├ rand_chacha v0.9.0
+     └── rand v0.9.5
+         └── commit_verify v0.12.1
+             ├── aluvm v0.12.0
+             │   ├── hypersonic v0.12.0
+             │   │   ├── rgb-invoice v0.12.0-rc.3
+             │   │   │   └── rgb-std v0.12.0-rc.3
+             │   │   │       ├── o2a-demo-cli v0.1.0
+             │   │   │       ├── o2a-demo-rgb v0.1.0
+             │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+             │   │   │       │   └── o2a-seal-smoke v0.1.0
+             │   │   │       ├── o2a-seal-smoke v0.1.0 (*)
+             │   │   │       ├── rgb-descriptors v0.12.0-rc.3
+             │   │   │       │   └── rgb-runtime v0.12.0-rc.3
+             │   │   │       │       ├── o2a-demo-cli v0.1.0 (*)
+             │   │   │       │       ├── o2a-demo-rgb v0.1.0 (*)
+             │   │   │       │       └── o2a-seal-smoke v0.1.0 (*)
+             │   │   │       ├── rgb-persist-fs v0.12.0-rc.3
+             │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+             │   │   │       │   ├── o2a-seal-smoke v0.1.0 (*)
+             │   │   │       │   └── rgb-runtime v0.12.0-rc.3 (*)
+             │   │   │       ├── rgb-psbt v0.12.0-rc.3
+             │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+             │   │   │       │   ├── o2a-seal-smoke v0.1.0 (*)
+             │   │   │       │   └── rgb-runtime v0.12.0-rc.3 (*)
+             │   │   │       └── rgb-runtime v0.12.0-rc.3 (*)
+             │   │   ├── rgb-std v0.12.0-rc.3 (*)
+             │   │   └── sonic-persist-fs v0.12.0
+             │   │       └── rgb-persist-fs v0.12.0-rc.3 (*)
+             │   ├── o2a-demo-rgb v0.1.0 (*)
+             │   ├── sonic-api v0.12.0
+             │   │   ├── hypersonic v0.12.0 (*)
+             │   │   └── o2a-demo-rgb v0.1.0 (*)
+             │   └── zk-aluvm v0.12.0
+             │       └── ultrasonic v0.12.0
+             │           ├── hypersonic v0.12.0 (*)
+             │           ├── o2a-demo-rgb v0.1.0 (*)
+             │           ├── rgb-core v0.12.0
+             │           │   ├── rgb-invoice v0.12.0-rc.3 (*)
+             │           │   └── rgb-std v0.12.0-rc.3 (*)
+             │           ├── sonic-api v0.12.0 (*)
+             │           └── sonic-callreq v0.12.0
+             │               ├── hypersonic v0.12.0 (*)
+             │               ├── rgb-invoice v0.12.0-rc.3 (*)
+             │               └── sonic-api v0.12.0 (*)
+             ├── bp-consensus v0.12.0
+             │   ├── bp-core v0.12.0
+             │   │   ├── bp-electrum v0.12.0-rc.1
+             │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+             │   │   ├── bp-std v0.12.0-rc.3
+             │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+             │   │   │   ├── o2a-demo-rgb v0.1.0 (*)
+             │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+             │   │   │   ├── rgb-descriptors v0.12.0-rc.3 (*)
+             │   │   │   ├── rgb-psbt v0.12.0-rc.3 (*)
+             │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+             │   │   ├── psbt v0.12.0-rc.3
+             │   │   │   └── bp-std v0.12.0-rc.3 (*)
+             │   │   ├── rgb-core v0.12.0 (*)
+             │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+             │   │   ├── rgb-psbt v0.12.0-rc.3 (*)
+             │   │   └── rgb-std v0.12.0-rc.3 (*)
+             │   ├── bp-dbc v0.12.0
+             │   │   ├── bp-core v0.12.0 (*)
+             │   │   └── bp-seals v0.12.0
+             │   │       └── bp-core v0.12.0 (*)
+             │   ├── bp-derive v0.12.0-rc.3
+             │   │   ├── bp-std v0.12.0-rc.3 (*)
+             │   │   ├── descriptors v0.12.0-rc.3
+             │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+             │   │   │   └── psbt v0.12.0-rc.3 (*)
+             │   │   └── psbt v0.12.0-rc.3 (*)
+             │   ├── bp-invoice v0.12.0-rc.3
+             │   │   ├── bp-derive v0.12.0-rc.3 (*)
+             │   │   ├── bp-std v0.12.0-rc.3 (*)
+             │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+             │   │   └── rgb-std v0.12.0-rc.3 (*)
+             │   ├── bp-seals v0.12.0 (*)
+             │   ├── bp-std v0.12.0-rc.3 (*)
+             │   └── psbt v0.12.0-rc.3 (*)
+             ├── bp-core v0.12.0 (*)
+             ├── bp-dbc v0.12.0 (*)
+             ├── bp-derive v0.12.0-rc.3 (*)
+             ├── bp-invoice v0.12.0-rc.3 (*)
+             ├── bp-seals v0.12.0 (*)
+             ├── descriptors v0.12.0-rc.3 (*)
+             ├── hypersonic v0.12.0 (*)
+             ├── psbt v0.12.0-rc.3 (*)
+             ├── rgb-core v0.12.0 (*)
+             ├── rgb-descriptors v0.12.0-rc.3 (*)
+             ├── rgb-invoice v0.12.0-rc.3 (*)
+             ├── rgb-runtime v0.12.0-rc.3 (*)
+             ├── rgb-std v0.12.0-rc.3 (*)
+             ├── sonic-api v0.12.0 (*)
+             ├── sonic-persist-fs v0.12.0 (*)
+             └── ultrasonic v0.12.0 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'rand_core'
+   ┌─ /workspace/Cargo.lock:91:1
+   │  
+91 │ ╭ rand_core 0.6.4 registry+https://github.com/rust-lang/crates.io-index
+92 │ │ rand_core 0.9.5 registry+https://github.com/rust-lang/crates.io-index
+   │ ╰─────────────────────────────────────────────────────────────────────┘ lock entries
+   │  
+   ├ rand_core v0.6.4
+     ├── rand v0.8.8
+     │   └── secp256k1 v0.30.0
+     │       ├── bp-consensus v0.12.0
+     │       │   ├── bp-core v0.12.0
+     │       │   │   ├── bp-electrum v0.12.0-rc.1
+     │       │   │   │   └── rgb-runtime v0.12.0-rc.3
+     │       │   │   │       ├── o2a-demo-cli v0.1.0
+     │       │   │   │       ├── o2a-demo-rgb v0.1.0
+     │       │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+     │       │   │   │       │   └── o2a-seal-smoke v0.1.0
+     │       │   │   │       └── o2a-seal-smoke v0.1.0 (*)
+     │       │   │   ├── bp-std v0.12.0-rc.3
+     │       │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+     │       │   │   │   ├── o2a-demo-rgb v0.1.0 (*)
+     │       │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+     │       │   │   │   ├── rgb-descriptors v0.12.0-rc.3
+     │       │   │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+     │       │   │   │   ├── rgb-psbt v0.12.0-rc.3
+     │       │   │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+     │       │   │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+     │       │   │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+     │       │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+     │       │   │   ├── psbt v0.12.0-rc.3
+     │       │   │   │   └── bp-std v0.12.0-rc.3 (*)
+     │       │   │   ├── rgb-core v0.12.0
+     │       │   │   │   ├── rgb-invoice v0.12.0-rc.3
+     │       │   │   │   │   └── rgb-std v0.12.0-rc.3
+     │       │   │   │   │       ├── o2a-demo-cli v0.1.0 (*)
+     │       │   │   │   │       ├── o2a-demo-rgb v0.1.0 (*)
+     │       │   │   │   │       ├── o2a-seal-smoke v0.1.0 (*)
+     │       │   │   │   │       ├── rgb-descriptors v0.12.0-rc.3 (*)
+     │       │   │   │   │       ├── rgb-persist-fs v0.12.0-rc.3
+     │       │   │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+     │       │   │   │   │       │   ├── o2a-seal-smoke v0.1.0 (*)
+     │       │   │   │   │       │   └── rgb-runtime v0.12.0-rc.3 (*)
+     │       │   │   │   │       ├── rgb-psbt v0.12.0-rc.3 (*)
+     │       │   │   │   │       └── rgb-runtime v0.12.0-rc.3 (*)
+     │       │   │   │   └── rgb-std v0.12.0-rc.3 (*)
+     │       │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+     │       │   │   ├── rgb-psbt v0.12.0-rc.3 (*)
+     │       │   │   └── rgb-std v0.12.0-rc.3 (*)
+     │       │   ├── bp-dbc v0.12.0
+     │       │   │   ├── bp-core v0.12.0 (*)
+     │       │   │   └── bp-seals v0.12.0
+     │       │   │       └── bp-core v0.12.0 (*)
+     │       │   ├── bp-derive v0.12.0-rc.3
+     │       │   │   ├── bp-std v0.12.0-rc.3 (*)
+     │       │   │   ├── descriptors v0.12.0-rc.3
+     │       │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+     │       │   │   │   └── psbt v0.12.0-rc.3 (*)
+     │       │   │   └── psbt v0.12.0-rc.3 (*)
+     │       │   ├── bp-invoice v0.12.0-rc.3
+     │       │   │   ├── bp-derive v0.12.0-rc.3 (*)
+     │       │   │   ├── bp-std v0.12.0-rc.3 (*)
+     │       │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+     │       │   │   └── rgb-std v0.12.0-rc.3 (*)
+     │       │   ├── bp-seals v0.12.0 (*)
+     │       │   ├── bp-std v0.12.0-rc.3 (*)
+     │       │   └── psbt v0.12.0-rc.3 (*)
+     │       ├── bp-dbc v0.12.0 (*)
+     │       └── bp-std v0.12.0-rc.3 (*)
+     └── rand_chacha v0.3.1
+         └── rand v0.8.8 (*)
+   ├ rand_core v0.9.5
+     ├── rand v0.9.5
+     │   └── commit_verify v0.12.1
+     │       ├── aluvm v0.12.0
+     │       │   ├── hypersonic v0.12.0
+     │       │   │   ├── rgb-invoice v0.12.0-rc.3
+     │       │   │   │   └── rgb-std v0.12.0-rc.3
+     │       │   │   │       ├── o2a-demo-cli v0.1.0
+     │       │   │   │       ├── o2a-demo-rgb v0.1.0
+     │       │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+     │       │   │   │       │   └── o2a-seal-smoke v0.1.0
+     │       │   │   │       ├── o2a-seal-smoke v0.1.0 (*)
+     │       │   │   │       ├── rgb-descriptors v0.12.0-rc.3
+     │       │   │   │       │   └── rgb-runtime v0.12.0-rc.3
+     │       │   │   │       │       ├── o2a-demo-cli v0.1.0 (*)
+     │       │   │   │       │       ├── o2a-demo-rgb v0.1.0 (*)
+     │       │   │   │       │       └── o2a-seal-smoke v0.1.0 (*)
+     │       │   │   │       ├── rgb-persist-fs v0.12.0-rc.3
+     │       │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+     │       │   │   │       │   ├── o2a-seal-smoke v0.1.0 (*)
+     │       │   │   │       │   └── rgb-runtime v0.12.0-rc.3 (*)
+     │       │   │   │       ├── rgb-psbt v0.12.0-rc.3
+     │       │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+     │       │   │   │       │   ├── o2a-seal-smoke v0.1.0 (*)
+     │       │   │   │       │   └── rgb-runtime v0.12.0-rc.3 (*)
+     │       │   │   │       └── rgb-runtime v0.12.0-rc.3 (*)
+     │       │   │   ├── rgb-std v0.12.0-rc.3 (*)
+     │       │   │   └── sonic-persist-fs v0.12.0
+     │       │   │       └── rgb-persist-fs v0.12.0-rc.3 (*)
+     │       │   ├── o2a-demo-rgb v0.1.0 (*)
+     │       │   ├── sonic-api v0.12.0
+     │       │   │   ├── hypersonic v0.12.0 (*)
+     │       │   │   └── o2a-demo-rgb v0.1.0 (*)
+     │       │   └── zk-aluvm v0.12.0
+     │       │       └── ultrasonic v0.12.0
+     │       │           ├── hypersonic v0.12.0 (*)
+     │       │           ├── o2a-demo-rgb v0.1.0 (*)
+     │       │           ├── rgb-core v0.12.0
+     │       │           │   ├── rgb-invoice v0.12.0-rc.3 (*)
+     │       │           │   └── rgb-std v0.12.0-rc.3 (*)
+     │       │           ├── sonic-api v0.12.0 (*)
+     │       │           └── sonic-callreq v0.12.0
+     │       │               ├── hypersonic v0.12.0 (*)
+     │       │               ├── rgb-invoice v0.12.0-rc.3 (*)
+     │       │               └── sonic-api v0.12.0 (*)
+     │       ├── bp-consensus v0.12.0
+     │       │   ├── bp-core v0.12.0
+     │       │   │   ├── bp-electrum v0.12.0-rc.1
+     │       │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+     │       │   │   ├── bp-std v0.12.0-rc.3
+     │       │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+     │       │   │   │   ├── o2a-demo-rgb v0.1.0 (*)
+     │       │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+     │       │   │   │   ├── rgb-descriptors v0.12.0-rc.3 (*)
+     │       │   │   │   ├── rgb-psbt v0.12.0-rc.3 (*)
+     │       │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+     │       │   │   ├── psbt v0.12.0-rc.3
+     │       │   │   │   └── bp-std v0.12.0-rc.3 (*)
+     │       │   │   ├── rgb-core v0.12.0 (*)
+     │       │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+     │       │   │   ├── rgb-psbt v0.12.0-rc.3 (*)
+     │       │   │   └── rgb-std v0.12.0-rc.3 (*)
+     │       │   ├── bp-dbc v0.12.0
+     │       │   │   ├── bp-core v0.12.0 (*)
+     │       │   │   └── bp-seals v0.12.0
+     │       │   │       └── bp-core v0.12.0 (*)
+     │       │   ├── bp-derive v0.12.0-rc.3
+     │       │   │   ├── bp-std v0.12.0-rc.3 (*)
+     │       │   │   ├── descriptors v0.12.0-rc.3
+     │       │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+     │       │   │   │   └── psbt v0.12.0-rc.3 (*)
+     │       │   │   └── psbt v0.12.0-rc.3 (*)
+     │       │   ├── bp-invoice v0.12.0-rc.3
+     │       │   │   ├── bp-derive v0.12.0-rc.3 (*)
+     │       │   │   ├── bp-std v0.12.0-rc.3 (*)
+     │       │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+     │       │   │   └── rgb-std v0.12.0-rc.3 (*)
+     │       │   ├── bp-seals v0.12.0 (*)
+     │       │   ├── bp-std v0.12.0-rc.3 (*)
+     │       │   └── psbt v0.12.0-rc.3 (*)
+     │       ├── bp-core v0.12.0 (*)
+     │       ├── bp-dbc v0.12.0 (*)
+     │       ├── bp-derive v0.12.0-rc.3 (*)
+     │       ├── bp-invoice v0.12.0-rc.3 (*)
+     │       ├── bp-seals v0.12.0 (*)
+     │       ├── descriptors v0.12.0-rc.3 (*)
+     │       ├── hypersonic v0.12.0 (*)
+     │       ├── psbt v0.12.0-rc.3 (*)
+     │       ├── rgb-core v0.12.0 (*)
+     │       ├── rgb-descriptors v0.12.0-rc.3 (*)
+     │       ├── rgb-invoice v0.12.0-rc.3 (*)
+     │       ├── rgb-runtime v0.12.0-rc.3 (*)
+     │       ├── rgb-std v0.12.0-rc.3 (*)
+     │       ├── sonic-api v0.12.0 (*)
+     │       ├── sonic-persist-fs v0.12.0 (*)
+     │       └── ultrasonic v0.12.0 (*)
+     └── rand_chacha v0.9.0
+         └── rand v0.9.5 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'secp256k1'
+    ┌─ /workspace/Cargo.lock:108:1
+    │  
+108 │ ╭ secp256k1 0.29.1 registry+https://github.com/rust-lang/crates.io-index
+109 │ │ secp256k1 0.30.0 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰──────────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ secp256k1 v0.29.1
+      ├── o2a-demo-core v0.1.0
+      │   ├── o2a-demo-cli v0.1.0
+      │   ├── o2a-demo-rgb v0.1.0
+      │   │   ├── o2a-demo-cli v0.1.0 (*)
+      │   │   └── o2a-seal-smoke v0.1.0
+      │   └── o2a-seal-smoke v0.1.0 (*)
+      └── o2a-seal-smoke v0.1.0 (*)
+    ├ secp256k1 v0.30.0
+      ├── bp-consensus v0.12.0
+      │   ├── bp-core v0.12.0
+      │   │   ├── bp-electrum v0.12.0-rc.1
+      │   │   │   └── rgb-runtime v0.12.0-rc.3
+      │   │   │       ├── o2a-demo-cli v0.1.0
+      │   │   │       ├── o2a-demo-rgb v0.1.0
+      │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+      │   │   │       │   └── o2a-seal-smoke v0.1.0
+      │   │   │       └── o2a-seal-smoke v0.1.0 (*)
+      │   │   ├── bp-std v0.12.0-rc.3
+      │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+      │   │   │   ├── o2a-demo-rgb v0.1.0 (*)
+      │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+      │   │   │   ├── rgb-descriptors v0.12.0-rc.3
+      │   │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+      │   │   │   ├── rgb-psbt v0.12.0-rc.3
+      │   │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+      │   │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+      │   │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+      │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+      │   │   ├── psbt v0.12.0-rc.3
+      │   │   │   └── bp-std v0.12.0-rc.3 (*)
+      │   │   ├── rgb-core v0.12.0
+      │   │   │   ├── rgb-invoice v0.12.0-rc.3
+      │   │   │   │   └── rgb-std v0.12.0-rc.3
+      │   │   │   │       ├── o2a-demo-cli v0.1.0 (*)
+      │   │   │   │       ├── o2a-demo-rgb v0.1.0 (*)
+      │   │   │   │       ├── o2a-seal-smoke v0.1.0 (*)
+      │   │   │   │       ├── rgb-descriptors v0.12.0-rc.3 (*)
+      │   │   │   │       ├── rgb-persist-fs v0.12.0-rc.3
+      │   │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+      │   │   │   │       │   ├── o2a-seal-smoke v0.1.0 (*)
+      │   │   │   │       │   └── rgb-runtime v0.12.0-rc.3 (*)
+      │   │   │   │       ├── rgb-psbt v0.12.0-rc.3 (*)
+      │   │   │   │       └── rgb-runtime v0.12.0-rc.3 (*)
+      │   │   │   └── rgb-std v0.12.0-rc.3 (*)
+      │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+      │   │   ├── rgb-psbt v0.12.0-rc.3 (*)
+      │   │   └── rgb-std v0.12.0-rc.3 (*)
+      │   ├── bp-dbc v0.12.0
+      │   │   ├── bp-core v0.12.0 (*)
+      │   │   └── bp-seals v0.12.0
+      │   │       └── bp-core v0.12.0 (*)
+      │   ├── bp-derive v0.12.0-rc.3
+      │   │   ├── bp-std v0.12.0-rc.3 (*)
+      │   │   ├── descriptors v0.12.0-rc.3
+      │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+      │   │   │   └── psbt v0.12.0-rc.3 (*)
+      │   │   └── psbt v0.12.0-rc.3 (*)
+      │   ├── bp-invoice v0.12.0-rc.3
+      │   │   ├── bp-derive v0.12.0-rc.3 (*)
+      │   │   ├── bp-std v0.12.0-rc.3 (*)
+      │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+      │   │   └── rgb-std v0.12.0-rc.3 (*)
+      │   ├── bp-seals v0.12.0 (*)
+      │   ├── bp-std v0.12.0-rc.3 (*)
+      │   └── psbt v0.12.0-rc.3 (*)
+      ├── bp-dbc v0.12.0 (*)
+      └── bp-std v0.12.0-rc.3 (*)
+
+warning[duplicate]: found 3 duplicate entries for crate 'syn'
+    ┌─ /workspace/Cargo.lock:130:1
+    │  
+130 │ ╭ syn 1.0.109 registry+https://github.com/rust-lang/crates.io-index
+131 │ │ syn 2.0.119 registry+https://github.com/rust-lang/crates.io-index
+132 │ │ syn 3.0.6 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰───────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ syn v1.0.109
+      ├── amplify_derive v4.0.1
+      │   └── amplify v4.9.0
+      │       ├── aluvm v0.12.0
+      │       │   ├── hypersonic v0.12.0
+      │       │   │   ├── rgb-invoice v0.12.0-rc.3
+      │       │   │   │   └── rgb-std v0.12.0-rc.3
+      │       │   │   │       ├── o2a-demo-cli v0.1.0
+      │       │   │   │       ├── o2a-demo-rgb v0.1.0
+      │       │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+      │       │   │   │       │   └── o2a-seal-smoke v0.1.0
+      │       │   │   │       ├── o2a-seal-smoke v0.1.0 (*)
+      │       │   │   │       ├── rgb-descriptors v0.12.0-rc.3
+      │       │   │   │       │   └── rgb-runtime v0.12.0-rc.3
+      │       │   │   │       │       ├── o2a-demo-cli v0.1.0 (*)
+      │       │   │   │       │       ├── o2a-demo-rgb v0.1.0 (*)
+      │       │   │   │       │       └── o2a-seal-smoke v0.1.0 (*)
+      │       │   │   │       ├── rgb-persist-fs v0.12.0-rc.3
+      │       │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+      │       │   │   │       │   ├── o2a-seal-smoke v0.1.0 (*)
+      │       │   │   │       │   └── rgb-runtime v0.12.0-rc.3 (*)
+      │       │   │   │       ├── rgb-psbt v0.12.0-rc.3
+      │       │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+      │       │   │   │       │   ├── o2a-seal-smoke v0.1.0 (*)
+      │       │   │   │       │   └── rgb-runtime v0.12.0-rc.3 (*)
+      │       │   │   │       └── rgb-runtime v0.12.0-rc.3 (*)
+      │       │   │   ├── rgb-std v0.12.0-rc.3 (*)
+      │       │   │   └── sonic-persist-fs v0.12.0
+      │       │   │       └── rgb-persist-fs v0.12.0-rc.3 (*)
+      │       │   ├── o2a-demo-rgb v0.1.0 (*)
+      │       │   ├── sonic-api v0.12.0
+      │       │   │   ├── hypersonic v0.12.0 (*)
+      │       │   │   └── o2a-demo-rgb v0.1.0 (*)
+      │       │   └── zk-aluvm v0.12.0
+      │       │       └── ultrasonic v0.12.0
+      │       │           ├── hypersonic v0.12.0 (*)
+      │       │           ├── o2a-demo-rgb v0.1.0 (*)
+      │       │           ├── rgb-core v0.12.0
+      │       │           │   ├── rgb-invoice v0.12.0-rc.3 (*)
+      │       │           │   └── rgb-std v0.12.0-rc.3 (*)
+      │       │           ├── sonic-api v0.12.0 (*)
+      │       │           └── sonic-callreq v0.12.0
+      │       │               ├── hypersonic v0.12.0 (*)
+      │       │               ├── rgb-invoice v0.12.0-rc.3 (*)
+      │       │               └── sonic-api v0.12.0 (*)
+      │       ├── aora v0.6.4
+      │       │   ├── rgb-persist-fs v0.12.0-rc.3 (*)
+      │       │   ├── rgb-std v0.12.0-rc.3 (*)
+      │       │   └── sonic-persist-fs v0.12.0 (*)
+      │       ├── baid64 v0.4.2
+      │       │   ├── aluvm v0.12.0 (*)
+      │       │   ├── rgb-invoice v0.12.0-rc.3 (*)
+      │       │   ├── sonic-api v0.12.0 (*)
+      │       │   ├── sonic-callreq v0.12.0 (*)
+      │       │   ├── strict_types v2.9.1
+      │       │   │   ├── commit_verify v0.12.1
+      │       │   │   │   ├── aluvm v0.12.0 (*)
+      │       │   │   │   ├── bp-consensus v0.12.0
+      │       │   │   │   │   ├── bp-core v0.12.0
+      │       │   │   │   │   │   ├── bp-electrum v0.12.0-rc.1
+      │       │   │   │   │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+      │       │   │   │   │   │   ├── bp-std v0.12.0-rc.3
+      │       │   │   │   │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+      │       │   │   │   │   │   │   ├── o2a-demo-rgb v0.1.0 (*)
+      │       │   │   │   │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+      │       │   │   │   │   │   │   ├── rgb-descriptors v0.12.0-rc.3 (*)
+      │       │   │   │   │   │   │   ├── rgb-psbt v0.12.0-rc.3 (*)
+      │       │   │   │   │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+      │       │   │   │   │   │   ├── psbt v0.12.0-rc.3
+      │       │   │   │   │   │   │   └── bp-std v0.12.0-rc.3 (*)
+      │       │   │   │   │   │   ├── rgb-core v0.12.0 (*)
+      │       │   │   │   │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+      │       │   │   │   │   │   ├── rgb-psbt v0.12.0-rc.3 (*)
+      │       │   │   │   │   │   └── rgb-std v0.12.0-rc.3 (*)
+      │       │   │   │   │   ├── bp-dbc v0.12.0
+      │       │   │   │   │   │   ├── bp-core v0.12.0 (*)
+      │       │   │   │   │   │   └── bp-seals v0.12.0
+      │       │   │   │   │   │       └── bp-core v0.12.0 (*)
+      │       │   │   │   │   ├── bp-derive v0.12.0-rc.3
+      │       │   │   │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+      │       │   │   │   │   │   ├── descriptors v0.12.0-rc.3
+      │       │   │   │   │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+      │       │   │   │   │   │   │   └── psbt v0.12.0-rc.3 (*)
+      │       │   │   │   │   │   └── psbt v0.12.0-rc.3 (*)
+      │       │   │   │   │   ├── bp-invoice v0.12.0-rc.3
+      │       │   │   │   │   │   ├── bp-derive v0.12.0-rc.3 (*)
+      │       │   │   │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+      │       │   │   │   │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+      │       │   │   │   │   │   └── rgb-std v0.12.0-rc.3 (*)
+      │       │   │   │   │   ├── bp-seals v0.12.0 (*)
+      │       │   │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+      │       │   │   │   │   └── psbt v0.12.0-rc.3 (*)
+      │       │   │   │   ├── bp-core v0.12.0 (*)
+      │       │   │   │   ├── bp-dbc v0.12.0 (*)
+      │       │   │   │   ├── bp-derive v0.12.0-rc.3 (*)
+      │       │   │   │   ├── bp-invoice v0.12.0-rc.3 (*)
+      │       │   │   │   ├── bp-seals v0.12.0 (*)
+      │       │   │   │   ├── descriptors v0.12.0-rc.3 (*)
+      │       │   │   │   ├── hypersonic v0.12.0 (*)
+      │       │   │   │   ├── psbt v0.12.0-rc.3 (*)
+      │       │   │   │   ├── rgb-core v0.12.0 (*)
+      │       │   │   │   ├── rgb-descriptors v0.12.0-rc.3 (*)
+      │       │   │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+      │       │   │   │   ├── rgb-runtime v0.12.0-rc.3 (*)
+      │       │   │   │   ├── rgb-std v0.12.0-rc.3 (*)
+      │       │   │   │   ├── sonic-api v0.12.0 (*)
+      │       │   │   │   ├── sonic-persist-fs v0.12.0 (*)
+      │       │   │   │   └── ultrasonic v0.12.0 (*)
+      │       │   │   ├── hypersonic v0.12.0 (*)
+      │       │   │   ├── o2a-demo-cli v0.1.0 (*)
+      │       │   │   ├── o2a-demo-rgb v0.1.0 (*)
+      │       │   │   ├── o2a-seal-smoke v0.1.0 (*)
+      │       │   │   ├── rgb-runtime v0.12.0-rc.3 (*)
+      │       │   │   ├── rgb-std v0.12.0-rc.3 (*)
+      │       │   │   ├── sonic-api v0.12.0 (*)
+      │       │   │   └── sonic-callreq v0.12.0 (*)
+      │       │   └── ultrasonic v0.12.0 (*)
+      │       ├── binfile v0.2.0
+      │       │   ├── aora v0.6.4 (*)
+      │       │   ├── hypersonic v0.12.0 (*)
+      │       │   ├── rgb-std v0.12.0-rc.3 (*)
+      │       │   ├── sonic-api v0.12.0 (*)
+      │       │   └── sonic-persist-fs v0.12.0 (*)
+      │       ├── bp-consensus v0.12.0 (*)
+      │       ├── bp-dbc v0.12.0 (*)
+      │       ├── bp-derive v0.12.0-rc.3 (*)
+      │       ├── bp-electrum v0.12.0-rc.1 (*)
+      │       ├── bp-invoice v0.12.0-rc.3 (*)
+      │       ├── bp-seals v0.12.0 (*)
+      │       ├── bp-std v0.12.0-rc.3 (*)
+      │       ├── commit_encoding_derive v0.12.0
+      │       │   └── commit_verify v0.12.1 (*)
+      │       ├── commit_verify v0.12.1 (*)
+      │       ├── descriptors v0.12.0-rc.3 (*)
+      │       ├── hypersonic v0.12.0 (*)
+      │       ├── o2a-demo-cli v0.1.0 (*)
+      │       ├── o2a-demo-rgb v0.1.0 (*)
+      │       ├── o2a-seal-smoke v0.1.0 (*)
+      │       ├── psbt v0.12.0-rc.3 (*)
+      │       ├── rgb-core v0.12.0 (*)
+      │       ├── rgb-descriptors v0.12.0-rc.3 (*)
+      │       ├── rgb-invoice v0.12.0-rc.3 (*)
+      │       ├── rgb-persist-fs v0.12.0-rc.3 (*)
+      │       ├── rgb-psbt v0.12.0-rc.3 (*)
+      │       ├── rgb-runtime v0.12.0-rc.3 (*)
+      │       ├── rgb-std v0.12.0-rc.3 (*)
+      │       ├── sonic-api v0.12.0 (*)
+      │       ├── sonic-callreq v0.12.0 (*)
+      │       ├── sonic-persist-fs v0.12.0 (*)
+      │       ├── strict_encoding v2.9.1
+      │       │   ├── aluvm v0.12.0 (*)
+      │       │   ├── aora v0.6.4 (*)
+      │       │   ├── bp-consensus v0.12.0 (*)
+      │       │   ├── bp-core v0.12.0 (*)
+      │       │   ├── bp-dbc v0.12.0 (*)
+      │       │   ├── bp-invoice v0.12.0-rc.3 (*)
+      │       │   ├── bp-seals v0.12.0 (*)
+      │       │   ├── commit_verify v0.12.1 (*)
+      │       │   ├── hypersonic v0.12.0 (*)
+      │       │   ├── o2a-demo-cli v0.1.0 (*)
+      │       │   ├── o2a-demo-rgb v0.1.0 (*)
+      │       │   ├── o2a-seal-smoke v0.1.0 (*)
+      │       │   ├── psbt v0.12.0-rc.3 (*)
+      │       │   ├── rgb-core v0.12.0 (*)
+      │       │   ├── rgb-invoice v0.12.0-rc.3 (*)
+      │       │   ├── rgb-persist-fs v0.12.0-rc.3 (*)
+      │       │   ├── rgb-std v0.12.0-rc.3 (*)
+      │       │   ├── single_use_seals v0.12.0
+      │       │   │   ├── bp-seals v0.12.0 (*)
+      │       │   │   ├── rgb-core v0.12.0 (*)
+      │       │   │   └── rgb-std v0.12.0-rc.3 (*)
+      │       │   ├── sonic-api v0.12.0 (*)
+      │       │   ├── sonic-callreq v0.12.0 (*)
+      │       │   ├── sonic-persist-fs v0.12.0 (*)
+      │       │   ├── strict_types v2.9.1 (*)
+      │       │   ├── ultrasonic v0.12.0 (*)
+      │       │   ├── vesper-lang v0.2.3
+      │       │   │   ├── commit_verify v0.12.1 (*)
+      │       │   │   └── strict_types v2.9.1 (*)
+      │       │   └── zk-aluvm v0.12.0 (*)
+      │       ├── strict_types v2.9.1 (*)
+      │       ├── ultrasonic v0.12.0 (*)
+      │       ├── vesper-lang v0.2.3 (*)
+      │       └── zk-aluvm v0.12.0 (*)
+      ├── amplify_syn v2.0.1
+      │   ├── amplify v4.9.0 (*)
+      │   ├── amplify_derive v4.0.1 (*)
+      │   ├── commit_encoding_derive v0.12.0 (*)
+      │   └── strict_encoding_derive v2.8.0
+      │       └── strict_encoding v2.9.1 (*)
+      ├── commit_encoding_derive v0.12.0 (*)
+      └── strict_encoding_derive v2.8.0 (*)
+    ├ syn v2.0.119
+      ├── thiserror-impl v1.0.69
+      │   └── thiserror v1.0.69
+      │       └── base85 v2.0.0
+      │           └── bp-dbc v0.12.0
+      │               ├── bp-core v0.12.0
+      │               │   ├── bp-electrum v0.12.0-rc.1
+      │               │   │   └── rgb-runtime v0.12.0-rc.3
+      │               │   │       ├── o2a-demo-cli v0.1.0
+      │               │   │       ├── o2a-demo-rgb v0.1.0
+      │               │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+      │               │   │       │   └── o2a-seal-smoke v0.1.0
+      │               │   │       └── o2a-seal-smoke v0.1.0 (*)
+      │               │   ├── bp-std v0.12.0-rc.3
+      │               │   │   ├── o2a-demo-cli v0.1.0 (*)
+      │               │   │   ├── o2a-demo-rgb v0.1.0 (*)
+      │               │   │   ├── o2a-seal-smoke v0.1.0 (*)
+      │               │   │   ├── rgb-descriptors v0.12.0-rc.3
+      │               │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+      │               │   │   ├── rgb-psbt v0.12.0-rc.3
+      │               │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+      │               │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+      │               │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+      │               │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+      │               │   ├── psbt v0.12.0-rc.3
+      │               │   │   └── bp-std v0.12.0-rc.3 (*)
+      │               │   ├── rgb-core v0.12.0
+      │               │   │   ├── rgb-invoice v0.12.0-rc.3
+      │               │   │   │   └── rgb-std v0.12.0-rc.3
+      │               │   │   │       ├── o2a-demo-cli v0.1.0 (*)
+      │               │   │   │       ├── o2a-demo-rgb v0.1.0 (*)
+      │               │   │   │       ├── o2a-seal-smoke v0.1.0 (*)
+      │               │   │   │       ├── rgb-descriptors v0.12.0-rc.3 (*)
+      │               │   │   │       ├── rgb-persist-fs v0.12.0-rc.3
+      │               │   │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+      │               │   │   │       │   ├── o2a-seal-smoke v0.1.0 (*)
+      │               │   │   │       │   └── rgb-runtime v0.12.0-rc.3 (*)
+      │               │   │   │       ├── rgb-psbt v0.12.0-rc.3 (*)
+      │               │   │   │       └── rgb-runtime v0.12.0-rc.3 (*)
+      │               │   │   └── rgb-std v0.12.0-rc.3 (*)
+      │               │   ├── rgb-invoice v0.12.0-rc.3 (*)
+      │               │   ├── rgb-psbt v0.12.0-rc.3 (*)
+      │               │   └── rgb-std v0.12.0-rc.3 (*)
+      │               └── bp-seals v0.12.0
+      │                   └── bp-core v0.12.0 (*)
+      ├── windows-implement v0.60.2
+      │   └── windows-core v0.62.2
+      │       └── iana-time-zone v0.1.65
+      │           └── chrono v0.4.45
+      │               ├── bp-consensus v0.12.0
+      │               │   ├── bp-core v0.12.0 (*)
+      │               │   ├── bp-dbc v0.12.0 (*)
+      │               │   ├── bp-derive v0.12.0-rc.3
+      │               │   │   ├── bp-std v0.12.0-rc.3 (*)
+      │               │   │   ├── descriptors v0.12.0-rc.3
+      │               │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+      │               │   │   │   └── psbt v0.12.0-rc.3 (*)
+      │               │   │   └── psbt v0.12.0-rc.3 (*)
+      │               │   ├── bp-invoice v0.12.0-rc.3
+      │               │   │   ├── bp-derive v0.12.0-rc.3 (*)
+      │               │   │   ├── bp-std v0.12.0-rc.3 (*)
+      │               │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+      │               │   │   └── rgb-std v0.12.0-rc.3 (*)
+      │               │   ├── bp-seals v0.12.0 (*)
+      │               │   ├── bp-std v0.12.0-rc.3 (*)
+      │               │   └── psbt v0.12.0-rc.3 (*)
+      │               ├── rgb-runtime v0.12.0-rc.3 (*)
+      │               ├── rgb-std v0.12.0-rc.3 (*)
+      │               ├── sonic-api v0.12.0
+      │               │   ├── hypersonic v0.12.0
+      │               │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+      │               │   │   ├── rgb-std v0.12.0-rc.3 (*)
+      │               │   │   └── sonic-persist-fs v0.12.0
+      │               │   │       └── rgb-persist-fs v0.12.0-rc.3 (*)
+      │               │   └── o2a-demo-rgb v0.1.0 (*)
+      │               └── sonic-callreq v0.12.0
+      │                   ├── hypersonic v0.12.0 (*)
+      │                   ├── rgb-invoice v0.12.0-rc.3 (*)
+      │                   └── sonic-api v0.12.0 (*)
+      └── windows-interface v0.59.3
+          └── windows-core v0.62.2 (*)
+    ├ syn v3.0.6
+      ├── ref-cast-impl v1.0.27
+      │   └── ref-cast v1.0.27
+      │       └── fluent-uri v0.3.2
+      │           └── sonic-callreq v0.12.0
+      │               ├── hypersonic v0.12.0
+      │               │   ├── rgb-invoice v0.12.0-rc.3
+      │               │   │   └── rgb-std v0.12.0-rc.3
+      │               │   │       ├── o2a-demo-cli v0.1.0
+      │               │   │       ├── o2a-demo-rgb v0.1.0
+      │               │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+      │               │   │       │   └── o2a-seal-smoke v0.1.0
+      │               │   │       ├── o2a-seal-smoke v0.1.0 (*)
+      │               │   │       ├── rgb-descriptors v0.12.0-rc.3
+      │               │   │       │   └── rgb-runtime v0.12.0-rc.3
+      │               │   │       │       ├── o2a-demo-cli v0.1.0 (*)
+      │               │   │       │       ├── o2a-demo-rgb v0.1.0 (*)
+      │               │   │       │       └── o2a-seal-smoke v0.1.0 (*)
+      │               │   │       ├── rgb-persist-fs v0.12.0-rc.3
+      │               │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+      │               │   │       │   ├── o2a-seal-smoke v0.1.0 (*)
+      │               │   │       │   └── rgb-runtime v0.12.0-rc.3 (*)
+      │               │   │       ├── rgb-psbt v0.12.0-rc.3
+      │               │   │       │   ├── o2a-demo-cli v0.1.0 (*)
+      │               │   │       │   ├── o2a-seal-smoke v0.1.0 (*)
+      │               │   │       │   └── rgb-runtime v0.12.0-rc.3 (*)
+      │               │   │       └── rgb-runtime v0.12.0-rc.3 (*)
+      │               │   ├── rgb-std v0.12.0-rc.3 (*)
+      │               │   └── sonic-persist-fs v0.12.0
+      │               │       └── rgb-persist-fs v0.12.0-rc.3 (*)
+      │               ├── rgb-invoice v0.12.0-rc.3 (*)
+      │               └── sonic-api v0.12.0
+      │                   ├── hypersonic v0.12.0 (*)
+      │                   └── o2a-demo-rgb v0.1.0 (*)
+      ├── serde_derive v1.0.229
+      │   ├── serde v1.0.229
+      │   │   ├── aluvm v0.12.0
+      │   │   │   ├── hypersonic v0.12.0 (*)
+      │   │   │   ├── o2a-demo-rgb v0.1.0 (*)
+      │   │   │   ├── sonic-api v0.12.0 (*)
+      │   │   │   └── zk-aluvm v0.12.0
+      │   │   │       └── ultrasonic v0.12.0
+      │   │   │           ├── hypersonic v0.12.0 (*)
+      │   │   │           ├── o2a-demo-rgb v0.1.0 (*)
+      │   │   │           ├── rgb-core v0.12.0
+      │   │   │           │   ├── rgb-invoice v0.12.0-rc.3 (*)
+      │   │   │           │   └── rgb-std v0.12.0-rc.3 (*)
+      │   │   │           ├── sonic-api v0.12.0 (*)
+      │   │   │           └── sonic-callreq v0.12.0 (*)
+      │   │   ├── amplify v4.9.0
+      │   │   │   ├── aluvm v0.12.0 (*)
+      │   │   │   ├── aora v0.6.4
+      │   │   │   │   ├── rgb-persist-fs v0.12.0-rc.3 (*)
+      │   │   │   │   ├── rgb-std v0.12.0-rc.3 (*)
+      │   │   │   │   └── sonic-persist-fs v0.12.0 (*)
+      │   │   │   ├── baid64 v0.4.2
+      │   │   │   │   ├── aluvm v0.12.0 (*)
+      │   │   │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+      │   │   │   │   ├── sonic-api v0.12.0 (*)
+      │   │   │   │   ├── sonic-callreq v0.12.0 (*)
+      │   │   │   │   ├── strict_types v2.9.1
+      │   │   │   │   │   ├── commit_verify v0.12.1
+      │   │   │   │   │   │   ├── aluvm v0.12.0 (*)
+      │   │   │   │   │   │   ├── bp-consensus v0.12.0
+      │   │   │   │   │   │   │   ├── bp-core v0.12.0
+      │   │   │   │   │   │   │   │   ├── bp-electrum v0.12.0-rc.1
+      │   │   │   │   │   │   │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   │   │   ├── bp-std v0.12.0-rc.3
+      │   │   │   │   │   │   │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+      │   │   │   │   │   │   │   │   │   ├── o2a-demo-rgb v0.1.0 (*)
+      │   │   │   │   │   │   │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+      │   │   │   │   │   │   │   │   │   ├── rgb-descriptors v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   │   │   │   ├── rgb-psbt v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   │   │   │   └── rgb-runtime v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   │   │   ├── psbt v0.12.0-rc.3
+      │   │   │   │   │   │   │   │   │   └── bp-std v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   │   │   ├── rgb-core v0.12.0 (*)
+      │   │   │   │   │   │   │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   │   │   ├── rgb-psbt v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   │   │   └── rgb-std v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   │   ├── bp-dbc v0.12.0
+      │   │   │   │   │   │   │   │   ├── bp-core v0.12.0 (*)
+      │   │   │   │   │   │   │   │   └── bp-seals v0.12.0
+      │   │   │   │   │   │   │   │       └── bp-core v0.12.0 (*)
+      │   │   │   │   │   │   │   ├── bp-derive v0.12.0-rc.3
+      │   │   │   │   │   │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   │   │   ├── descriptors v0.12.0-rc.3
+      │   │   │   │   │   │   │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   │   │   │   └── psbt v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   │   │   └── psbt v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   │   ├── bp-invoice v0.12.0-rc.3
+      │   │   │   │   │   │   │   │   ├── bp-derive v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   │   │   └── rgb-std v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   │   ├── bp-seals v0.12.0 (*)
+      │   │   │   │   │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   │   └── psbt v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   ├── bp-core v0.12.0 (*)
+      │   │   │   │   │   │   ├── bp-dbc v0.12.0 (*)
+      │   │   │   │   │   │   ├── bp-derive v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   ├── bp-invoice v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   ├── bp-seals v0.12.0 (*)
+      │   │   │   │   │   │   ├── descriptors v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   ├── hypersonic v0.12.0 (*)
+      │   │   │   │   │   │   ├── psbt v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   ├── rgb-core v0.12.0 (*)
+      │   │   │   │   │   │   ├── rgb-descriptors v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   ├── rgb-runtime v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   ├── rgb-std v0.12.0-rc.3 (*)
+      │   │   │   │   │   │   ├── sonic-api v0.12.0 (*)
+      │   │   │   │   │   │   ├── sonic-persist-fs v0.12.0 (*)
+      │   │   │   │   │   │   └── ultrasonic v0.12.0 (*)
+      │   │   │   │   │   ├── hypersonic v0.12.0 (*)
+      │   │   │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+      │   │   │   │   │   ├── o2a-demo-rgb v0.1.0 (*)
+      │   │   │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+      │   │   │   │   │   ├── rgb-runtime v0.12.0-rc.3 (*)
+      │   │   │   │   │   ├── rgb-std v0.12.0-rc.3 (*)
+      │   │   │   │   │   ├── sonic-api v0.12.0 (*)
+      │   │   │   │   │   └── sonic-callreq v0.12.0 (*)
+      │   │   │   │   └── ultrasonic v0.12.0 (*)
+      │   │   │   ├── binfile v0.2.0
+      │   │   │   │   ├── aora v0.6.4 (*)
+      │   │   │   │   ├── hypersonic v0.12.0 (*)
+      │   │   │   │   ├── rgb-std v0.12.0-rc.3 (*)
+      │   │   │   │   ├── sonic-api v0.12.0 (*)
+      │   │   │   │   └── sonic-persist-fs v0.12.0 (*)
+      │   │   │   ├── bp-consensus v0.12.0 (*)
+      │   │   │   ├── bp-dbc v0.12.0 (*)
+      │   │   │   ├── bp-derive v0.12.0-rc.3 (*)
+      │   │   │   ├── bp-electrum v0.12.0-rc.1 (*)
+      │   │   │   ├── bp-invoice v0.12.0-rc.3 (*)
+      │   │   │   ├── bp-seals v0.12.0 (*)
+      │   │   │   ├── bp-std v0.12.0-rc.3 (*)
+      │   │   │   ├── commit_encoding_derive v0.12.0
+      │   │   │   │   └── commit_verify v0.12.1 (*)
+      │   │   │   ├── commit_verify v0.12.1 (*)
+      │   │   │   ├── descriptors v0.12.0-rc.3 (*)
+      │   │   │   ├── hypersonic v0.12.0 (*)
+      │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+      │   │   │   ├── o2a-demo-rgb v0.1.0 (*)
+      │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+      │   │   │   ├── psbt v0.12.0-rc.3 (*)
+      │   │   │   ├── rgb-core v0.12.0 (*)
+      │   │   │   ├── rgb-descriptors v0.12.0-rc.3 (*)
+      │   │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+      │   │   │   ├── rgb-persist-fs v0.12.0-rc.3 (*)
+      │   │   │   ├── rgb-psbt v0.12.0-rc.3 (*)
+      │   │   │   ├── rgb-runtime v0.12.0-rc.3 (*)
+      │   │   │   ├── rgb-std v0.12.0-rc.3 (*)
+      │   │   │   ├── sonic-api v0.12.0 (*)
+      │   │   │   ├── sonic-callreq v0.12.0 (*)
+      │   │   │   ├── sonic-persist-fs v0.12.0 (*)
+      │   │   │   ├── strict_encoding v2.9.1
+      │   │   │   │   ├── aluvm v0.12.0 (*)
+      │   │   │   │   ├── aora v0.6.4 (*)
+      │   │   │   │   ├── bp-consensus v0.12.0 (*)
+      │   │   │   │   ├── bp-core v0.12.0 (*)
+      │   │   │   │   ├── bp-dbc v0.12.0 (*)
+      │   │   │   │   ├── bp-invoice v0.12.0-rc.3 (*)
+      │   │   │   │   ├── bp-seals v0.12.0 (*)
+      │   │   │   │   ├── commit_verify v0.12.1 (*)
+      │   │   │   │   ├── hypersonic v0.12.0 (*)
+      │   │   │   │   ├── o2a-demo-cli v0.1.0 (*)
+      │   │   │   │   ├── o2a-demo-rgb v0.1.0 (*)
+      │   │   │   │   ├── o2a-seal-smoke v0.1.0 (*)
+      │   │   │   │   ├── psbt v0.12.0-rc.3 (*)
+      │   │   │   │   ├── rgb-core v0.12.0 (*)
+      │   │   │   │   ├── rgb-invoice v0.12.0-rc.3 (*)
+      │   │   │   │   ├── rgb-persist-fs v0.12.0-rc.3 (*)
+      │   │   │   │   ├── rgb-std v0.12.0-rc.3 (*)
+      │   │   │   │   ├── single_use_seals v0.12.0
+      │   │   │   │   │   ├── bp-seals v0.12.0 (*)
+      │   │   │   │   │   ├── rgb-core v0.12.0 (*)
+      │   │   │   │   │   └── rgb-std v0.12.0-rc.3 (*)
+      │   │   │   │   ├── sonic-api v0.12.0 (*)
+      │   │   │   │   ├── sonic-callreq v0.12.0 (*)
+      │   │   │   │   ├── sonic-persist-fs v0.12.0 (*)
+      │   │   │   │   ├── strict_types v2.9.1 (*)
+      │   │   │   │   ├── ultrasonic v0.12.0 (*)
+      │   │   │   │   ├── vesper-lang v0.2.3
+      │   │   │   │   │   ├── commit_verify v0.12.1 (*)
+      │   │   │   │   │   └── strict_types v2.9.1 (*)
+      │   │   │   │   └── zk-aluvm v0.12.0 (*)
+      │   │   │   ├── strict_types v2.9.1 (*)
+      │   │   │   ├── ultrasonic v0.12.0 (*)
+      │   │   │   ├── vesper-lang v0.2.3 (*)
+      │   │   │   └── zk-aluvm v0.12.0 (*)
+      │   │   ├── amplify_num v0.5.4
+      │   │   │   └── amplify v4.9.0 (*)
+      │   │   ├── ascii v1.1.0
+      │   │   │   └── amplify v4.9.0 (*)
+      │   │   ├── bp-consensus v0.12.0 (*)
+      │   │   ├── bp-core v0.12.0 (*)
+      │   │   ├── bp-dbc v0.12.0 (*)
+      │   │   ├── bp-derive v0.12.0-rc.3 (*)
+      │   │   ├── bp-electrum v0.12.0-rc.1 (*)
+      │   │   ├── bp-invoice v0.12.0-rc.3 (*)
+      │   │   ├── bp-seals v0.12.0 (*)
+      │   │   ├── bp-std v0.12.0-rc.3 (*)
+      │   │   ├── chrono v0.4.45
+      │   │   │   ├── bp-consensus v0.12.0 (*)
+      │   │   │   ├── rgb-runtime v0.12.0-rc.3 (*)
+      │   │   │   ├── rgb-std v0.12.0-rc.3 (*)
+      │   │   │   ├── sonic-api v0.12.0 (*)
+      │   │   │   └── sonic-callreq v0.12.0 (*)
+      │   │   ├── commit_verify v0.12.1 (*)
+      │   │   ├── descriptors v0.12.0-rc.3 (*)
+      │   │   ├── hypersonic v0.12.0 (*)
+      │   │   ├── psbt v0.12.0-rc.3 (*)
+      │   │   ├── rgb-descriptors v0.12.0-rc.3 (*)
+      │   │   ├── rgb-runtime v0.12.0-rc.3 (*)
+      │   │   ├── secp256k1 v0.30.0
+      │   │   │   ├── bp-consensus v0.12.0 (*)
+      │   │   │   ├── bp-dbc v0.12.0 (*)
+      │   │   │   └── bp-std v0.12.0-rc.3 (*)
+      │   │   ├── serde_spanned v0.6.9
+      │   │   │   ├── toml v0.8.23
+      │   │   │   │   ├── rgb-runtime v0.12.0-rc.3 (*)
+      │   │   │   │   ├── sonic-persist-fs v0.12.0 (*)
+      │   │   │   │   └── strict_types v2.9.1 (*)
+      │   │   │   └── toml_edit v0.22.27
+      │   │   │       └── toml v0.8.23 (*)
+      │   │   ├── serde_str_helpers v0.1.2
+      │   │   │   └── stringly_conversions v0.1.1
+      │   │   │       └── amplify v4.9.0 (*)
+      │   │   ├── serde_yaml v0.9.34+deprecated
+      │   │   │   ├── sonic-api v0.12.0 (*)
+      │   │   │   ├── sonic-persist-fs v0.12.0 (*)
+      │   │   │   └── strict_types v2.9.1 (*)
+      │   │   ├── sonic-api v0.12.0 (*)
+      │   │   ├── sonic-callreq v0.12.0 (*)
+      │   │   ├── strict_encoding v2.9.1 (*)
+      │   │   ├── strict_types v2.9.1 (*)
+      │   │   ├── toml v0.8.23 (*)
+      │   │   ├── toml_datetime v0.6.11
+      │   │   │   ├── toml v0.8.23 (*)
+      │   │   │   └── toml_edit v0.22.27 (*)
+      │   │   ├── toml_edit v0.22.27 (*)
+      │   │   ├── ultrasonic v0.12.0 (*)
+      │   │   └── zk-aluvm v0.12.0 (*)
+      │   └── serde_str_helpers v0.1.2 (*)
+      └── wasm-bindgen-macro-support v0.2.128
+          └── wasm-bindgen-macro v0.2.128
+              └── wasm-bindgen v0.2.128
+                  ├── aluvm v0.12.0 (*)
+                  ├── amplify v4.9.0 (*)
+                  ├── amplify_num v0.5.4 (*)
+                  ├── aora v0.6.4 (*)
+                  ├── bp-consensus v0.12.0 (*)
+                  ├── bp-core v0.12.0 (*)
+                  ├── bp-dbc v0.12.0 (*)
+                  ├── bp-seals v0.12.0 (*)
+                  ├── bp-std v0.12.0-rc.3 (*)
+                  ├── chrono v0.4.45 (*)
+                  ├── commit_verify v0.12.1 (*)
+                  ├── getrandom v0.2.17
+                  │   ├── aluvm v0.12.0 (*)
+                  │   ├── amplify v4.9.0 (*)
+                  │   ├── aora v0.6.4 (*)
+                  │   ├── bp-consensus v0.12.0 (*)
+                  │   ├── bp-core v0.12.0 (*)
+                  │   ├── bp-dbc v0.12.0 (*)
+                  │   ├── bp-seals v0.12.0 (*)
+                  │   ├── bp-std v0.12.0-rc.3 (*)
+                  │   ├── commit_verify v0.12.1 (*)
+                  │   ├── hypersonic v0.12.0 (*)
+                  │   ├── rand_core v0.6.4
+                  │   │   ├── rand v0.8.8
+                  │   │   │   └── secp256k1 v0.30.0 (*)
+                  │   │   └── rand_chacha v0.3.1
+                  │   │       └── rand v0.8.8 (*)
+                  │   ├── rgb-core v0.12.0 (*)
+                  │   ├── rgb-runtime v0.12.0-rc.3 (*)
+                  │   ├── rgb-std v0.12.0-rc.3 (*)
+                  │   ├── sonic-api v0.12.0 (*)
+                  │   ├── sonic-callreq v0.12.0 (*)
+                  │   ├── strict_encoding v2.9.1 (*)
+                  │   ├── strict_types v2.9.1 (*)
+                  │   ├── ultrasonic v0.12.0 (*)
+                  │   └── zk-aluvm v0.12.0 (*)
+                  ├── getrandom v0.3.4
+                  │   ├── aluvm v0.12.0 (*)
+                  │   ├── amplify v4.9.0 (*)
+                  │   ├── bp-consensus v0.12.0 (*)
+                  │   ├── bp-core v0.12.0 (*)
+                  │   ├── bp-dbc v0.12.0 (*)
+                  │   ├── bp-seals v0.12.0 (*)
+                  │   ├── bp-std v0.12.0-rc.3 (*)
+                  │   ├── commit_verify v0.12.1 (*)
+                  │   ├── hypersonic v0.12.0 (*)
+                  │   ├── rand_core v0.9.5
+                  │   │   ├── rand v0.9.5
+                  │   │   │   └── commit_verify v0.12.1 (*)
+                  │   │   └── rand_chacha v0.9.0
+                  │   │       └── rand v0.9.5 (*)
+                  │   ├── rgb-core v0.12.0 (*)
+                  │   ├── rgb-runtime v0.12.0-rc.3 (*)
+                  │   ├── rgb-std v0.12.0-rc.3 (*)
+                  │   ├── sonic-api v0.12.0 (*)
+                  │   ├── sonic-callreq v0.12.0 (*)
+                  │   ├── strict_encoding v2.9.1 (*)
+                  │   ├── strict_types v2.9.1 (*)
+                  │   ├── ultrasonic v0.12.0 (*)
+                  │   └── zk-aluvm v0.12.0 (*)
+                  ├── hypersonic v0.12.0 (*)
+                  ├── iana-time-zone v0.1.65
+                  │   └── chrono v0.4.45 (*)
+                  ├── js-sys v0.3.105
+                  │   ├── chrono v0.4.45 (*)
+                  │   ├── getrandom v0.2.17 (*)
+                  │   ├── getrandom v0.3.4 (*)
+                  │   └── iana-time-zone v0.1.65 (*)
+                  ├── rgb-core v0.12.0 (*)
+                  ├── rgb-runtime v0.12.0-rc.3 (*)
+                  ├── rgb-std v0.12.0-rc.3 (*)
+                  ├── sonic-api v0.12.0 (*)
+                  ├── sonic-callreq v0.12.0 (*)
+                  ├── strict_encoding v2.9.1 (*)
+                  ├── strict_types v2.9.1 (*)
+                  ├── ultrasonic v0.12.0 (*)
+                  └── zk-aluvm v0.12.0 (*)
+
+advisories ok, bans ok, licenses ok, sources ok

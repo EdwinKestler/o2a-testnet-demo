@@ -1,0 +1,25 @@
+Optional Core round-trip of the plain seal-C PSBT. No private keys are in this file.
+
+psbt_version=0
+decodepsbt=accepted
+input fields present: witness_utxo, taproot_internal_key, taproot_merkle_root, taproot_scripts
+taproot_internal_key=50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0
+witness_utxo script=5120f2489653394b1a911fd8a8b5a3983ba327d0414264d676d794bf6b86ca518954
+
+Wallet smoke-leaf: blank descriptor wallet, private keys enabled.
+Import attempts:
+1. active=true -> error -8 "Active descriptors must be ranged"
+2. public form of the descriptor -> error -4 "Cannot import descriptor without private keys to a wallet with private keys enabled"
+3. private descriptor plus checksum us7kcx7a, active=false -> success
+   warning: "Not all private keys provided. Some wallet functionality may return unexpected errors"
+   The missing key is the NUMS internal point. There is no key-path spend.
+
+walletprocesspsbt complete=true
+returned input keys: final_scriptwitness, witness_utxo
+final witness items:
+  64-byte signature
+  script 204fe93634dffbe7f391397acdec47bcd7a2aa5626d881350fcf56870d0801e6e8ac
+  control c050929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0f09ed09d69e81f151640f47dbb61c2880d6a85a7b380f75051e3d5659f137463
+
+The script and control block match the manual C2 spend. Core did not reject PSBT version 0.
+The Core-signed transaction was not broadcast. The plain spend in plain-and-s6.txt was broadcast.

@@ -1,0 +1,19 @@
+=== MECH A ===
+electrum_height=113
+rgb_contract_id=contract:zf3wG3sS-CX225e8-ppsigBg-rOP4UrJ-XBGNp8e-Ab1HX5c
+rgb_current_cell=Ei9WPd9b1ea9dpWn9KBbvjBnb1FLrAsPkQv6y3zajGo:0
+rgb_current_seal=46475f1eb02b18b99e9975dbfd833c6f403c3649ed4ef8b55f28541359e30878:3/00000000000000000000000000000000000000000000000000000000000000000000000000000000
+bitcoin_order_spend=Mined(113)
+o2a_semantics=not_applicable
+=== MECH B ===
+electrum_height=113
+rgb_contract_id=contract:zf3wG3sS-CX225e8-ppsigBg-rOP4UrJ-XBGNp8e-Ab1HX5c
+rgb_current_cell=Ei9WPd9b1ea9dpWn9KBbvjBnb1FLrAsPkQv6y3zajGo:0
+rgb_current_seal=46475f1eb02b18b99e9975dbfd833c6f403c3649ed4ef8b55f28541359e30878:3/00000000000000000000000000000000000000000000000000000000000000000000000000000000
+bitcoin_order_spend=Mined(113)
+o2a_semantics=not_applicable
+byte_identical=true
+
+=== OBSERVE ===
+runtime_update=ok
+owned name=identity cell=Ei9WPd9b1ea9dpWn9KBbvjBnb1FLrAsPkQv6y3zajGo:0 seal=46475f1eb02b18b99e9975dbfd833c6f403c3649ed4ef8b55f28541359e30878:3/00000000000000000000000000000000000000000000000000000000000000000000000000000000 status=Mined(113)
