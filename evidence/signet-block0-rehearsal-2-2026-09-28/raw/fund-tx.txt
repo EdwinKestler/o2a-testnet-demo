@@ -1,0 +1,62 @@
+{
+  "txid": "72010399ab58ef93374431b7fa9cb810d2839abc50ec8600640f77b6ecd3c530",
+  "hash": "d6f24e1b7b32a14784a439d63cea6ff95e84846bbaed21a4804b63698288e232",
+  "version": 2,
+  "size": 394,
+  "vsize": 232,
+  "weight": 928,
+  "locktime": 324083,
+  "vin": [
+    {
+      "txid": "87402b84b4ffa35d9c5bd7308598fb9ff37571c3426849ba2700918d011fb33c",
+      "vout": 0,
+      "scriptSig": {
+        "asm": "",
+        "hex": ""
+      },
+      "txinwitness": [
+        "3044022077fc0736b627390eb7f96b3532d1e120b6cf46a51ac35059dcd984e86b8ea133022079982ab88290fdc934345cfb949a85b8ef7b2216c425d4ae0f94a0df46d29fe301",
+        "02cedba67c5ec4137283f16c3df1c391144400d6443dd6ac08eb28348a3c85aef5"
+      ],
+      "sequence": 4294967294
+    },
+    {
+      "txid": "a9a27af476145a0667a2625251a72ee4fa914969d34ad6ca2b516ea5468fae08",
+      "vout": 1,
+      "scriptSig": {
+        "asm": "",
+        "hex": ""
+      },
+      "txinwitness": [
+        "3044022017cb39eec9b91b8c22179c325b688b68fc729382304c99da9daab68d4f246912022033c6622aeb8c1662e7b860f45adc6f069fd554b04d42156794a4db829691693c01",
+        "02cedba67c5ec4137283f16c3df1c391144400d6443dd6ac08eb28348a3c85aef5"
+      ],
+      "sequence": 4294967294
+    }
+  ],
+  "vout": [
+    {
+      "value": 0.00007899,
+      "n": 0,
+      "scriptPubKey": {
+        "asm": "1 7ccaa668294aef7fe38b2f952c30b1d329b887db006024abf4f0b168b4984bf7",
+        "desc": "rawtr(7ccaa668294aef7fe38b2f952c30b1d329b887db006024abf4f0b168b4984bf7)#8r07z8vj",
+        "hex": "51207ccaa668294aef7fe38b2f952c30b1d329b887db006024abf4f0b168b4984bf7",
+        "address": "tb1p0n92v6pffthhlcut972jcv936v5m3p7mqpszf2l57zck3dycf0mshchz8v",
+        "type": "witness_v1_taproot"
+      }
+    },
+    {
+      "value": 0.00010000,
+      "n": 1,
+      "scriptPubKey": {
+        "asm": "1 7d097d3486967191aff3506a7eca2299dfe8811d73fbf28058c651f95c25d32d",
+        "desc": "rawtr(7d097d3486967191aff3506a7eca2299dfe8811d73fbf28058c651f95c25d32d)#ma9z46vq",
+        "hex": "51207d097d3486967191aff3506a7eca2299dfe8811d73fbf28058c651f95c25d32d",
+        "address": "tb1p05yh6dyxjecertln2p48aj3zn8073qgaw0al9qzccegljhp96vksf87xce",
+        "type": "witness_v1_taproot"
+      }
+    }
+  ],
+  "hex": "020000000001023cb31f018d910027ba496842c37175f39ffb988530d75b9c5da3ffb4842b40870000000000feffffff08ae8f46a56e512bcad64ad3694991fae42ea7515262a267065a1476f47aa2a90100000000feffffff02db1e0000000000002251207ccaa668294aef7fe38b2f952c30b1d329b887db006024abf4f0b168b4984bf710270000000000002251207d097d3486967191aff3506a7eca2299dfe8811d73fbf28058c651f95c25d32d02473044022077fc0736b627390eb7f96b3532d1e120b6cf46a51ac35059dcd984e86b8ea133022079982ab88290fdc934345cfb949a85b8ef7b2216c425d4ae0f94a0df46d29fe3012102cedba67c5ec4137283f16c3df1c391144400d6443dd6ac08eb28348a3c85aef502473044022017cb39eec9b91b8c22179c325b688b68fc729382304c99da9daab68d4f246912022033c6622aeb8c1662e7b860f45adc6f069fd554b04d42156794a4db829691693c012102cedba67c5ec4137283f16c3df1c391144400d6443dd6ac08eb28348a3c85aef5f3f10400"
+}

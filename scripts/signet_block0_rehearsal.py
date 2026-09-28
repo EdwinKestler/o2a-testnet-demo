@@ -37,6 +37,30 @@ DELAY = "1008"
 AMOUNT = "0.0001"
 NAME = "Rehearsal Name"
 ELECTRUM = "tcp://signet-infra-electrs-1:60601"
+RUN = "1"
+
+
+def use_run(number):
+    """Select the evidence directory and a seed that is not a previous identity."""
+    global EVIDENCE, RAW, PUBLIC, ARTIST, PAPER, STAFF, SEED, ARTIST_PKG
+    global OPERATOR, VER_A, VER_B, BACKUP, RESTORE, ENTITY, RUN
+    RUN = number
+    if number == "1":
+        return
+    EVIDENCE = ROOT / "evidence/signet-block0-rehearsal-2-2026-09-28"
+    RAW = EVIDENCE / "raw"
+    PUBLIC = EVIDENCE / "public"
+    ARTIST = Path("/tmp/o2a-artist-device-2")
+    PAPER = Path("/tmp/o2a-artist-paper-2")
+    STAFF = Path("/tmp/o2a-staff-2")
+    SEED = ARTIST / "seed.hex"
+    ARTIST_PKG = ARTIST / "package"
+    OPERATOR = Path("/tmp/o2a-operator-2")
+    VER_A = Path("/tmp/o2a-verifier-a-2")
+    VER_B = Path("/tmp/o2a-verifier-b-2")
+    BACKUP = Path("/tmp/o2a-backup-operator-2")
+    RESTORE = Path("/tmp/o2a-restore-2")
+    ENTITY = "2"
 
 
 def run(cmd, name, check=True):
@@ -136,21 +160,22 @@ def make_seed():
 
 
 def paper_share():
-    if (PAPER / "recovery-2.hex").exists():
+    target = PAPER / "recovery-2.hex"
+    if target.exists():
         return
-    code = r"""
+    code = f"""
 import sys
-sys.path.insert(0, "/media/kestl/andor/ffwd/o2a-protocol/tests/vectors")
+sys.path.insert(0, "{PROTOCOL}/tests/vectors")
 import derive_route_b as route
-seed = bytes.fromhex(open("/tmp/o2a-artist-device/seed.hex").read().strip())
+seed = bytes.fromhex(open("{SEED}").read().strip())
 master = route.bip32_master(seed)
 o2a = route.bip85_xprv(master, route.O2A_INDEX)
-key = route.derive_path(o2a, [route.hardened(1), route.hardened(1), route.hardened(2), route.hardened(2)])
-open("/tmp/o2a-artist-paper/recovery-2.hex", "w").write(key.encode() + "\n")
+key = route.derive_path(o2a, [route.hardened(1), route.hardened({ENTITY}), route.hardened(2), route.hardened(2)])
+open("{target}", "w").write(key.encode() + "\\n")
 print(route.xonly_pub(key.secret))
 """
     text, _ = run(["python3", "-c", code], "paper-xonly")
-    os.chmod(PAPER / "recovery-2.hex", 0o600)
+    os.chmod(target, 0o600)
     (RAW / "paper-xonly.txt").write_text(text)
 
 
@@ -272,6 +297,15 @@ def verify_pair(label):
 
 def main():
     RAW.mkdir(parents=True, exist_ok=True)
+    if RUN == "2":
+        (EVIDENCE / "WHY-FIRST-RUN-WAS-SUPERSEDED.md").write_text(
+            "The first bundle, evidence/signet-block0-rehearsal-2026-09-28, "
+            "is unchanged. Gate 3 rejected it because the verifier trusted the "
+            "seal record's scriptPubKey. This second rehearsal uses a new seed, "
+            "entity index 2, and a new seal. The verifier recomputes the seal "
+            "script from the seal policy in the signed genesis. The seal record "
+            "only locates the outpoint. No seal record was edited by hand.\n"
+        )
     (RAW / "timings.txt").write_text("")
     make_seed()
     paper_share()
@@ -520,6 +554,8 @@ def continue_stage():
 
 if __name__ == "__main__":
     try:
+        if "--run2" in sys.argv:
+            use_run("2")
         if "--continue" in sys.argv:
             continue_stage()
         else:
