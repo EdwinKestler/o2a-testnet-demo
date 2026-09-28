@@ -50,8 +50,20 @@ fn convert_bits(data: &[u8]) -> Vec<u8> {
     out
 }
 
+pub fn seal_address(output_key: &[u8; 32]) -> String {
+    let hrp = match o2a_demo_core::demo_network() {
+        4 => "bcrt",
+        3 | 1 | 2 => "tb",
+        _ => "bcrt",
+    };
+    bech32m_address(hrp, output_key)
+}
+
 pub fn regtest_address(output_key: &[u8; 32]) -> String {
-    let hrp = "bcrt";
+    bech32m_address("bcrt", output_key)
+}
+
+fn bech32m_address(hrp: &str, output_key: &[u8; 32]) -> String {
     let mut data = vec![1u8];
     data.extend(convert_bits(output_key));
     let mut values = hrp_expand(hrp);
@@ -119,7 +131,7 @@ pub fn prepare_state(stage: &str) -> Result<PrepareText, &'static str> {
     };
     let _ = keys;
     let policy = encode_seal_policy(&state.controller_bindings, &state.recovery_bindings);
-    let address = regtest_address(&script.output_key);
+    let address = seal_address(&script.output_key);
     let text = format!(
         "stage={stage}\naddress={address}\nscript_pubkey={}\npolicy={}\npaths={paths}\ndescriptor={}\n",
         hex::encode(&script.script_pubkey),
