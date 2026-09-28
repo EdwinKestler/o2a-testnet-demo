@@ -17,7 +17,7 @@ pub use chain::{
     evaluate_lineage, format_lineage_report, inclusion_matches, merkle_root, CurrentSealView,
     InclusionProof, LineageEvidence, LineageReport, SealFact,
 };
-pub use decode::{decode_payload, evaluate_name_claim, ClaimAuthorization};
+pub use decode::{decode_identity_state, decode_payload, evaluate_name_claim, ClaimAuthorization};
 pub use encode::{
     bytes_field, common_header, content_reference, encode_recovery_policy, encode_resulting_state,
     encode_seal_policy, entity_id as entity_id_of_payload, key_id, list_items, option_fixed,
@@ -60,6 +60,16 @@ pub struct DemoKey {
 }
 
 impl DemoKey {
+    pub fn from_secret(secret: [u8; 32]) -> Result<Self, &'static str> {
+        let parsed = SecretKey::from_slice(&secret).map_err(|_| "invalid secret")?;
+        let pair = Keypair::from_secret_key(&Secp256k1::new(), &parsed);
+        let (xonly, _) = pair.x_only_public_key();
+        Ok(Self {
+            secret,
+            xonly: xonly.serialize(),
+        })
+    }
+
     pub fn sign_schnorr(&self, message: [u8; 32]) -> [u8; 64] {
         let secret = SecretKey::from_slice(&self.secret).expect("published demo key");
         let secp = Secp256k1::new();
@@ -351,6 +361,41 @@ pub fn genesis_with(root: DemoKey, state: &ResultingState) -> SignedObject {
     sign(GENESIS_TAG, payload, root)
 }
 
+/// Recomputes the seal script from the signed state that names `outpoint`.
+///
+/// A history with no genesis payload is `missing genesis`. The seal record is
+/// not an input.
+pub fn script_for_named_seal(
+    payloads: &[&[u8]],
+    outpoint: &[u8; 36],
+) -> Result<Vec<u8>, &'static str> {
+    let mut saw_genesis = false;
+    let mut script = None;
+    for payload in payloads {
+        if payload.len() < 5 {
+            return Err("truncated payload");
+        }
+        let object_type = u16::from_le_bytes([payload[3], payload[4]]);
+        if !matches!(object_type, 1 | 2 | 3) {
+            continue;
+        }
+        let state = decode_identity_state(payload)?;
+        if object_type == 1 {
+            saw_genesis = true;
+        }
+        if state.next_seal == *outpoint {
+            if script.is_some() {
+                return Err("more than one state names this seal");
+            }
+            script = Some(seal_for_state(&state)?.script_pubkey);
+        }
+    }
+    if !saw_genesis {
+        return Err("missing genesis");
+    }
+    script.ok_or("no state names this seal")
+}
+
 pub fn seal_for_state(state: &ResultingState) -> Result<SealScript, &'static str> {
     let policy = encode_seal_policy(&state.controller_bindings, &state.recovery_bindings);
     seal_script(
@@ -639,6 +684,172 @@ mod tests {
     fn authority_is_pinned() {
         assert_eq!(SPEC_COMMIT.len(), 40);
         assert_eq!(CANONICAL_RULES.len(), 4);
+    }
+
+    fn fresh_key(fill: u8) -> DemoKey {
+        let secret = [fill; 32];
+        let parsed = SecretKey::from_slice(&secret).expect("scalar");
+        let pair = Keypair::from_secret_key(&Secp256k1::new(), &parsed);
+        let (xonly, _) = pair.x_only_public_key();
+        DemoKey {
+            secret,
+            xonly: xonly.serialize(),
+        }
+    }
+
+    fn fresh_state(next_seal: [u8; 36], seal_byte: u8) -> ResultingState {
+        let controller = fresh_key(0x21);
+        ResultingState {
+            sequence: 0,
+            previous_state: None,
+            previous_seal: None,
+            next_seal,
+            controllers: vec![ControllerEntry {
+                xonly: controller.xonly,
+                capabilities: vec![2, 4],
+            }],
+            recovery: RecoveryPolicy {
+                version: 1,
+                sequence: 0,
+                threshold: 1,
+                key_ids: vec![key_id(2, fresh_key(0x22).xonly)],
+                delay_blocks: 1008,
+                cancellation_rule: 1,
+            },
+            controller_bindings: vec![SealBinding {
+                authorizing_key_id: key_id(1, controller.xonly),
+                seal_xonly: [seal_byte; 32],
+            }],
+            recovery_bindings: vec![SealBinding {
+                authorizing_key_id: key_id(2, fresh_key(0x23).xonly),
+                seal_xonly: [seal_byte.wrapping_add(1); 32],
+            }],
+            lifecycle_status: 1,
+        }
+    }
+
+    fn lineage(expected: Vec<u8>, observed: Vec<u8>) -> LineageEvidence {
+        let txid = [0x44u8; 32];
+        let mut header = [0u8; 80];
+        header[36..68].copy_from_slice(&txid);
+        LineageEvidence {
+            seals: vec![SealFact {
+                expected_script: expected,
+                observed_script: observed,
+                creation: InclusionProof {
+                    txid,
+                    index: 0,
+                    siblings: Vec::new(),
+                    header,
+                    height: 100,
+                },
+            }],
+            anchor: None,
+            observation: Some(CurrentSealView {
+                unspent: true,
+                spend: None,
+            }),
+            o2a_ok: true,
+            best_height: 105,
+            required_depth: 1,
+        }
+    }
+
+    #[test]
+    fn identity_state_roundtrip_rejects_truncated_and_trailing_bytes() {
+        let state = fresh_state([0x41; 36], 0x55);
+        let payload = genesis_with(fresh_key(0x11), &state).payload;
+        assert_eq!(decode_identity_state(&payload).unwrap(), state);
+        decode_payload(&payload).unwrap();
+        assert_eq!(
+            decode_identity_state(&payload[..payload.len() - 1]),
+            Err("truncated payload")
+        );
+        let mut extra = payload.clone();
+        extra.push(0);
+        assert_eq!(decode_identity_state(&extra), Err("trailing payload bytes"));
+    }
+
+    #[test]
+    fn record_script_matching_the_chain_but_not_the_policy_is_invalid() {
+        let outpoint = [0x41; 36];
+        let state = fresh_state(outpoint, 0x55);
+        let payload = genesis_with(fresh_key(0x11), &state).payload;
+        let policy_script = script_for_named_seal(&[&payload], &outpoint).unwrap();
+        let record_script = b"record-script-that-matches-the-chain".to_vec();
+        assert_ne!(record_script, policy_script);
+        let report = evaluate_lineage(&lineage(policy_script, record_script), "imported");
+        assert_eq!(report.identity_history_state, "INVALID");
+        assert_eq!(report.bitcoin, "script does not match the policy");
+    }
+
+    #[test]
+    fn policy_bytes_outside_the_seal_policy_field_do_not_select_the_script() {
+        let outpoint = [0x42; 36];
+        let state = fresh_state(outpoint, 0x66);
+        let payload = genesis_with(fresh_key(0x12), &state).payload;
+        let policy = encode_seal_policy(&state.controller_bindings, &state.recovery_bindings);
+        let at = payload
+            .windows(policy.len())
+            .position(|window| window == policy.as_slice())
+            .expect("seal policy field");
+        let stray = if at == 0 {
+            &payload[1..1 + policy.len()]
+        } else {
+            &payload[..policy.len()]
+        };
+        assert_ne!(stray, policy.as_slice());
+        assert!(payload.windows(stray.len()).any(|window| window == stray));
+        let selected = script_for_named_seal(&[&payload], &outpoint).unwrap();
+        let policy_script = seal_for_state(&state).unwrap().script_pubkey;
+        assert_eq!(selected, policy_script);
+        let report = evaluate_lineage(
+            &lineage(selected, b"script-from-the-stray-bytes".to_vec()),
+            "imported",
+        );
+        assert_eq!(report.identity_history_state, "INVALID");
+    }
+
+    #[test]
+    fn history_without_a_genesis_is_never_current() {
+        let outpoint = [0x43; 36];
+        assert_eq!(
+            script_for_named_seal(&[], &outpoint),
+            Err("missing genesis")
+        );
+        let state = fresh_state(outpoint, 0x77);
+        let transition = {
+            let mut payload = common_header(
+                4,
+                2,
+                [0x9; 32],
+                Some([0x8; 32]),
+                key_id(1, fresh_key(0x21).xonly),
+                1,
+                2,
+            );
+            payload.push(1);
+            payload.extend(encode_resulting_state(&state));
+            payload
+        };
+        assert_eq!(
+            script_for_named_seal(&[&transition], &outpoint),
+            Err("missing genesis")
+        );
+    }
+
+    #[test]
+    fn fresh_seed_genesis_verifies_without_demo_keys() {
+        let outpoint = [0x44; 36];
+        let state = fresh_state(outpoint, 0x88);
+        let payload = genesis_with(fresh_key(0x13), &state).payload;
+        let script = script_for_named_seal(&[&payload], &outpoint).unwrap();
+        let demo_script = seal_for_state(&demo_genesis_state(outpoint))
+            .unwrap()
+            .script_pubkey;
+        assert_ne!(script, demo_script);
+        let report = evaluate_lineage(&lineage(script.clone(), script), "imported");
+        assert_eq!(report.identity_history_state, "CURRENT");
     }
 
     #[test]

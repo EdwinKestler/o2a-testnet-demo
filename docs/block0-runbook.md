@@ -124,7 +124,7 @@ On the show's signet wallet, when the maintainer has created one:
 bitcoin-cli -signet -rpcwallet=SHOW -named sendtoaddress address="SEAL_ADDRESS" amount=AMOUNT replaceable=false
 ```
 
-`replaceable=false` asks Core not to signal replacement. Named arguments keep that flag on the replacement setting.
+`replaceable=false` asks Core not to signal replacement. Named arguments keep that flag on the replacement setting. Not signaling replacement is operator discipline. Since Bitcoin Core 28, a node may accept a replacement even when the original transaction did not signal it. The protection for the EntityID is to wait for 6 confirmations before the artist signs the genesis, and to never fee-bump that funding transaction. If the fee needs help before those 6 confirmations, use child-pays-for-parent, which keeps the same outpoint.
 
 Then check the transaction:
 
@@ -193,7 +193,7 @@ Open `file:///tmp/block0-screen/index.html` in a browser window with no other ta
 
 The USB stick handed to each verifier contains the signed genesis, the consignment, the seal record, and the public plan. It does not contain the seed.
 
-The verifier checks the seal script stored in that package against the chain. Those policy bytes also have to sit inside the signed genesis. The 2026-09-28 rehearsal first recorded the seal without the artist keys, and both verifiers then said the script did not match. Recording it again with the artist keys, still without giving the verifiers the seed, produced CURRENT. A different recovery delay is a different address. The pre-flight compares that address with Core and does not fund the mismatch.
+The verifier derives the seal script from the seal policy inside the signed genesis. The seal record only helps locate the outpoint. A script written into the record is not the expected script, even when those policy bytes also appear somewhere else in the genesis. A different recovery delay is a different address. The pre-flight compares that address with Core and does not fund the mismatch.
 
 ### What the projector shows
 

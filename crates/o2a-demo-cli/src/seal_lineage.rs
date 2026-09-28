@@ -564,26 +564,35 @@ pub fn verify(
         .iter()
         .position(|record| record.name == name)
         .context("seal record")?;
-    let genesis_payload = data_dir
-        .join("genesis.o2a")
-        .exists()
-        .then(|| read_signed(&data_dir.join("genesis.o2a")))
-        .transpose()?
-        .map(|object| object.payload);
+    let payloads = identity_payloads(data_dir)?;
+    if !payloads
+        .iter()
+        .any(|payload| payload.len() >= 5 && u16::from_le_bytes([payload[3], payload[4]]) == 1)
+    {
+        print_incomplete("signed genesis is absent");
+        return Ok(());
+    }
     let mut tracked = Vec::new();
     for record in &records {
-        let expected = hex::decode(&record.script_pubkey)
-            .with_context(|| format!("seal {} script", record.name))?;
-        if let Some(payload) = &genesis_payload {
-            let policy = hex::decode(&record.policy_hex)
-                .with_context(|| format!("seal {} policy", record.name))?;
-            if !payload.windows(policy.len()).any(|window| window == policy) {
-                bail!(
-                    "seal {} policy is not inside the signed genesis",
-                    record.name
-                );
+        let outpoint = canonical_outpoint(Outpoint::from_str(&record.outpoint)?);
+        let expected = match o2a_demo_core::script_for_named_seal(
+            &payloads.iter().map(Vec::as_slice).collect::<Vec<_>>(),
+            &outpoint,
+        ) {
+            Ok(script) => script,
+            Err("missing genesis") => {
+                print_incomplete("signed genesis is absent");
+                return Ok(());
             }
-        }
+            Err("no state names this seal") => {
+                print_incomplete("no signed state names this seal");
+                return Ok(());
+            }
+            Err(error) => {
+                print_incomplete(error);
+                return Ok(());
+            }
+        };
         tracked.push(TrackedSeal {
             expected_script: expected,
             outpoint: record.outpoint.clone(),
@@ -691,6 +700,141 @@ pub fn presign_recovery(data_dir: &Path, name: &str, destination_hex: &str) -> R
     println!("raw_tx={raw}");
     println!("presign_recovery=bip68");
     Ok(())
+}
+
+fn identity_payloads(data_dir: &Path) -> Result<Vec<Vec<u8>>> {
+    let mut payloads = Vec::new();
+    let Ok(entries) = fs::read_dir(data_dir) else {
+        return Ok(payloads);
+    };
+    for entry in entries.flatten() {
+        let name = entry.file_name();
+        let name = name.to_string_lossy();
+        if !name.ends_with(".o2a") {
+            continue;
+        }
+        let object = read_signed(&entry.path())?;
+        if matches!(
+            object.tag,
+            "O2A/v0.1/entity-genesis" | "O2A/v0.1/identity-transition" | "O2A/v0.1/recovery"
+        ) {
+            payloads.push(object.payload);
+        }
+    }
+    Ok(payloads)
+}
+
+fn print_incomplete(reason: &'static str) {
+    println!("entity_index={}", o2a_demo_core::demo_entity_index());
+    println!(
+        "{}",
+        o2a_demo_core::format_lineage_report(&o2a_demo_core::LineageReport {
+            identity_history_state: "INCOMPLETE",
+            bitcoin: reason,
+            rgb: "consignment absent",
+            o2a: "objects rejected",
+            header_trust: "headers come from one electrs instance; this is a trust assumption, not a light client",
+        })
+    );
+}
+
+#[cfg(test)]
+mod verifier_regression {
+    use super::identity_payloads;
+    use o2a_demo_core::{
+        genesis_with, key_id, script_for_named_seal, ControllerEntry, DemoKey, RecoveryPolicy,
+        ResultingState, SealBinding,
+    };
+    use std::fs;
+
+    fn fresh(fill: u8) -> DemoKey {
+        DemoKey::from_secret([fill; 32]).unwrap()
+    }
+
+    fn write_genesis(dir: &std::path::Path, payload: &[u8]) {
+        fs::create_dir_all(dir).unwrap();
+        fs::write(
+            dir.join("genesis.o2a"),
+            format!(
+                "tag=O2A/v0.1/entity-genesis\npayload={}\ndigest={}\nsigner={}\nsignature={}\n",
+                hex::encode(payload),
+                hex::encode([0u8; 32]),
+                hex::encode([0u8; 32]),
+                hex::encode([0u8; 64]),
+            ),
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn package_without_genesis_has_no_signed_state() {
+        let dir = std::env::temp_dir().join(format!("o2a-no-genesis-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        fs::create_dir_all(dir.join("seals")).unwrap();
+        fs::write(
+            dir.join("seals/A.txt"),
+            "name=A\noutpoint=11:0\npolicy_hex=00\nscript_pubkey=51\npaths=\nstage=genesis\nfunding_txid=11\nconfirmation_height=1\nvalue_sats=1\n",
+        )
+        .unwrap();
+        assert!(identity_payloads(&dir).unwrap().is_empty());
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn fresh_genesis_script_does_not_come_from_the_record_or_demo_seed() {
+        let outpoint = [0x45u8; 36];
+        let root = fresh(0x31);
+        let controller = fresh(0x32);
+        let state = ResultingState {
+            sequence: 0,
+            previous_state: None,
+            previous_seal: None,
+            next_seal: outpoint,
+            controllers: vec![ControllerEntry {
+                xonly: controller.xonly,
+                capabilities: vec![2, 4],
+            }],
+            recovery: RecoveryPolicy {
+                version: 1,
+                sequence: 0,
+                threshold: 1,
+                key_ids: vec![key_id(2, fresh(0x33).xonly)],
+                delay_blocks: 1008,
+                cancellation_rule: 1,
+            },
+            controller_bindings: vec![SealBinding {
+                authorizing_key_id: key_id(1, controller.xonly),
+                seal_xonly: [0x46; 32],
+            }],
+            recovery_bindings: vec![SealBinding {
+                authorizing_key_id: key_id(2, fresh(0x34).xonly),
+                seal_xonly: [0x47; 32],
+            }],
+            lifecycle_status: 1,
+        };
+        let object = genesis_with(root, &state);
+        let dir = std::env::temp_dir().join(format!("o2a-fresh-genesis-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        write_genesis(&dir, &object.payload);
+        fs::create_dir_all(dir.join("seals")).unwrap();
+        fs::write(
+            dir.join("seals/A.txt"),
+            "name=A\noutpoint=4545454545454545454545454545454545454545454545454545454545454545:0\npolicy_hex=00\nscript_pubkey=0014aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\npaths=\nstage=genesis\nfunding_txid=45\nconfirmation_height=1\nvalue_sats=1\n",
+        )
+        .unwrap();
+        let payloads = identity_payloads(&dir).unwrap();
+        let refs: Vec<&[u8]> = payloads.iter().map(Vec::as_slice).collect();
+        let script = script_for_named_seal(&refs, &outpoint).unwrap();
+        let record = fs::read_to_string(dir.join("seals/A.txt")).unwrap();
+        assert!(!record.contains(&hex::encode(&script)));
+        assert_ne!(
+            script,
+            o2a_demo_core::seal_for_state(&o2a_demo_core::demo_genesis_state(outpoint))
+                .unwrap()
+                .script_pubkey
+        );
+        let _ = fs::remove_dir_all(&dir);
+    }
 }
 
 fn state_for_stage(stage: &str) -> Result<ResultingState> {

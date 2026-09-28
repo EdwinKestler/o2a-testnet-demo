@@ -5,6 +5,7 @@
 //! `evaluate_name_claim` mirror the same names in
 //! `tests/vectors/check_vectors.py`.
 
+use crate::encode::{ControllerEntry, RecoveryPolicy, ResultingState, SealBinding};
 use crate::{key_id, signature_accepts};
 
 const MAX_BYTES: usize = 1_048_576;
@@ -74,14 +75,22 @@ impl<'a> Reader<'a> {
     }
 
     fn option_fixed(&mut self, length: usize) -> Result<(), &'static str> {
+        self.option_bytes(length).map(|_| ())
+    }
+
+    fn option_bytes(&mut self, length: usize) -> Result<Option<Vec<u8>>, &'static str> {
         match self.u8()? {
-            0 => Ok(()),
-            1 => {
-                self.take(length)?;
-                Ok(())
-            }
+            0 => Ok(None),
+            1 => Ok(Some(self.take(length)?.to_vec())),
             _ => Err("invalid option marker"),
         }
+    }
+
+    fn array<const N: usize>(&mut self) -> Result<[u8; N], &'static str> {
+        let bytes = self.take(N)?;
+        let mut out = [0u8; N];
+        out.copy_from_slice(bytes);
+        Ok(out)
     }
 
     fn list_count(&mut self) -> Result<u32, &'static str> {
@@ -225,6 +234,127 @@ fn decode_content_reference(reader: &mut Reader<'_>) -> Result<(), &'static str>
     reader.u64()?;
     reader.take(32)?;
     Ok(())
+}
+
+/// Returns the resulting state from a genesis, transition, or recovery payload.
+///
+/// Truncation and trailing bytes fail, as they do in [`decode_payload`].
+pub fn decode_identity_state(payload: &[u8]) -> Result<ResultingState, &'static str> {
+    let mut reader = Reader::new(payload, "truncated payload");
+    let _version = reader.u16()?;
+    let _network = reader.u8()?;
+    let object_type = reader.u16()?;
+    reader.take(32)?;
+    reader.option_fixed(32)?;
+    reader.take(32)?;
+    reader.u8()?;
+    reader.u16()?;
+    match object_type {
+        1 => {
+            reader.u16()?;
+            reader.take(32)?;
+        }
+        2 => {
+            reader.u8()?;
+        }
+        3 => {
+            reader.u8()?;
+            reader.take(32)?;
+            reader.u32()?;
+        }
+        _ => return Err("object does not establish an identity state"),
+    }
+    let state = parse_resulting_state(&mut reader)?;
+    reader.done("trailing payload bytes")?;
+    Ok(state)
+}
+
+fn parse_resulting_state(reader: &mut Reader<'_>) -> Result<ResultingState, &'static str> {
+    let sequence = reader.u64()?;
+    let previous_state = optional_array(reader, 32)?;
+    let previous_seal = optional_array(reader, 36)?;
+    let next_seal = reader.array()?;
+    let controller_count = reader.list_count()?;
+    let mut controllers = Vec::with_capacity(controller_count as usize);
+    for _ in 0..controller_count {
+        reader.take(32)?;
+        let xonly = reader.array()?;
+        reader.u8()?;
+        let capability_count = reader.list_count()?;
+        let mut capabilities = Vec::with_capacity(capability_count as usize);
+        for _ in 0..capability_count {
+            capabilities.push(reader.u16()?);
+        }
+        controllers.push(ControllerEntry {
+            xonly,
+            capabilities,
+        });
+    }
+    let version = reader.u16()?;
+    let recovery_sequence = reader.u64()?;
+    let threshold = reader.u16()?;
+    let recovery_key_count = reader.list_count()?;
+    let mut key_ids = Vec::with_capacity(recovery_key_count as usize);
+    for _ in 0..recovery_key_count {
+        key_ids.push(reader.array()?);
+    }
+    let delay_blocks = reader.u32()?;
+    let cancellation_rule = reader.u8()?;
+    reader.u16()?;
+    let controller_binding_count = reader.list_count()?;
+    let mut controller_bindings = Vec::with_capacity(controller_binding_count as usize);
+    for _ in 0..controller_binding_count {
+        controller_bindings.push(binding_pair(reader)?);
+    }
+    let recovery_binding_count = reader.list_count()?;
+    let mut recovery_bindings = Vec::with_capacity(recovery_binding_count as usize);
+    for _ in 0..recovery_binding_count {
+        recovery_bindings.push(binding_pair(reader)?);
+    }
+    reader.option_fixed(32)?;
+    let lifecycle_status = reader.u8()?;
+    reader.option_fixed(32)?;
+    reader.option_fixed(32)?;
+    Ok(ResultingState {
+        sequence,
+        previous_state,
+        previous_seal,
+        next_seal,
+        controllers,
+        recovery: RecoveryPolicy {
+            version,
+            sequence: recovery_sequence,
+            threshold,
+            key_ids,
+            delay_blocks,
+            cancellation_rule,
+        },
+        controller_bindings,
+        recovery_bindings,
+        lifecycle_status,
+    })
+}
+
+fn optional_array<const N: usize>(
+    reader: &mut Reader<'_>,
+    length: usize,
+) -> Result<Option<[u8; N]>, &'static str> {
+    let Some(bytes) = reader.option_bytes(length)? else {
+        return Ok(None);
+    };
+    let mut out = [0u8; N];
+    if bytes.len() != N {
+        return Err("truncated payload");
+    }
+    out.copy_from_slice(&bytes);
+    Ok(Some(out))
+}
+
+fn binding_pair(reader: &mut Reader<'_>) -> Result<SealBinding, &'static str> {
+    Ok(SealBinding {
+        authorizing_key_id: reader.array()?,
+        seal_xonly: reader.array()?,
+    })
 }
 
 fn decode_state(reader: &mut Reader<'_>) -> Result<(), &'static str> {
