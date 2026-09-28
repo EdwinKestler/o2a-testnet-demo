@@ -31,6 +31,13 @@ use rgpsbt::RgbPsbt;
 
 use crate::{canonical_outpoint, external_seal, runtime, write_object};
 
+fn hx32(value: &str) -> Result<[u8; 32]> {
+    let bytes = hex::decode(value)?;
+    bytes
+        .try_into()
+        .map_err(|_| anyhow::anyhow!("expected 32 bytes"))
+}
+
 fn ensure_wallet(data_dir: &Path, electrum: &str) -> Result<()> {
     if data_dir.join("wallet").exists() {
         return Ok(());
@@ -89,6 +96,19 @@ pub fn sign_genesis(data_dir: &Path, outpoint: &str) -> Result<()> {
     std::fs::create_dir_all(data_dir)?;
     write_object(&data_dir.join("genesis.o2a"), &object)?;
     let id = entity_id(&object.payload);
+    let keys = demo_keys();
+    std::fs::write(
+        data_dir.join("public.txt"),
+        format!(
+            "entity_id={}\nstate_id={}\nroot_xonly={}\ncontroller_xonly={}\npolicy_hash={}\nnetwork={}\n",
+            hex::encode(id),
+            hex::encode(state_id(&id, &state_bytes)),
+            hex::encode(object.signer_xonly),
+            hex::encode(keys.controller_0.xonly),
+            hex::encode(o2a_demo_core::recovery_policy_hash(&state.recovery)),
+            demo_network(),
+        ),
+    )?;
     println!("entity_id={}", hex::encode(id));
     println!("state_id={}", hex::encode(state_id(&id, &state_bytes)));
     println!("signer_entity_zero=true");
@@ -226,13 +246,30 @@ pub fn issue(data_dir: &Path, electrum: &str, name: &str) -> Result<()> {
         write_object(&signed_path, &object)?;
         object
     };
-    let keys = demo_keys();
+    let (root_xonly, controller_xonly, policy_hash) = if data_dir.join("public.txt").exists() {
+        let fields = crate::read_fields(&data_dir.join("public.txt"))?;
+        (
+            hx32(crate::field(&fields, "root_xonly")?)?,
+            hx32(crate::field(&fields, "controller_xonly")?)?,
+            hx32(crate::field(&fields, "policy_hash")?)?,
+        )
+    } else {
+        let keys = demo_keys();
+        (
+            keys.root.xonly,
+            keys.controller_0.xonly,
+            o2a_demo_core::recovery_policy_hash(&o2a_demo_core::demo_recovery_policy()),
+        )
+    };
+    if root_xonly != object.signer_xonly {
+        bail!("public root does not match the signed genesis");
+    }
     runtime.contracts.import_issuer(demo_issuer())?;
     let contract_id = runtime.issue(genesis_params(GenesisInput {
-        root_xonly: keys.root.xonly,
+        root_xonly,
         entity_id: o2a_demo_core::entity_id(&object.payload),
-        controller_xonly: keys.controller_0.xonly,
-        policy_hash: o2a_demo_core::recovery_policy_hash(&o2a_demo_core::demo_recovery_policy()),
+        controller_xonly,
+        policy_hash,
         state_commitment: object.digest,
         seal: outpoint,
     }))?;
