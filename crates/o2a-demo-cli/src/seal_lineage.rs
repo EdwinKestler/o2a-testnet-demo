@@ -13,7 +13,7 @@ use o2a_demo_core::{
     controller_rotation_with, demo_delay_blocks, demo_entity_index, demo_genesis_state, demo_keys,
     demo_network, demo_rotation_state, demo_threshold, encode_resulting_state, entity_id,
     genesis_with, key_id, official_name_claim, official_name_nonce, recovery_authorizations,
-    seal_bindings_valid, seal_for_state, state_id, ResultingState,
+    seal_bindings_valid, state_id, ResultingState,
 };
 use o2a_demo_rgb::{
     controller_rotation, demo_issuer, genesis_params, recover, GenesisInput, RotationInput,
@@ -564,11 +564,26 @@ pub fn verify(
         .iter()
         .position(|record| record.name == name)
         .context("seal record")?;
+    let genesis_payload = data_dir
+        .join("genesis.o2a")
+        .exists()
+        .then(|| read_signed(&data_dir.join("genesis.o2a")))
+        .transpose()?
+        .map(|object| object.payload);
     let mut tracked = Vec::new();
     for record in &records {
-        let expected = seal_for_state(&state_for_stage(&record.stage)?)
-            .map_err(anyhow::Error::msg)?
-            .script_pubkey;
+        let expected = hex::decode(&record.script_pubkey)
+            .with_context(|| format!("seal {} script", record.name))?;
+        if let Some(payload) = &genesis_payload {
+            let policy = hex::decode(&record.policy_hex)
+                .with_context(|| format!("seal {} policy", record.name))?;
+            if !payload.windows(policy.len()).any(|window| window == policy) {
+                bail!(
+                    "seal {} policy is not inside the signed genesis",
+                    record.name
+                );
+            }
+        }
         tracked.push(TrackedSeal {
             expected_script: expected,
             outpoint: record.outpoint.clone(),
