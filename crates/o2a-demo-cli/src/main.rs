@@ -50,13 +50,27 @@ fn runtime(data_dir: &Path, electrum: &str) -> Result<RgbpRuntimeDir<ElectrumRes
     fs::create_dir_all(data_dir)?;
     let holder = FileHolder::load(data_dir.join("wallet"))?;
     let resolver = ElectrumResolver::new(electrum)?;
-    let owner = Owner::with_components(Network::Regtest, holder, resolver);
+    let owner = Owner::with_components(demo_bp_network(), holder, resolver);
     let stockpile =
         StockpileDir::<TxoSeal>::load(data_dir.to_path_buf(), Consensus::Bitcoin, true)?;
     Ok(RgbRuntime::with_components(
         owner,
         Contracts::load(stockpile),
     ))
+}
+
+pub(crate) fn demo_bp_network() -> Network {
+    match o2a_demo_core::demo_network() {
+        3 => Network::Signet,
+        4 => Network::Regtest,
+        1 => Network::Testnet3,
+        2 => Network::Testnet4,
+        _ => bail_network(),
+    }
+}
+
+fn bail_network() -> Network {
+    panic!("mainnet identities are not authorized");
 }
 
 fn require_ack(args: &[String]) -> Result<()> {
@@ -124,7 +138,7 @@ fn prepare(data_dir: &Path) -> Result<()> {
     fs::create_dir_all(data_dir)?;
     let holder = FileHolder::create(data_dir.join("wallet"), descriptor())?;
     let resolver = ElectrumResolver::new("tcp://electrs:50001")?;
-    let mut owner = Owner::with_components(Network::Regtest, holder, resolver);
+    let mut owner = Owner::with_components(demo_bp_network(), holder, resolver);
     let genesis = owner.next_address();
     let successor = owner.next_address();
     println!("genesis_funding_address={genesis}");
@@ -363,7 +377,11 @@ fn help() {
     println!(
         "pre-seal-policy: o2a-demo verify-package VALIDATOR_DIR ELECTRUM_URL EVIDENCE_PACKAGE_DIR"
     );
+    println!("seal plan {ACK}");
     println!("seal prepare STAGE {ACK}");
+    println!("seal sign-genesis DATA OUTPOINT {ACK}");
+    println!("seal sign-claim DATA NAME {ACK}");
+    println!("seal verify-claim DATA");
     println!("seal record DATA NAME OUTPOINT TXID HEIGHT VALUE STAGE {ACK}");
     println!("seal issue DATA ELECTRUM NAME {ACK}");
     println!("seal transition DATA ELECTRUM FROM TO FEE FEE_VALUE FEE_SCRIPT KIND BROADCAST {ACK}");
@@ -399,6 +417,25 @@ fn run() -> Result<()> {
         }
         [command, validator, electrum, package] if command == "verify-package" => {
             verify_package(Path::new(validator), electrum, Path::new(package))
+        }
+        [command, action, ack] if command == "seal" && action == "plan" && ack == ACK => {
+            require_ack(&args)?;
+            seal_lineage::plan()
+        }
+        [command, action, data, outpoint, ack]
+            if command == "seal" && action == "sign-genesis" && ack == ACK =>
+        {
+            require_ack(&args)?;
+            seal_lineage::sign_genesis(Path::new(data), outpoint)
+        }
+        [command, action, data, name, ack]
+            if command == "seal" && action == "sign-claim" && ack == ACK =>
+        {
+            require_ack(&args)?;
+            seal_lineage::sign_claim(Path::new(data), name)
+        }
+        [command, action, data] if command == "seal" && action == "verify-claim" => {
+            seal_lineage::verify_claim(Path::new(data))
         }
         [command, action, data, stage, ack]
             if command == "seal" && action == "prepare" && ack == ACK =>

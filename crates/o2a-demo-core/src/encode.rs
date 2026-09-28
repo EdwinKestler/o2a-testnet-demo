@@ -63,6 +63,14 @@ pub fn entity_id(genesis_payload: &[u8]) -> [u8; 32] {
     tagged_hash("O2A/v0.1/entity-id", genesis_payload)
 }
 
+/// Signer-independent id of one resulting state for one EntityID.
+pub fn state_id(entity: &[u8; 32], resulting_state: &[u8]) -> [u8; 32] {
+    let mut preimage = Vec::with_capacity(32 + resulting_state.len());
+    preimage.extend_from_slice(entity);
+    preimage.extend_from_slice(resulting_state);
+    tagged_hash("O2A/v0.1/state-id", &preimage)
+}
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct RecoveryPolicy {
     pub version: u16,

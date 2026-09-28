@@ -94,10 +94,38 @@ fn o2a_root(seed: &[u8]) -> Xprv {
 
 /// Derives `m/coin'/entity'/role'/index'` below `xprv_o2a`.
 pub fn identity_key(seed: &[u8], coin: u32, entity: u32, role: u32, index: u32) -> DemoKey {
-    demo_key(derive(
+    demo_key(identity_xprv(seed, coin, entity, role, index))
+}
+
+#[cfg(test)]
+fn xprv_bytes(key: Xprv) -> [u8; 64] {
+    let mut out = [0u8; 64];
+    out[..32].copy_from_slice(&key.secret);
+    out[32..].copy_from_slice(&key.chain_code);
+    out
+}
+
+#[cfg(test)]
+pub(crate) fn o2a_xprv_bytes(seed: &[u8]) -> [u8; 64] {
+    xprv_bytes(o2a_root(seed))
+}
+
+#[cfg(test)]
+pub(crate) fn identity_xprv_bytes(
+    seed: &[u8],
+    coin: u32,
+    entity: u32,
+    role: u32,
+    index: u32,
+) -> [u8; 64] {
+    xprv_bytes(identity_xprv(seed, coin, entity, role, index))
+}
+
+fn identity_xprv(seed: &[u8], coin: u32, entity: u32, role: u32, index: u32) -> Xprv {
+    derive(
         o2a_root(seed),
         &[hard(coin), hard(entity), hard(role), hard(index)],
-    ))
+    )
 }
 
 /// Accepts a v0.1 identity path and candidate x-only key, or returns the

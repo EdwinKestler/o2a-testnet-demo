@@ -21,7 +21,8 @@ pub use decode::{decode_payload, evaluate_name_claim, ClaimAuthorization};
 pub use encode::{
     bytes_field, common_header, content_reference, encode_recovery_policy, encode_resulting_state,
     encode_seal_policy, entity_id as entity_id_of_payload, key_id, list_items, option_fixed,
-    text_field, ControllerEntry, RecoveryPolicy, ResultingState, SealBinding,
+    state_id as state_id_of, text_field, ControllerEntry, RecoveryPolicy, ResultingState,
+    SealBinding,
 };
 pub use eval::{
     adapter_key_distinct, adapter_scheme, capability_known, evidence_ids_valid, genesis_root_ok,
@@ -32,7 +33,7 @@ pub use eval::{
 };
 pub use seal::{recovery_leaf, script_num, seal_script, SealScript, NUMS_X};
 
-pub const SPEC_COMMIT: &str = "0ef16c2132ea54cdfd4aa86a34a748f998f388d8";
+pub const SPEC_COMMIT: &str = "b622c9830e98085c5270a604dc14fa7bec1bf2c2";
 pub const CANONICAL_RULES: [&str; 4] = [
     "../o2a-protocol/specs/canonical-encoding.md",
     "../o2a-protocol/specs/cryptographic-profile.md",
@@ -50,6 +51,7 @@ pub const DEMO_DELAY_BLOCKS: u32 = 10;
 const GENESIS_TAG: &str = "O2A/v0.1/entity-genesis";
 const TRANSITION_TAG: &str = "O2A/v0.1/identity-transition";
 const RECOVERY_TAG: &str = "O2A/v0.1/recovery";
+const CLAIM_TAG: &str = "O2A/v0.1/claim";
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct DemoKey {
@@ -113,9 +115,10 @@ pub fn demo_entity_index() -> u32 {
 }
 
 pub fn demo_keys() -> DemoKeys {
-    let seed = unsafe_seed();
+    let seed = demo_seed();
     let entity = demo_entity_index();
-    let key = |role: u32, index: u32| derive::identity_key(&seed, 1, entity, role, index);
+    let coin = demo_coin();
+    let key = |role: u32, index: u32| derive::identity_key(&seed, coin, entity, role, index);
     DemoKeys {
         root: key(0, 0),
         controller_0: key(1, 0),
@@ -159,6 +162,58 @@ pub fn entity_id(genesis_payload: &[u8]) -> [u8; 32] {
     entity_id_of_payload(genesis_payload)
 }
 
+/// O2A state id: `TaggedHash("O2A/v0.1/state-id", entity_id || resulting_state)`.
+pub fn state_id(entity: &[u8; 32], resulting_state: &[u8]) -> [u8; 32] {
+    state_id_of(entity, resulting_state)
+}
+
+/// Network byte for demo objects. Mainnet is refused.
+pub fn demo_network() -> u8 {
+    match std::env::var("O2A_DEMO_NETWORK").ok().as_deref() {
+        None | Some("") | Some("regtest") => NETWORK_REGTEST,
+        Some("signet") => 3,
+        Some("testnet") => 1,
+        Some("testnet4") => 2,
+        Some("mainnet") => panic!("mainnet identities are not authorized"),
+        Some(other) => panic!("unknown O2A_DEMO_NETWORK {other}"),
+    }
+}
+
+pub fn demo_coin() -> u32 {
+    1
+}
+
+pub fn demo_delay_blocks() -> u32 {
+    std::env::var("O2A_DEMO_DELAY")
+        .ok()
+        .and_then(|value| value.parse().ok())
+        .unwrap_or(DEMO_DELAY_BLOCKS)
+}
+
+pub fn demo_threshold() -> u16 {
+    std::env::var("O2A_DEMO_THRESHOLD")
+        .ok()
+        .and_then(|value| value.parse().ok())
+        .unwrap_or(DEMO_RECOVERY_THRESHOLD)
+}
+
+fn demo_seed() -> Vec<u8> {
+    let Ok(path) = std::env::var("O2A_DEMO_SEED_FILE") else {
+        return unsafe_seed();
+    };
+    let text =
+        std::fs::read_to_string(&path).unwrap_or_else(|err| panic!("seed file {path}: {err}"));
+    let compact: String = text.chars().filter(|c| c.is_ascii_hexdigit()).collect();
+    let bytes = hex::decode(compact).unwrap_or_else(|err| panic!("seed file {path}: {err}"));
+    if bytes.len() != 64 {
+        panic!("seed file {path} must contain 64 bytes");
+    }
+    if bytes.as_slice() == unsafe_seed().as_slice() {
+        panic!("seed file {path} is the published unsafe seed");
+    }
+    bytes
+}
+
 /// Rejects an unknown network or a root that is not a BIP340 x-only key.
 ///
 /// The EntityID itself is [`entity_id`] of the genesis payload, not of the root.
@@ -187,9 +242,9 @@ pub fn demo_recovery_policy() -> RecoveryPolicy {
     RecoveryPolicy {
         version: 1,
         sequence: 1,
-        threshold: DEMO_RECOVERY_THRESHOLD,
+        threshold: demo_threshold(),
         key_ids: key_ids.to_vec(),
-        delay_blocks: DEMO_DELAY_BLOCKS,
+        delay_blocks: demo_delay_blocks(),
         cancellation_rule: 1,
     }
 }
@@ -282,7 +337,7 @@ fn sign(tag: &'static str, payload: Vec<u8>, key: DemoKey) -> SignedObject {
 
 pub fn genesis_with(root: DemoKey, state: &ResultingState) -> SignedObject {
     let mut payload = common_header(
-        NETWORK_REGTEST,
+        demo_network(),
         1,
         [0u8; 32],
         None,
@@ -312,6 +367,45 @@ pub fn genesis(next_seal: [u8; 36]) -> SignedObject {
     genesis_with(keys.root, &demo_genesis_state(next_seal))
 }
 
+/// Frozen `official_name` claim. The subject is the history EntityID.
+pub fn official_name_claim(
+    network: u8,
+    entity: [u8; 32],
+    authorizing_state: [u8; 32],
+    controller: DemoKey,
+    name: &str,
+    nonce: [u8; 32],
+) -> Result<SignedObject, &'static str> {
+    if name.is_empty() {
+        return Err("official name is empty");
+    }
+    let mut payload = common_header(
+        network,
+        4,
+        entity,
+        Some(authorizing_state),
+        key_id(1, controller.xonly),
+        1,
+        4,
+    );
+    payload.extend_from_slice(&entity);
+    payload.extend(text_field("official_name")?);
+    payload.extend(bytes_field(name.as_bytes()));
+    payload.extend(option_fixed(None));
+    payload.extend_from_slice(&nonce);
+    payload.extend(option_fixed(None));
+    payload.extend(option_fixed(None));
+    Ok(sign(CLAIM_TAG, payload, controller))
+}
+
+/// Nonce for one live official-name claim. It is not a secret.
+pub fn official_name_nonce(entity: &[u8; 32], name: &str) -> [u8; 32] {
+    use bitcoin_hashes::{sha256, Hash};
+    let mut preimage = entity.to_vec();
+    preimage.extend_from_slice(name.as_bytes());
+    sha256::Hash::hash(&preimage).to_byte_array()
+}
+
 pub fn controller_rotation_with(
     signer: DemoKey,
     history_entity: [u8; 32],
@@ -319,7 +413,7 @@ pub fn controller_rotation_with(
     state: &ResultingState,
 ) -> SignedObject {
     let mut payload = common_header(
-        NETWORK_REGTEST,
+        demo_network(),
         2,
         history_entity,
         Some(prior_state),
@@ -376,7 +470,7 @@ pub fn recovery_authorizations(
         .into_iter()
         .map(|signer| {
             let mut payload = common_header(
-                NETWORK_REGTEST,
+                demo_network(),
                 3,
                 history_entity,
                 Some(prior_state),

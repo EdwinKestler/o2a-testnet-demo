@@ -14,8 +14,9 @@ use crate::encode::{
 };
 use crate::seal::seal_script;
 use crate::{
-    accept_identity_key, entity_id, entity_id_checked, identity_key, recovery_policy_hash,
-    signature_accepts, tagged_hash, SPEC_COMMIT, UNSAFE_BIP39_SEED_HEX,
+    accept_identity_key, entity_id, entity_id_checked, identity_key, official_name_claim,
+    recovery_policy_hash, signature_accepts, state_id, tagged_hash, SPEC_COMMIT,
+    UNSAFE_BIP39_SEED_HEX,
 };
 use crate::{
     adapter_key_distinct, adapter_scheme, capability_known, evidence_ids_valid, genesis_root_ok,
@@ -72,8 +73,6 @@ fn protocol_payloads() -> Vec<(&'static str, Vec<u8>)> {
     let nostr = hx32("d69c3509bb99e412e68b0fe8544e72837dfa30746d8be2aa65975f29d22dc7b9");
     let seal0 = hx32("d25ed00ba7188d413f7c0ed100bb092460be1eaed2e69596c3dfc43dc43e5c06");
     let seal3 = hx32("6e5382b91922ab39a3995429c0a60fd2caa301c060cb9b2b428f20865e9d11d8");
-    let state = [0x22u8; 32];
-    let next_state = [0x23u8; 32];
     let recovery_id = key_id(2, recovery);
     let policy = RecoveryPolicy {
         version: 1,
@@ -103,18 +102,7 @@ fn protocol_payloads() -> Vec<(&'static str, Vec<u8>)> {
         lifecycle_status: 1,
     };
     let genesis_state = state_at(0, None, None, marker_outpoint(0x11, 0));
-    let transition_state = state_at(
-        1,
-        Some(state),
-        Some(marker_outpoint(0x11, 0)),
-        marker_outpoint(0x12, 1),
-    );
-    let recovery_state = state_at(
-        2,
-        Some(state),
-        Some(marker_outpoint(0x12, 1)),
-        marker_outpoint(0x13, 2),
-    );
+    let genesis_bytes = encode_resulting_state(&genesis_state);
     let signed = |name: &'static str,
                   object_type,
                   capability,
@@ -172,6 +160,22 @@ fn protocol_payloads() -> Vec<(&'static str, Vec<u8>)> {
         })
         .1,
     );
+    let root_state_id = state_id(&root_entity, &genesis_bytes);
+    let event_state_id = state_id(&event_entity, &genesis_bytes);
+    let album_state_id = state_id(&album_entity, &genesis_bytes);
+    let transition_state = state_at(
+        1,
+        Some(root_state_id),
+        Some(marker_outpoint(0x11, 0)),
+        marker_outpoint(0x12, 1),
+    );
+    let transition_state_id = state_id(&root_entity, &encode_resulting_state(&transition_state));
+    let recovery_state = state_at(
+        2,
+        Some(transition_state_id),
+        Some(marker_outpoint(0x12, 1)),
+        marker_outpoint(0x13, 2),
+    );
     let mut cases = vec![
         signed("entity_genesis", 1, 1, 0, [0u8; 32], None, root, {
             let mut body = 2u16.to_le_bytes().to_vec();
@@ -185,7 +189,7 @@ fn protocol_payloads() -> Vec<(&'static str, Vec<u8>)> {
             2,
             1,
             root_entity,
-            Some(state),
+            Some(root_state_id),
             controller,
             {
                 let mut body = vec![1];
@@ -199,7 +203,7 @@ fn protocol_payloads() -> Vec<(&'static str, Vec<u8>)> {
             3,
             2,
             root_entity,
-            Some(state),
+            Some(transition_state_id),
             recovery,
             {
                 let mut body = vec![3];
@@ -219,7 +223,7 @@ fn protocol_payloads() -> Vec<(&'static str, Vec<u8>)> {
         5,
         1,
         root_entity,
-        Some(state),
+        Some(root_state_id),
         controller,
         {
             let mut body = vec![1];
@@ -238,7 +242,7 @@ fn protocol_payloads() -> Vec<(&'static str, Vec<u8>)> {
         6,
         1,
         root_entity,
-        Some(state),
+        Some(root_state_id),
         controller,
         {
             let mut body = [0x32u8; 32].to_vec();
@@ -255,7 +259,7 @@ fn protocol_payloads() -> Vec<(&'static str, Vec<u8>)> {
         7,
         1,
         root_entity,
-        Some(state),
+        Some(root_state_id),
         controller,
         {
             let mut body = [0x34u8; 32].to_vec();
@@ -281,7 +285,7 @@ fn protocol_payloads() -> Vec<(&'static str, Vec<u8>)> {
         8,
         1,
         root_entity,
-        Some(state),
+        Some(root_state_id),
         controller,
         challenge_body,
     );
@@ -293,7 +297,7 @@ fn protocol_payloads() -> Vec<(&'static str, Vec<u8>)> {
         9,
         1,
         root_entity,
-        Some(state),
+        Some(root_state_id),
         controller,
         {
             let mut body = challenge_id.to_vec();
@@ -313,7 +317,7 @@ fn protocol_payloads() -> Vec<(&'static str, Vec<u8>)> {
         10,
         1,
         root_entity,
-        Some(state),
+        Some(root_state_id),
         controller,
         {
             let mut body = vec![1, 1];
@@ -332,7 +336,7 @@ fn protocol_payloads() -> Vec<(&'static str, Vec<u8>)> {
         10,
         1,
         root_entity,
-        Some(state),
+        Some(root_state_id),
         controller,
         {
             let mut body = vec![2, 2];
@@ -363,7 +367,7 @@ fn protocol_payloads() -> Vec<(&'static str, Vec<u8>)> {
         11,
         1,
         event_entity,
-        Some(next_state),
+        Some(event_state_id),
         controller,
         {
             let mut body = vec![1];
@@ -390,7 +394,7 @@ fn protocol_payloads() -> Vec<(&'static str, Vec<u8>)> {
         11,
         1,
         album_entity,
-        Some([0x24; 32]),
+        Some(album_state_id),
         controller,
         {
             let mut body = vec![2];
@@ -613,6 +617,239 @@ fn entity_id_regression_matches_the_authority_commit() {
     }
 }
 
+#[test]
+fn genesis_freeze_outputs_match_the_authority_commit() {
+    use std::collections::BTreeMap;
+
+    use bitcoin_hashes::{sha256, Hash};
+
+    use crate::derive::{identity_xprv_bytes, o2a_xprv_bytes};
+    use crate::NUMS_X;
+
+    let seed = hx(UNSAFE_BIP39_SEED_HEX);
+    let root = identity_key(0, 0, 0, 0);
+    let controller = identity_key(0, 0, 1, 0);
+    let recovery = identity_key(0, 0, 2, 0);
+    let seal0 = identity_key(0, 0, 4, 0);
+    let seal1 = identity_key(0, 0, 4, 1);
+    let controller_binding = SealBinding {
+        authorizing_key_id: key_id(1, controller.xonly),
+        seal_xonly: seal0.xonly,
+    };
+    let recovery_binding = SealBinding {
+        authorizing_key_id: key_id(2, recovery.xonly),
+        seal_xonly: seal1.xonly,
+    };
+    let mut next_seal = [0xa9u8; 36];
+    next_seal[32..].copy_from_slice(&0u32.to_le_bytes());
+    let state = ResultingState {
+        sequence: 0,
+        previous_state: None,
+        previous_seal: None,
+        next_seal,
+        controllers: vec![ControllerEntry {
+            xonly: controller.xonly,
+            capabilities: vec![2, 4],
+        }],
+        recovery: RecoveryPolicy {
+            version: 1,
+            sequence: 0,
+            threshold: 1,
+            key_ids: vec![key_id(2, recovery.xonly)],
+            delay_blocks: 144,
+            cancellation_rule: 1,
+        },
+        controller_bindings: vec![controller_binding],
+        recovery_bindings: vec![recovery_binding],
+        lifecycle_status: 1,
+    };
+    let state_bytes = encode_resulting_state(&state);
+    let mut genesis = common_header(0, 1, [0; 32], None, key_id(0, root.xonly), 0, 1);
+    genesis.extend_from_slice(&2u16.to_le_bytes());
+    genesis.extend_from_slice(&root.xonly);
+    genesis.extend_from_slice(&state_bytes);
+    let entity = entity_id(&genesis);
+    let state_identifier = state_id(&entity, &state_bytes);
+    let genesis_digest = tagged_hash("O2A/v0.1/entity-genesis", &genesis);
+    let genesis_signature = root.sign_schnorr(genesis_digest);
+    let nonce = sha256::Hash::hash(b"O2A ADR-0009 unsafe vector nonce").to_byte_array();
+    let claim = official_name_claim(
+        0,
+        entity,
+        state_identifier,
+        controller,
+        "Unsafe Mainnet Vector Artist",
+        nonce,
+    )
+    .expect("official_name");
+    let policy = encode_seal_policy(&state.controller_bindings, &state.recovery_bindings);
+    let seal = seal_script(
+        &state.controller_bindings,
+        &state.recovery_bindings,
+        1,
+        144,
+        policy.clone(),
+    )
+    .expect("seal");
+    let mut built = BTreeMap::<String, Vec<u8>>::new();
+    let mut put = |name: &str, raw: Vec<u8>| {
+        built.insert(name.to_string(), raw);
+    };
+    put("parameters.protocol_version", 1u16.to_le_bytes().to_vec());
+    put("parameters.network_byte_mainnet", vec![0]);
+    put("parameters.coin_type_mainnet", 0u32.to_le_bytes().to_vec());
+    put(
+        "parameters.mainnet_confirmation_depth",
+        6u32.to_le_bytes().to_vec(),
+    );
+    put("route_b.bip85_path", b"m/83696968'/32'/998536622'".to_vec());
+    put("route_b.bip39_seed", seed.clone());
+    put("route_b.o2a_index", 998_536_622u32.to_be_bytes().to_vec());
+    put(
+        "route_b.wallet_root_tagged_hash",
+        tagged_hash("O2A/v0.1/wallet-root", b"").to_vec(),
+    );
+    put("route_b.xprv_o2a", o2a_xprv_bytes(&seed).to_vec());
+    for (role, index, name, key) in [
+        (0u32, 0u32, "root_0", root),
+        (1, 0, "controller_0", controller),
+        (2, 0, "recovery_0", recovery),
+        (4, 0, "seal_0", seal0),
+        (4, 1, "seal_1", seal1),
+    ] {
+        put(
+            &format!("route_b.{name}.path"),
+            format!("m/0'/0'/{role}'/{index}'").into_bytes(),
+        );
+        put(
+            &format!("route_b.{name}.xprv"),
+            identity_xprv_bytes(&seed, 0, 0, role, index).to_vec(),
+        );
+        put(&format!("route_b.{name}.xonly"), key.xonly.to_vec());
+    }
+    for tag in [
+        "O2A/v0.1/wallet-root",
+        "O2A/v0.1/key-id",
+        "O2A/v0.1/recovery-policy",
+        "O2A/v0.1/entity-id",
+        "O2A/v0.1/state-id",
+        "O2A/v0.1/entity-genesis",
+        "O2A/v0.1/claim",
+        "TapLeaf",
+        "TapBranch",
+        "TapTweak",
+        "BIP0340/aux",
+        "BIP0340/nonce",
+        "BIP0340/challenge",
+    ] {
+        put(&format!("tag.{tag}"), tag.as_bytes().to_vec());
+    }
+    put("key_id.root", key_id(0, root.xonly).to_vec());
+    put("key_id.controller", key_id(1, controller.xonly).to_vec());
+    put("key_id.recovery", key_id(2, recovery.xonly).to_vec());
+    put("key_id.controller_seal", key_id(4, seal0.xonly).to_vec());
+    put("key_id.recovery_seal", key_id(4, seal1.xonly).to_vec());
+    put("next_seal", next_seal.to_vec());
+    put("resulting_state", state_bytes);
+    put("entity_genesis.payload", genesis);
+    put("entity_genesis.digest", genesis_digest.to_vec());
+    put("entity_genesis.signature", genesis_signature.to_vec());
+    put("entity_id", entity.to_vec());
+    put("state_id", state_identifier.to_vec());
+    put("official_name.payload", claim.payload);
+    put("official_name.digest", claim.digest.to_vec());
+    put("official_name.signature", claim.signature.to_vec());
+    put("seal.internal_key", NUMS_X.to_vec());
+    put("seal.policy", seal.policy);
+    put("seal.merkle_root", seal.merkle_root.to_vec());
+    put("seal.output_key", seal.output_key.to_vec());
+    put("seal.script_pubkey", seal.script_pubkey);
+    for (index, script) in seal.scripts.iter().enumerate() {
+        put(&format!("seal.script.{index}"), script.clone());
+    }
+    for (index, leaf) in seal.leaf_hashes.iter().enumerate() {
+        put(&format!("seal.leaf_hash.{index}"), leaf.to_vec());
+    }
+    let history = |confirmations: u32| {
+        identity_history_state(&HistoryInput {
+            has_bitcoin_view: true,
+            has_best_block: true,
+            observed_height: Some(840_000),
+            seal: Some(SealWatch::Unspent),
+            spend_proof: false,
+            spend_confirmations: 0,
+            required_depth: 6,
+            valid_transition: false,
+            seal_creating_confirmations: Some(vec![Some(confirmations)]),
+        })
+    };
+    put(
+        "pending_confirmation.confirmations_5",
+        history(5).as_bytes().to_vec(),
+    );
+    put(
+        "pending_confirmation.confirmations_6",
+        history(6).as_bytes().to_vec(),
+    );
+    drop(put);
+
+    let fixture = parse_json(&git_show("tests/vectors/genesis-freeze-v0.1.json"));
+    let Json::Object(fields) = fixture.obj("outputs") else {
+        panic!("outputs");
+    };
+    assert_eq!(fields.len(), 63, "authority manifest output count");
+    assert_eq!(built.len(), 63, "demo output count");
+    for (name, value) in fields {
+        let raw = built.get(name).unwrap_or_else(|| panic!("missing {name}"));
+        let recorded = if value.string("encoding") == "utf8" {
+            value.string("value").as_bytes().to_vec()
+        } else {
+            hx(value.string("value"))
+        };
+        assert_eq!(raw, &recorded, "{name}");
+        assert_eq!(raw.len() as u64, value.number("length"), "{name} length");
+        assert_eq!(
+            hex::encode(sha256::Hash::hash(raw).to_byte_array()),
+            value.string("sha256"),
+            "{name} sha256"
+        );
+    }
+    if let Ok(path) = std::env::var("O2A_FREEZE_OUT") {
+        let mut lines = vec![
+            "{".to_string(),
+            "  \"adr\": \"ADR-0009 Proposed\",".to_string(),
+            "  \"description\": \"Unsafe mainnet Route B vector; never a real identity\","
+                .to_string(),
+            "  \"outputs\": {".to_string(),
+        ];
+        let names = built.keys().cloned().collect::<Vec<_>>();
+        for (index, name) in names.iter().enumerate() {
+            let raw = &built[name];
+            let utf8 = name.starts_with("tag.")
+                || name.ends_with(".path")
+                || name.starts_with("pending_confirmation.")
+                || name == "route_b.bip85_path";
+            let encoding = if utf8 { "utf8" } else { "hex" };
+            let value = if utf8 {
+                String::from_utf8(raw.clone()).expect("utf8 output")
+            } else {
+                hex::encode(raw)
+            };
+            let digest = hex::encode(sha256::Hash::hash(raw).to_byte_array());
+            let comma = if index + 1 == names.len() { "" } else { "," };
+            lines.push(format!(
+                "    \"{name}\": {{\"encoding\": \"{encoding}\", \"length\": {}, \"sha256\": \"{digest}\", \"value\": \"{value}\"}}{comma}",
+                raw.len()
+            ));
+        }
+        lines.push("  },".to_string());
+        lines.push("  \"spdx\": \"CC0-1.0\",".to_string());
+        lines.push("  \"unsafe_for_funds\": true".to_string());
+        lines.push("}".to_string());
+        std::fs::write(path, lines.join("\n") + "\n").expect("write freeze outputs");
+    }
+}
+
 fn hx32_pair(value: &str) -> [u8; 64] {
     hx(value).try_into().expect("64-byte signature")
 }
@@ -731,6 +968,10 @@ const JSON_REJECTS: &[(&str, &str)] = &[
         "payment keys have no O2A signing role",
     ),
     ("rejected_object_length", "oversized bytes field"),
+    (
+        "rejected_payload_hash_rule",
+        "state id is not a hash of one recovery payload",
+    ),
     ("rejected_text_length", "oversized text field"),
     (
         "retired-827-path",
@@ -839,6 +1080,33 @@ fn json_reject_reason(id: &str) -> &'static str {
             &hx32(semantic.obj("root_validation").string("invalid_xonly_hex")),
         )
         .expect_err(id),
+        "rejected_payload_hash_rule" => {
+            let doc = parse_json(&git_show("tests/vectors/entity-id-v0.1.json"));
+            let row = doc.obj("recovery_signer_convergence");
+            let entity = hx32(row.string("entity_id_hex"));
+            let resulting = hx(row.string("resulting_state_hex"));
+            let real = state_id(&entity, &resulting);
+            assert_eq!(hex::encode(real), row.string("state_id_hex"));
+            let mut rejected = row
+                .obj("rejected_payload_hash_rule")
+                .array("state_id_hexes")
+                .iter()
+                .map(|item| item.string_value().to_string())
+                .collect::<Vec<_>>();
+            let mut hashed = row
+                .array("signers")
+                .iter()
+                .map(|signer| {
+                    let wrong = tagged_hash("O2A/v0.1/state-id", &hx(signer.string("payload_hex")));
+                    assert_ne!(wrong, real);
+                    hex::encode(wrong)
+                })
+                .collect::<Vec<_>>();
+            rejected.sort();
+            hashed.sort();
+            assert_eq!(hashed, rejected);
+            "state id is not a hash of one recovery payload"
+        }
         "rejected_object_length" | "rejected_text_length" => {
             let needle = if id == "rejected_text_length" {
                 claim.string("predicate_utf8").as_bytes()

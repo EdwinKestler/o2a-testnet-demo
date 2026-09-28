@@ -1,7 +1,7 @@
 # O2A Demo Gate
 
 **Status:** mandatory boundary for the disposable testnet demonstration.
-Specification authority: sibling `../o2a-protocol` at commit `0ef16c2132ea54cdfd4aa86a34a748f998f388d8`.
+Specification authority: sibling `../o2a-protocol` at commit `b622c9830e98085c5270a604dc14fa7bec1bf2c2`.
 
 ## Rules carried from the specification
 

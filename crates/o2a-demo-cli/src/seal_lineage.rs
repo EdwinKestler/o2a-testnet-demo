@@ -8,10 +8,12 @@ use amplify::ByteArray;
 use anyhow::{bail, Context, Result};
 use bpstd::psbt::PsbtConstructor;
 use bpstd::signers::TestnetSigner;
-use bpstd::{Derive, Descriptor, Network, NormalIndex, Outpoint, ScriptPubkey, Terminal, Witness};
+use bpstd::{Derive, Descriptor, NormalIndex, Outpoint, ScriptPubkey, Terminal, Witness};
 use o2a_demo_core::{
-    controller_rotation_with, demo_genesis_state, demo_keys, demo_rotation_state, entity_id,
-    genesis_with, recovery_authorizations, seal_bindings_valid, seal_for_state, ResultingState,
+    controller_rotation_with, demo_delay_blocks, demo_entity_index, demo_genesis_state, demo_keys,
+    demo_network, demo_rotation_state, demo_threshold, encode_resulting_state, entity_id,
+    genesis_with, key_id, official_name_claim, official_name_nonce, recovery_authorizations,
+    seal_bindings_valid, seal_for_state, state_id, ResultingState,
 };
 use o2a_demo_rgb::{
     controller_rotation, demo_issuer, genesis_params, recover, GenesisInput, RotationInput,
@@ -29,6 +31,135 @@ use rgpsbt::RgbPsbt;
 
 use crate::{canonical_outpoint, external_seal, runtime, write_object};
 
+fn ensure_wallet(data_dir: &Path, electrum: &str) -> Result<()> {
+    if data_dir.join("wallet").exists() {
+        return Ok(());
+    }
+    std::fs::create_dir_all(data_dir)?;
+    let holder = FileHolder::create(data_dir.join("wallet"), crate::descriptor())?;
+    let resolver = ElectrumResolver::new(electrum)?;
+    let mut owner = Owner::with_components(crate::demo_bp_network(), holder, resolver);
+    println!("fee_address={}", owner.next_address());
+    Ok(())
+}
+
+pub fn plan() -> Result<()> {
+    let keys = demo_keys();
+    let prepared = prepare_state("genesis").map_err(anyhow::Error::msg)?;
+    print!("{}", prepared.text);
+    println!("entity_index={entity}", entity = demo_entity_index());
+    println!("network={}", demo_network());
+    println!("delay_blocks={}", demo_delay_blocks());
+    println!("threshold={}", demo_threshold());
+    println!("root_xonly={}", hex::encode(keys.root.xonly));
+    println!("controller_xonly={}", hex::encode(keys.controller_0.xonly));
+    println!("recovery_0_xonly={}", hex::encode(keys.recovery_0.xonly));
+    println!("recovery_1_xonly={}", hex::encode(keys.recovery_1.xonly));
+    println!("recovery_2_xonly={}", hex::encode(keys.recovery_2.xonly));
+    println!("seal_0_xonly={}", hex::encode(keys.seal_controller_0.xonly));
+    println!("root_key_id={}", hex::encode(key_id(0, keys.root.xonly)));
+    println!(
+        "controller_key_id={}",
+        hex::encode(key_id(1, keys.controller_0.xonly))
+    );
+    println!(
+        "recovery_0_key_id={}",
+        hex::encode(key_id(2, keys.recovery_0.xonly))
+    );
+    println!(
+        "recovery_1_key_id={}",
+        hex::encode(key_id(2, keys.recovery_1.xonly))
+    );
+    println!(
+        "recovery_2_key_id={}",
+        hex::encode(key_id(2, keys.recovery_2.xonly))
+    );
+    Ok(())
+}
+
+pub fn sign_genesis(data_dir: &Path, outpoint: &str) -> Result<()> {
+    let parsed = Outpoint::from_str(outpoint)?;
+    let state = demo_genesis_state(canonical_outpoint(parsed));
+    let state_bytes = encode_resulting_state(&state);
+    let object = genesis_with(demo_keys().root, &state);
+    o2a_demo_core::verify(&object).map_err(anyhow::Error::msg)?;
+    if object.payload.get(5..37) != Some(&[0u8; 32]) {
+        bail!("genesis signer_entity is not zero");
+    }
+    std::fs::create_dir_all(data_dir)?;
+    write_object(&data_dir.join("genesis.o2a"), &object)?;
+    let id = entity_id(&object.payload);
+    println!("entity_id={}", hex::encode(id));
+    println!("state_id={}", hex::encode(state_id(&id, &state_bytes)));
+    println!("signer_entity_zero=true");
+    println!("network={}", demo_network());
+    Ok(())
+}
+
+fn resulting_state_of_genesis(payload: &[u8]) -> Result<&[u8]> {
+    if payload.get(37) != Some(&0) || payload.len() < 107 {
+        bail!("genesis payload does not have an absent authorizing state");
+    }
+    Ok(&payload[107..])
+}
+
+pub fn sign_claim(data_dir: &Path, name: &str) -> Result<()> {
+    let genesis = read_signed(&data_dir.join("genesis.o2a"))?;
+    let id = entity_id(&genesis.payload);
+    let state_bytes = resulting_state_of_genesis(&genesis.payload)?;
+    let sid = state_id(&id, state_bytes);
+    let claim = official_name_claim(
+        demo_network(),
+        id,
+        sid,
+        demo_keys().controller_0,
+        name,
+        official_name_nonce(&id, name),
+    )
+    .map_err(anyhow::Error::msg)?;
+    write_object(&data_dir.join("claim.o2a"), &claim)?;
+    println!("entity_id={}", hex::encode(id));
+    println!("state_id={}", hex::encode(sid));
+    println!("predicate=official_name");
+    println!("name={name}");
+    println!("signer={}", hex::encode(claim.signer_xonly));
+    Ok(())
+}
+
+pub fn verify_claim(data_dir: &Path) -> Result<()> {
+    let genesis = read_signed(&data_dir.join("genesis.o2a"))?;
+    let claim = read_signed(&data_dir.join("claim.o2a"))?;
+    o2a_demo_core::verify(&genesis).map_err(anyhow::Error::msg)?;
+    o2a_demo_core::verify(&claim).map_err(anyhow::Error::msg)?;
+    if claim.tag != "O2A/v0.1/claim" {
+        bail!("claim tag is {}", claim.tag);
+    }
+    let id = entity_id(&genesis.payload);
+    let sid = state_id(&id, resulting_state_of_genesis(&genesis.payload)?);
+    if claim.payload.get(37) != Some(&1) || claim.payload.len() < 141 {
+        bail!("claim header is not the frozen official_name shape");
+    }
+    if claim.payload[38..70] != sid {
+        bail!("claim authorizing state is not the genesis state id");
+    }
+    if claim.payload[5..37] != id {
+        bail!("claim signer entity is not the genesis EntityID");
+    }
+    if claim.payload[105..137] != id {
+        bail!("claim subject is not the genesis EntityID");
+    }
+    let predicate_len = u32::from_le_bytes(claim.payload[137..141].try_into().expect("len"));
+    let predicate_end = 141 + predicate_len as usize;
+    if claim.payload.get(141..predicate_end) != Some(b"official_name") {
+        bail!("claim predicate is not official_name");
+    }
+    println!("claim_signature=valid");
+    println!("entity_id={}", hex::encode(id));
+    println!("state_id={}", hex::encode(sid));
+    println!("predicate=official_name");
+    Ok(())
+}
+
 pub fn prepare(data_dir: &Path, stage: &str) -> Result<()> {
     let prepared = prepare_state(stage).map_err(anyhow::Error::msg)?;
     print!("{}", prepared.text);
@@ -36,7 +167,7 @@ pub fn prepare(data_dir: &Path, stage: &str) -> Result<()> {
         std::fs::create_dir_all(data_dir)?;
         let holder = FileHolder::create(data_dir.join("wallet"), crate::descriptor())?;
         let resolver = ElectrumResolver::new("tcp://electrs:50001")?;
-        let mut owner = Owner::with_components(Network::Regtest, holder, resolver);
+        let mut owner = Owner::with_components(crate::demo_bp_network(), holder, resolver);
         println!("fee_address={}", owner.next_address());
     }
     Ok(())
@@ -71,6 +202,7 @@ pub fn record(
 pub fn issue(data_dir: &Path, electrum: &str, name: &str) -> Result<()> {
     let record = SealStore::open(data_dir)?.read(name)?;
     let outpoint = Outpoint::from_str(&record.outpoint)?;
+    ensure_wallet(data_dir, electrum)?;
     let mut runtime = runtime(data_dir, electrum)?;
     runtime
         .update(1)
@@ -80,11 +212,20 @@ pub fn issue(data_dir: &Path, electrum: &str, name: &str) -> Result<()> {
     if seen {
         bail!("RGB wallet selected the seal");
     }
-    let object = genesis_with(
-        demo_keys().root,
-        &demo_genesis_state(canonical_outpoint(outpoint)),
-    );
-    o2a_demo_core::verify(&object).map_err(anyhow::Error::msg)?;
+    let signed_path = data_dir.join("genesis.o2a");
+    let object = if signed_path.exists() {
+        let object = read_signed(&signed_path)?;
+        o2a_demo_core::verify(&object).map_err(anyhow::Error::msg)?;
+        object
+    } else {
+        let object = genesis_with(
+            demo_keys().root,
+            &demo_genesis_state(canonical_outpoint(outpoint)),
+        );
+        o2a_demo_core::verify(&object).map_err(anyhow::Error::msg)?;
+        write_object(&signed_path, &object)?;
+        object
+    };
     let keys = demo_keys();
     runtime.contracts.import_issuer(demo_issuer())?;
     let contract_id = runtime.issue(genesis_params(GenesisInput {
@@ -102,7 +243,9 @@ pub fn issue(data_dir: &Path, electrum: &str, name: &str) -> Result<()> {
         .flat_map(|items| items.iter())
         .next()
         .context("issued contract has no owned state")?;
-    write_object(&data_dir.join("genesis.o2a"), &object)?;
+    if !signed_path.exists() {
+        write_object(&signed_path, &object)?;
+    }
     let consignment = data_dir.join("genesis.rgb");
     runtime
         .contracts
@@ -434,7 +577,7 @@ pub fn verify(
 pub fn fee_address(data_dir: &Path) -> Result<()> {
     let holder = FileHolder::load(data_dir.join("wallet"))?;
     let resolver = rgbp::resolvers::ElectrumResolver::new("tcp://electrs:50001")?;
-    let mut owner = Owner::with_components(Network::Regtest, holder, resolver);
+    let mut owner = Owner::with_components(crate::demo_bp_network(), holder, resolver);
     println!("fee_address={}", owner.next_address());
     Ok(())
 }
@@ -602,6 +745,7 @@ fn read_signed(path: &Path) -> Result<o2a_demo_core::SignedObject> {
         "O2A/v0.1/entity-genesis" => "O2A/v0.1/entity-genesis",
         "O2A/v0.1/identity-transition" => "O2A/v0.1/identity-transition",
         "O2A/v0.1/recovery" => "O2A/v0.1/recovery",
+        "O2A/v0.1/claim" => "O2A/v0.1/claim",
         other => bail!("unknown O2A tag {other}"),
     };
     let payload = hex::decode(crate::field(&fields, "payload")?)?;
