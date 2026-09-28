@@ -4,7 +4,7 @@ This is the rehearsal runbook for the first O2A identity minted live with an art
 
 The identity in this rehearsal is on the public Bitcoin signet. It is disposable. The eventual real mint is on mainnet, and this document does not do that mint. It contains no mainnet key, address, or transaction.
 
-The show follows proposed ADR-0008. The EntityID is:
+The show follows ADR-0008 for the EntityID and ADR-0009 for the state id and the `official_name` claim. The EntityID is:
 
 ```text
 TaggedHash("O2A/v0.1/entity-id", genesis payload)
@@ -14,7 +14,7 @@ The genesis payload sets `signer_entity` to 32 zero bytes. The root still signs 
 
 The EntityID exists when the genesis is signed. It is final for the show when the seal's funding transaction is already confirmed at depth. The ceremony funds and confirms that output before the artist walks on stage. Signing then only adds the artist's signature. No controller rotation, recovery, or seal spend happens on this identity until the RGB stack is final. The stage flow is genesis plus one `official_name` claim.
 
-ADR-0008 is proposed. It is the ceremony rule for this rehearsal. It is not an accepted change to the specification in this commit. The demo binary on this branch still derives its test identities from entity index 0 and does not yet display this EntityID. P3b lands that display. Section "Rehearsal checklist" is what P3b-2 runs, in this order.
+Section "Rehearsal checklist" is the order for the signet dress rehearsal.
 
 ## People
 
@@ -191,7 +191,9 @@ python3 docs/block0-screen.py claim "Artist Name"
 
 Open `file:///tmp/block0-screen/index.html` in a browser window with no other tabs. Refresh after each command.
 
-The USB stick handed to each verifier contains the signed genesis, the consignment, and the public plan. It does not contain the seed.
+The USB stick handed to each verifier contains the signed genesis, the consignment, the seal record, and the public plan. It does not contain the seed.
+
+The verifier checks the seal script stored in that package against the chain. Those policy bytes also have to sit inside the signed genesis. The 2026-09-28 rehearsal first recorded the seal without the artist keys, and both verifiers then said the script did not match. Recording it again with the artist keys, still without giving the verifiers the seed, produced CURRENT. A different recovery delay is a different address. The pre-flight compares that address with Core and does not fund the mismatch.
 
 ### What the projector shows
 
