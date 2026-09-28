@@ -1,0 +1,4 @@
+exit=25
+error code: -25
+error message:
+bad-txns-inputs-missingorspent

@@ -1,0 +1,3 @@
+address=bcrt1padlwgtxh0z83mwh236q94gfe582xhpjrs46pgcnvgwtkr80xhd6ssrt5ve
+derived=bcrt1padlwgtxh0z83mwh236q94gfe582xhpjrs46pgcnvgwtkr80xhd6ssrt5ve
+checksum=dvnu2grm

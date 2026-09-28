@@ -1,0 +1,4 @@
+artist_seed=/tmp/o2a-artist-device/seed.hex
+paper_share=/tmp/o2a-artist-paper/recovery-2.hex
+staff_share=none
+seed_in_git=false

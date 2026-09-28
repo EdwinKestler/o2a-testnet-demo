@@ -1,0 +1,4 @@
+stale_transition_digest=9f6f5744e9615bd290fc76145ee6d2282675307dca99c4a5e7cdaf5f2ac90aed
+stale_binding=controller seal bindings do not cover the transition key set
+ Container o2a-testnet-demo-toolchain-run-45aed9b8da7d Creating 
+ Container o2a-testnet-demo-toolchain-run-45aed9b8da7d Created 

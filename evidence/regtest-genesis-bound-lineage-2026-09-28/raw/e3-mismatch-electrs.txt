@@ -1,0 +1,2 @@
+electrs_height=128
+bitcoind_height=128

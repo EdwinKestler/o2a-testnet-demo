@@ -1,0 +1,15 @@
+byte_identical=true
+entity_id=aca129959b83c0b6780bd265ec5a18fde8cb04f81e8810624ecb7f8ca348cd89
+entity_index=2
+best_height=125
+best_block_hash=19aa8baf44861cf7706e6b26c702526933a13ca1e9a0807e767d549fb342f4b9
+source_url=tcp://electrs:50001
+required_depth=1
+anchor_txid=8840e2fc281303150f41f411e1bd6e3edebe356485b5dfcf164d4bb7abe04b52
+anchor_height=125
+current_outpoint=8840e2fc281303150f41f411e1bd6e3edebe356485b5dfcf164d4bb7abe04b52:0
+identity_history_state=INCOMPLETE
+bitcoin=seal-creating transaction is absent from the named best chain
+rgb=consignment imported
+o2a=objects accepted
+header_trust=headers come from one electrs instance; this is a trust assumption, not a light client

@@ -1,0 +1,3 @@
+toolchain_electrs=open
+ Container o2a-testnet-demo-toolchain-run-750d348e8a0f Creating 
+ Container o2a-testnet-demo-toolchain-run-750d348e8a0f Created 

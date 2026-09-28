@@ -1,0 +1,3 @@
+wallet_contains_seal=false
+ Container o2a-testnet-demo-toolchain-run-32a611bfda55 Creating 
+ Container o2a-testnet-demo-toolchain-run-32a611bfda55 Created 

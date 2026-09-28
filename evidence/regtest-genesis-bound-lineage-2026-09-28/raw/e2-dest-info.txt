@@ -1,0 +1,3 @@
+address=bcrt1qh6jjmlww8zae87hahy3cgaaew589g62as4ynmn
+scriptPubKey=0014bea52dfdce38bb93fafdb9238477b9750e54695d
+note=wallet parent descriptor omitted from this file

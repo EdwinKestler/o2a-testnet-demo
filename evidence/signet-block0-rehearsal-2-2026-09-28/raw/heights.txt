@@ -1,0 +1,3 @@
+node=324083
+blockstream=324083
+electrs=324083

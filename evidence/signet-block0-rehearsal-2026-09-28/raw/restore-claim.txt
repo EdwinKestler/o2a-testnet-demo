@@ -1,0 +1,6 @@
+claim_signature=valid
+entity_id=ea7248ccdbbbdd4cde1690a2a489d8106a60567f903e514d75e02cc3b30e8039
+state_id=0adb657d225cbdf398ce530981068489ea6f5c2514c37691f8ec7d10fc369105
+predicate=official_name
+ Container o2a-testnet-demo-toolchain-run-51aba1835d51 Creating 
+ Container o2a-testnet-demo-toolchain-run-51aba1835d51 Created 

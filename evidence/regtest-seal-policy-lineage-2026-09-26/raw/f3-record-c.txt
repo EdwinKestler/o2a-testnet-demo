@@ -1,0 +1,5 @@
+recorded=C
+outpoint=6bd16fe445887f96c84ae6c579053f5ee079d1b907502ade76cf2cf9200fc0a6:1
+ Container o2a-testnet-demo-toolchain-run-df6b3ac84ae2 Creating 
+ Container o2a-testnet-demo-toolchain-run-df6b3ac84ae2 Created 
+DISPOSABLE IDENTITY: never use this demo identity or seed for funds or production

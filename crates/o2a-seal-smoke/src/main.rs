@@ -23,17 +23,17 @@ use bpstd::{
     ScriptPubkey, SeqNo, SighashCache, TapBranchHash, TapDerivation, TapLeafHash, TapMerklePath,
     TapNodeHash, Terminal, Tx, TxOut, TxVer, VarIntArray, Witness, XOnlyPk, XprivAccount,
 };
-use rgb::RgbSealDef;
 use o2a_demo_core::{controller_rotation as o2a_rotation, demo_keys, genesis as o2a_genesis};
 use o2a_demo_rgb::{controller_rotation, demo_issuer, genesis_params, GenesisInput, RotationInput};
 use rgb::popls::bp::{Prefab, PrefabBundle, WalletProvider};
+use rgb::RgbSealDef;
 use rgb::{CellAddr, Consensus, ContractId, Contracts};
 use rgb_persist_fs::StockpileDir;
 use rgbp::descriptors::RgbDescr;
 use rgbp::resolvers::{ElectrumResolver, Resolver};
 use rgbp::{FileHolder, Owner, RgbRuntime, RgbpRuntimeDir};
 use rgpsbt::RgbPsbt;
-use secp256k1::{Keypair, Message, SecretKey, Secp256k1};
+use secp256k1::{Keypair, Message, Secp256k1, SecretKey};
 use strict_encoding::StrictDumb;
 use strict_types::StrictVal;
 
@@ -209,13 +209,9 @@ fn build_tree(leaves: Vec<LeafScript>) -> SealScript {
         nodes = next_nodes;
         members = next_members;
     }
-    let internal = InternalPk::from_byte_array(
-        hex::decode(NUMS_X)
-            .expect("nums")
-            .try_into()
-            .expect("32"),
-    )
-    .expect("nums point");
+    let internal =
+        InternalPk::from_byte_array(hex::decode(NUMS_X).expect("nums").try_into().expect("32"))
+            .expect("nums point");
     let root = nodes[0];
     let (output, parity) = internal.to_output_pk(Some(root));
     let script_pubkey = ScriptPubkey::p2tr_scripted(internal, root);
@@ -276,17 +272,20 @@ fn hex_key(key: &SmokeKey) -> String {
 
 fn descriptor_for(name: &str) -> String {
     let recovery = recovery_keys();
-    let recovery_list = recovery
-        .iter()
-        .map(hex_key)
-        .collect::<Vec<_>>()
-        .join(",");
+    let recovery_list = recovery.iter().map(hex_key).collect::<Vec<_>>().join(",");
     let older = format!("and_v(v:multi_a(2,{recovery_list}),older(10))");
     let tree = match name {
-        "A" => format!("{{pk({}),{older}}}", hex_key(&smoke_key(ROLE_CONTROLLER, 0))),
-        "C" => format!("{{pk({}),{older}}}", hex_key(&smoke_key(ROLE_CONTROLLER, 1))),
+        "A" => format!(
+            "{{pk({}),{older}}}",
+            hex_key(&smoke_key(ROLE_CONTROLLER, 0))
+        ),
+        "C" => format!(
+            "{{pk({}),{older}}}",
+            hex_key(&smoke_key(ROLE_CONTROLLER, 1))
+        ),
         "B" => {
-            let mut controllers = vec![smoke_key(ROLE_CONTROLLER, 0), smoke_key(ROLE_CONTROLLER, 1)];
+            let mut controllers =
+                vec![smoke_key(ROLE_CONTROLLER, 0), smoke_key(ROLE_CONTROLLER, 1)];
             controllers.sort_by_key(|key| key.xonly);
             format!(
                 "{{{{pk({}),pk({})}},{older}}}",
@@ -375,8 +374,12 @@ fn runtime(data_dir: &Path, electrum: &str) -> Result<RgbpRuntimeDir<ElectrumRes
     let holder = FileHolder::load(data_dir.join("wallet"))?;
     let resolver = ElectrumResolver::new(electrum)?;
     let owner = Owner::with_components(bpstd::Network::Regtest, holder, resolver);
-    let stockpile = StockpileDir::<TxoSeal>::load(data_dir.to_path_buf(), Consensus::Bitcoin, true)?;
-    Ok(RgbRuntime::with_components(owner, Contracts::load(stockpile)))
+    let stockpile =
+        StockpileDir::<TxoSeal>::load(data_dir.to_path_buf(), Consensus::Bitcoin, true)?;
+    Ok(RgbRuntime::with_components(
+        owner,
+        Contracts::load(stockpile),
+    ))
 }
 
 fn prepare(data_dir: &Path) -> Result<()> {
@@ -408,9 +411,9 @@ fn issue(data_dir: &Path, electrum: &str, seal: Outpoint) -> Result<()> {
     runtime.contracts.import_issuer(demo_issuer())?;
     let contract_id = runtime.issue(genesis_params(GenesisInput {
         root_xonly: keys.root.xonly,
-        entity_id: o2a_demo_core::entity_id(keys.root.xonly),
+        entity_id: o2a_demo_core::entity_id(&object.payload),
         controller_xonly: keys.controller_0.xonly,
-        policy_hash: o2a_demo_core::recovery_policy_hash(keys.recovery_0.xonly),
+        policy_hash: o2a_demo_core::recovery_policy_hash(&o2a_demo_core::demo_recovery_policy()),
         state_commitment: object.digest,
         seal,
     }))?;
@@ -484,10 +487,8 @@ fn try_select(data_dir: &Path, electrum: &str, outpoint: Outpoint) -> Result<()>
 }
 
 fn control_for(script: &SealScript, leaf: usize) -> ControlBlock {
-    let internal = InternalPk::from_byte_array(
-        hex::decode(NUMS_X).unwrap().try_into().unwrap(),
-    )
-    .unwrap();
+    let internal =
+        InternalPk::from_byte_array(hex::decode(NUMS_X).unwrap().try_into().unwrap()).unwrap();
     let siblings = script.paths[leaf]
         .iter()
         .map(|node| TapBranchHash::from(node.to_byte_array()))
@@ -548,10 +549,14 @@ fn build_anchor(
         lock_time: LockTime::ZERO,
     };
     let mut psbt = Psbt::from_tx(unsigned);
-    psbt.input_mut(0).context("seal input")?.witness_utxo =
-        Some(TxOut::new(seal_script.clone(), bpstd::Sats::from_sats(seal_value)));
-    psbt.input_mut(1).context("fee input")?.witness_utxo =
-        Some(TxOut::new(fee_script.clone(), bpstd::Sats::from_sats(fee_value)));
+    psbt.input_mut(0).context("seal input")?.witness_utxo = Some(TxOut::new(
+        seal_script.clone(),
+        bpstd::Sats::from_sats(seal_value),
+    ));
+    psbt.input_mut(1).context("fee input")?.witness_utxo = Some(TxOut::new(
+        fee_script.clone(),
+        bpstd::Sats::from_sats(fee_value),
+    ));
     let host = psbt.output_mut(0).context("opret")?;
     host.set_opret_host()
         .map_err(|_| anyhow::anyhow!("opret host"))?;
@@ -598,7 +603,12 @@ fn leaf_index_for(script: &SealScript, key: &SmokeKey) -> usize {
     script
         .leaves
         .iter()
-        .position(|leaf| leaf.as_script_bytes().as_slice().windows(32).any(|window| window == key.xonly))
+        .position(|leaf| {
+            leaf.as_script_bytes()
+                .as_slice()
+                .windows(32)
+                .any(|window| window == key.xonly)
+        })
         .expect("leaf")
 }
 
@@ -635,12 +645,7 @@ fn manual_script_witness(
     let unsigned = psbt.to_unsigned_tx();
     let prevouts = psbt
         .inputs()
-        .map(|input| {
-            input
-                .witness_utxo
-                .clone()
-                .context("missing witness utxo")
-        })
+        .map(|input| input.witness_utxo.clone().context("missing witness utxo"))
         .collect::<Result<Vec<_>>>()?;
     let tx = Tx::from(unsigned);
     let mut cache = SighashCache::new(tx, prevouts)?;
@@ -791,7 +796,10 @@ fn anchor(
         input.tap_internal_key = Some(control.internal_pk);
         input.tap_merkle_root = Some(script.root);
         input.tap_leaf_script.insert(control.clone(), leaf.clone());
-        println!("seal_leaf_scripts_after_complete={}", input.tap_leaf_script.len());
+        println!(
+            "seal_leaf_scripts_after_complete={}",
+            input.tap_leaf_script.len()
+        );
     }
     for key in slots.iter().flatten() {
         println!(
@@ -984,7 +992,8 @@ fn verify(validator_dir: &Path, electrum: &str, package_dir: &Path, o2a: bool) -
     let consignment = package_dir.join("transition.rgb");
     let object_path = package_dir.join("transition.o2a");
     fs::create_dir_all(validator_dir)?;
-    let stockpile = StockpileDir::<TxoSeal>::load(validator_dir.to_path_buf(), Consensus::Bitcoin, true)?;
+    let stockpile =
+        StockpileDir::<TxoSeal>::load(validator_dir.to_path_buf(), Consensus::Bitcoin, true)?;
     let mut contracts: Contracts<StockpileDir<TxoSeal>> = Contracts::load(stockpile);
     let fields = fs::read_to_string(&object_path)?;
     let mut map = BTreeMap::new();

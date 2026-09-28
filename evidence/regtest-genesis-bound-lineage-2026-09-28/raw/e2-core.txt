@@ -1,0 +1,3 @@
+address=bcrt1ptp7qqp7ha7fsxa3x8nmzacxmc0mlm9m4t8wppx2dgj276hrlzeusjk7ryn
+derived=bcrt1ptp7qqp7ha7fsxa3x8nmzacxmc0mlm9m4t8wppx2dgj276hrlzeusjk7ryn
+checksum=eu0z7xek

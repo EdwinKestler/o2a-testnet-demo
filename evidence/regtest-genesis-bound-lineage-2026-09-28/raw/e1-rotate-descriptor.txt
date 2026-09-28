@@ -1,0 +1,7 @@
+{
+  "descriptor": "tr(50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0,{pk(5dd170ab286dae356d56caa2bc9e15f5047e0068b243306f348d98ab8e44e43e),and_v(v:multi_a(2,214d98e9c8c953ecd2354c84d5feea89016e836d807c74c1478ccded31a569fc,3949a79dcd706e555538b5d67e5c52f8190959efa47cb7a6c9f7a7625d2944d3,60198f04094fd13127065bbb8f44b596521cfff54adbad829e711fdb5ef7ebb9),older(10))})#q84h8xrj",
+  "checksum": "q84h8xrj",
+  "isrange": false,
+  "issolvable": true,
+  "hasprivatekeys": false
+}

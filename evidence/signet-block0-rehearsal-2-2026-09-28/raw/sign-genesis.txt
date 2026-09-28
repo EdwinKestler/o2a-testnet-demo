@@ -1,0 +1,7 @@
+entity_id=95f84ba2dd5e8140cfd50d881e41ed07250e715c0a6f8d388247de8a58efcf51
+state_id=f02951489439e0855a0fbd5232f96f9c5b4add5106477daacf37fbb18fb7709e
+signer_entity_zero=true
+network=3
+ Container o2a-testnet-demo-toolchain-run-c08f729c4b74 Creating 
+ Container o2a-testnet-demo-toolchain-run-c08f729c4b74 Created 
+DISPOSABLE IDENTITY: never use this demo identity or seed for funds or production

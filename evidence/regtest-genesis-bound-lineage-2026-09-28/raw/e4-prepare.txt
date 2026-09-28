@@ -1,0 +1,10 @@
+stage=genesis
+address=bcrt1padlwgtxh0z83mwh236q94gfe582xhpjrs46pgcnvgwtkr80xhd6ssrt5ve
+script_pubkey=5120eb7ee42cd7788f1dbaea8e805aa139a1d46b8643857414626c4397619de6bb75
+policy=010001000000b75730ac1d20a0adfd010adb45cc47974f3899cad02d4d4195ed618790f44f28e707c3d5bba628ef9755d66751b7c0414c4d03ea6a00dec93845417ac71493a6030000002f45851db149565b27373f74195c37bf1be80b7c1d8db70b22600d5b8a56bcacec62c623b5a42561e5f1cd4c4242fe46cacbf380d265de5c505f24e0c4339a4ca5ee37c10643f4b01598483185ff91d4146bd5673f648ce89795d1d54b435ecfb9e1d6060bea6df0266d15dbfe57e6c66b9662326a038568679b3bafe6386b50f4cd1e982edfaba78fac2790a9996ccdc9eed9d170d66053461d403f8a8f0434b9818d6bde2affd18889af2456a035099a58005da7c11bca749ffb125c018c7a
+paths=m/1'/4'/1'/0' m/1'/4'/4'/0' m/1'/4'/2'/0' m/1'/4'/4'/2' m/1'/4'/2'/1' m/1'/4'/4'/3' m/1'/4'/2'/2' m/1'/4'/4'/4'
+descriptor=tr(50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0,{pk(e707c3d5bba628ef9755d66751b7c0414c4d03ea6a00dec93845417ac71493a6),and_v(v:multi_a(2,b9818d6bde2affd18889af2456a035099a58005da7c11bca749ffb125c018c7a,b9e1d6060bea6df0266d15dbfe57e6c66b9662326a038568679b3bafe6386b50,ec62c623b5a42561e5f1cd4c4242fe46cacbf380d265de5c505f24e0c4339a4c),older(10))})
+fee_address=bcrt1paaphx7mxrkhpy3fel08k96fgul89tl5rwxweh7v4fevc72mav7gqphcvvt
+ Container o2a-testnet-demo-toolchain-run-fa5e65528fb8 Creating 
+ Container o2a-testnet-demo-toolchain-run-fa5e65528fb8 Created 
+DISPOSABLE IDENTITY: never use this demo identity or seed for funds or production

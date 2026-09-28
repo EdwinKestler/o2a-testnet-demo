@@ -1,0 +1,12 @@
+fee_address=tb1paaphx7mxrkhpy3fel08k96fgul89tl5rwxweh7v4fevc72mav7gqvwj2e3
+wallet_contains_seal=false
+entity_id=95f84ba2dd5e8140cfd50d881e41ed07250e715c0a6f8d388247de8a58efcf51
+entity_index=2
+contract_id=contract:jnKyWhj_-uhXfT~N-bSuZeyf-Lv2ew85-A5QqC27-Xivo8Ho
+consignment=/data/genesis.rgb
+cell=HQWuR02sLWtEIQ_mpXYgocrBz~0nRamovVIQCWtTWSA:0
+seal=72010399ab58ef93374431b7fa9cb810d2839abc50ec8600640f77b6ecd3c530:1
+o2a_genesis=valid
+ Container o2a-testnet-demo-toolchain-run-46fdd710c0a1 Creating 
+ Container o2a-testnet-demo-toolchain-run-46fdd710c0a1 Created 
+DISPOSABLE IDENTITY: never use this demo identity or seed for funds or production

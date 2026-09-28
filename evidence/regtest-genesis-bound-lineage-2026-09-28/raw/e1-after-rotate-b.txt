@@ -1,0 +1,17 @@
+entity_id=3ec753a7b05168f107415522437e52163bea1f596527752d849fc5f33de1fddb
+entity_index=1
+best_height=114
+best_block_hash=5bae13fcba74149449e61fd3d3d553c296413afede857e6e8dba6b2638f0697c
+source_url=tcp://electrs:50001
+required_depth=1
+anchor_txid=1ff94d96385b78f4c3564cfa4bc5149f0b50572a31c934934361dc47c7e857f2
+anchor_height=114
+current_outpoint=737e9ea58a5a6cb48c91ee4c6d06a50003e702f53981c52bfa85b53f3e990511:0
+identity_history_state=CURRENT
+bitcoin=current seal is unspent and the supplied proofs meet the header
+rgb=consignment imported
+o2a=objects accepted
+header_trust=headers come from one electrs instance; this is a trust assumption, not a light client
+
+ Container o2a-testnet-demo-toolchain-run-f6e723feaf22 Creating 
+ Container o2a-testnet-demo-toolchain-run-f6e723feaf22 Created 

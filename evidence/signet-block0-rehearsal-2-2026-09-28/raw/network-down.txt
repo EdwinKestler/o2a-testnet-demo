@@ -1,0 +1,4 @@
+ Container o2a-testnet-demo-toolchain-run-2ce3dc62e7d0 Creating 
+ Container o2a-testnet-demo-toolchain-run-2ce3dc62e7d0 Created 
+error: electrum 127.0.0.1:9: Connection refused (os error 111)
+

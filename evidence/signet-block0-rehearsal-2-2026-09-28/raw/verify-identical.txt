@@ -1,0 +1,5 @@
+byte_identical=true
+entity_id=95f84ba2dd5e8140cfd50d881e41ed07250e715c0a6f8d388247de8a58efcf51
+identity_history_state=CURRENT
+best_height=324089
+rgb=consignment imported

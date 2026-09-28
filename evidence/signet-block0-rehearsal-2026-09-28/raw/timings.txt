@@ -1,0 +1,11 @@
+plan=0.502
+wrong-policy=0.491
+fund=0.186
+wait-depth=3700.423
+sign-genesis=0.538
+anchor=1.252
+verify=1.771
+projector=0.065
+sign-claim=0.501
+screen-claim=0.018
+restore=1.415

@@ -17,6 +17,7 @@ bp-std.workspace = true
 hex.workspace = true
 o2a-demo-core.workspace = true
 o2a-demo-rgb.workspace = true
+o2a-demo-seal.workspace = true
 rgb-persist-fs.workspace = true
 rgb-psbt.workspace = true
 rgb-runtime.workspace = true

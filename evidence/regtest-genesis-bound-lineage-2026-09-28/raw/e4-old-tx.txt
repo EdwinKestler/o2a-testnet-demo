@@ -1,0 +1,3 @@
+error code: -5
+error message:
+No such mempool or blockchain transaction. Use gettransaction for wallet transactions.

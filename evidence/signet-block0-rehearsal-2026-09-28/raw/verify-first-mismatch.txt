@@ -1,0 +1,6 @@
+The first verify, before the seal record was rewritten with the artist keys, reported:
+identity_history_state=INVALID
+bitcoin=script does not match the policy
+rgb=consignment imported
+o2a=objects accepted
+Both validators agreed. The chain output was the artist seal. The seal record had been written without the artist seed, so its script was a different policy. After recording again with the artist keys, both validators reported CURRENT.

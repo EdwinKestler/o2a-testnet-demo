@@ -1,0 +1,7 @@
+ Container o2a-testnet-demo-toolchain-run-f2476dc232be Creating 
+ Container o2a-testnet-demo-toolchain-run-f2476dc232be Created 
+
+thread 'main' (1) panicked at /home/o2a/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hypersonic-0.12.0/src/state.rs:156:32:
+undefined token of authority at:YIEsKR2Y-gffoBJD3-ACsZ6nRp-KqsDZJr2-LgtIt6vs-9tzcAw
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+

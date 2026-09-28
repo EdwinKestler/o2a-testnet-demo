@@ -1,0 +1,15 @@
+best_height=124
+best_block_hash=588f2e53f3eb645305cfa02bd36193a274b1758a1def7cd828b2f7c963d675e0
+source_url=tcp://electrs:50001
+required_depth=1
+anchor_txid=d262bd240ae84604cd41229e4a1154a8da5b5279edad4fe8760e8a1a5f245501
+anchor_height=124
+current_outpoint=481ec137b39a68d4843e36198cfd5bf50ab90074a5e3a91267da4ef37dacd8c3:0
+identity_history_state=INCOMPLETE
+bitcoin=anchor or seal creation is not on the named best chain at the required depth
+rgb=consignment imported
+o2a=objects accepted
+header_trust=headers come from one electrs instance; this is a trust assumption, not a light client
+
+ Container o2a-testnet-demo-toolchain-run-183290d87f8c Creating 
+ Container o2a-testnet-demo-toolchain-run-183290d87f8c Created 
