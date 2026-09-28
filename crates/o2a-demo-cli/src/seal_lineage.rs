@@ -10,8 +10,8 @@ use bpstd::psbt::PsbtConstructor;
 use bpstd::signers::TestnetSigner;
 use bpstd::{Derive, Descriptor, Network, NormalIndex, Outpoint, ScriptPubkey, Terminal, Witness};
 use o2a_demo_core::{
-    controller_rotation_with, demo_genesis_state, demo_keys, demo_rotation_state, genesis_with,
-    recovery_authorizations, seal_bindings_valid, seal_for_state, ResultingState,
+    controller_rotation_with, demo_genesis_state, demo_keys, demo_rotation_state, entity_id,
+    genesis_with, recovery_authorizations, seal_bindings_valid, seal_for_state, ResultingState,
 };
 use o2a_demo_rgb::{
     controller_rotation, demo_issuer, genesis_params, recover, GenesisInput, RotationInput,
@@ -89,7 +89,7 @@ pub fn issue(data_dir: &Path, electrum: &str, name: &str) -> Result<()> {
     runtime.contracts.import_issuer(demo_issuer())?;
     let contract_id = runtime.issue(genesis_params(GenesisInput {
         root_xonly: keys.root.xonly,
-        entity_id: o2a_demo_core::entity_id(keys.root.xonly),
+        entity_id: o2a_demo_core::entity_id(&object.payload),
         controller_xonly: keys.controller_0.xonly,
         policy_hash: o2a_demo_core::recovery_policy_hash(&o2a_demo_core::demo_recovery_policy()),
         state_commitment: object.digest,
@@ -119,6 +119,11 @@ pub fn issue(data_dir: &Path, electrum: &str, name: &str) -> Result<()> {
             consignment.display()
         ),
     )?;
+    println!(
+        "entity_id={}",
+        hex::encode(o2a_demo_core::entity_id(&object.payload))
+    );
+    println!("entity_index={}", o2a_demo_core::demo_entity_index());
     println!("contract_id={contract_id}");
     println!("consignment={}", consignment.display());
     println!("cell={}", owned.addr);
@@ -168,9 +173,10 @@ pub fn transition(
     } else {
         (keys.controller_0, false)
     };
+    let history = history_entity(data_dir)?;
     let object = if rgb_call_recover {
         let auths = recovery_authorizations(
-            keys.root.xonly,
+            history,
             prior,
             &o2a_demo_core::demo_recovery_policy(),
             from.confirmation_height + 10,
@@ -180,7 +186,7 @@ pub fn transition(
         .map_err(anyhow::Error::msg)?;
         auths[0].clone()
     } else {
-        controller_rotation_with(signer, keys.root.xonly, prior, &state)
+        controller_rotation_with(signer, history, prior, &state)
     };
     if !rgb_call_recover {
         o2a_demo_core::verify_controller_rotation(&object).map_err(anyhow::Error::msg)?;
@@ -296,6 +302,7 @@ pub fn transition(
     let path = data_dir.join(format!("{kind}.raw"));
     std::fs::write(&path, &raw)?;
     write_object(&data_dir.join(format!("{kind}.o2a")), &object)?;
+    println!("history_entity={}", hex::encode(history));
     println!("defined_cell={defined_cell}");
     println!("o2a_digest={}", hex::encode(object.digest));
     println!("next_seal={to_outpoint}");
@@ -410,9 +417,16 @@ pub fn verify(
         &anchor,
         objects_ok(data_dir),
         rgb,
-        1,
+        demo_depth(),
         skip_observation,
     )?;
+    if let Ok(genesis) = read_signed(&data_dir.join("genesis.o2a")) {
+        println!(
+            "entity_id={}",
+            hex::encode(o2a_demo_core::entity_id(&genesis.payload))
+        );
+    }
+    println!("entity_index={}", o2a_demo_core::demo_entity_index());
     println!("{report}");
     Ok(())
 }
@@ -543,6 +557,45 @@ fn objects_ok(data_dir: &Path) -> bool {
     found
 }
 
+fn demo_depth() -> u32 {
+    std::env::var("O2A_DEMO_DEPTH")
+        .ok()
+        .and_then(|value| value.parse().ok())
+        .unwrap_or(1)
+}
+
+pub fn show_fork(outpoint: &str) -> Result<()> {
+    let parsed = Outpoint::from_str(outpoint)?;
+    let canonical = canonical_outpoint(parsed);
+    let legit = genesis_with(demo_keys().root, &demo_genesis_state(canonical));
+    let mut state = demo_genesis_state(canonical);
+    state.controllers[0].xonly = demo_keys().controller_1.xonly;
+    let fork = genesis_with(demo_keys().root, &state);
+    let legit_id = entity_id(&legit.payload);
+    let fork_id = entity_id(&fork.payload);
+    println!("legit_entity_id={}", hex::encode(legit_id));
+    println!("fork_entity_id={}", hex::encode(fork_id));
+    println!("ids_differ={}", legit_id != fork_id);
+    println!("signer_entity_zero={}", legit.payload[5..37] == [0u8; 32]);
+    Ok(())
+}
+
+pub fn write_fork(data_dir: &Path, outpoint: &str) -> Result<()> {
+    let parsed = Outpoint::from_str(outpoint)?;
+    let mut state = demo_genesis_state(canonical_outpoint(parsed));
+    state.controllers[0].xonly = demo_keys().controller_1.xonly;
+    let fork = genesis_with(demo_keys().root, &state);
+    std::fs::create_dir_all(data_dir)?;
+    write_object(&data_dir.join("genesis.o2a"), &fork)?;
+    println!("fork_entity_id={}", hex::encode(entity_id(&fork.payload)));
+    Ok(())
+}
+
+fn history_entity(data_dir: &Path) -> Result<[u8; 32]> {
+    let genesis = read_signed(&data_dir.join("genesis.o2a"))?;
+    Ok(entity_id(&genesis.payload))
+}
+
 fn read_signed(path: &Path) -> Result<o2a_demo_core::SignedObject> {
     let fields = crate::read_fields(path)?;
     let tag = match crate::field(&fields, "tag")? {
@@ -646,7 +699,8 @@ pub fn show_stale() -> Result<()> {
     }];
     let mut state = demo_rotation_state(1, [9; 32], [1; 36], [2; 36]);
     state.controller_bindings = stale.to_vec();
-    let object = controller_rotation_with(keys.controller_0, keys.root.xonly, [9; 32], &state);
+    let history = entity_id(&genesis_with(keys.root, &demo_genesis_state([0; 36])).payload);
+    let object = controller_rotation_with(keys.controller_0, history, [9; 32], &state);
     println!("stale_transition_digest={}", hex::encode(object.digest));
     let recovery = demo_genesis_state([0; 36]).recovery_bindings;
     let error = seal_bindings_valid(

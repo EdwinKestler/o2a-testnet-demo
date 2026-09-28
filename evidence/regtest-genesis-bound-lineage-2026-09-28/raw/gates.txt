@@ -1,0 +1,7 @@
+cargo fmt --all --check: pass
+cargo test -p o2a-demo-core: 14 passed
+cargo check --workspace --locked: pass
+cargo test --workspace: o2a-demo-core 14 passed, o2a-demo-rgb 3 passed
+cargo audit --ignore RUSTSEC-2024-0436: scanned 192 crates, exit 0
+cargo deny check: advisories ok, bans ok, licenses ok, sources ok
+warnings kept: unused RGB-WG source allowance, unused Zlib allowance, three getrandom copies

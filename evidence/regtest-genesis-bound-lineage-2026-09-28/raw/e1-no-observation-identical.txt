@@ -1,0 +1,15 @@
+byte_identical=true
+entity_id=3ec753a7b05168f107415522437e52163bea1f596527752d849fc5f33de1fddb
+entity_index=1
+best_height=125
+best_block_hash=19aa8baf44861cf7706e6b26c702526933a13ca1e9a0807e767d549fb342f4b9
+source_url=tcp://electrs:50001
+required_depth=1
+anchor_txid=f377e57a7d0be3fbc5593f1b22c61bd889ebab19f82bdf2b56e88a0f6bc1ae13
+anchor_height=125
+current_outpoint=a747623bb9ef2178ff30c7745a1fc5ef461b11cf07cd8bfe19e776b27435c944:0
+identity_history_state=INCOMPLETE
+bitcoin=current seal was not observed
+rgb=consignment imported
+o2a=objects accepted
+header_trust=headers come from one electrs instance; this is a trust assumption, not a light client

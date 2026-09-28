@@ -154,7 +154,7 @@ fn issue(data_dir: &Path, electrum: &str) -> Result<()> {
     runtime.contracts.import_issuer(demo_issuer())?;
     let contract_id = runtime.issue(genesis_params(GenesisInput {
         root_xonly: keys.root.xonly,
-        entity_id: o2a_demo_core::entity_id(keys.root.xonly),
+        entity_id: o2a_demo_core::entity_id(&object.payload),
         controller_xonly: keys.controller_0.xonly,
         policy_hash: o2a_demo_core::recovery_policy_hash(&o2a_demo_core::demo_recovery_policy()),
         state_commitment: object.digest,
@@ -494,6 +494,12 @@ fn run() -> Result<()> {
             seal_lineage::mismatched_genesis(outpoint)
         }
         [command, action] if command == "seal" && action == "stale" => seal_lineage::show_stale(),
+        [command, action, outpoint] if command == "seal" && action == "fork" => {
+            seal_lineage::show_fork(outpoint)
+        }
+        [command, action, data, outpoint] if command == "seal" && action == "fork-write" => {
+            seal_lineage::write_fork(Path::new(data), outpoint)
+        }
         [command, action, data, electrum, outpoint] if command == "seal" && action == "wallet" => {
             seal_lineage::wallet_sees(Path::new(data), electrum, outpoint)
         }

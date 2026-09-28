@@ -78,8 +78,8 @@ Offer this plan, then let the artist change it.
 | Choice | What it means |
 | --- | --- |
 | 2 of 3 | Any two of the three recovery keys can recover after the delay. |
-| Who holds them | The artist holds two (this device and a second device or a paper share in their own safe). One person the artist names holds the third. |
-| Delay | Long enough that a mistake cannot finish during the show. The artist picks the number of blocks. The demo lineage used 10 blocks on regtest. A live show should use a longer delay. Write the chosen number into the public plan. |
+| Who holds them | The artist holds two shares, in different physical places (this device, and a paper share or second device kept somewhere else). One person the artist names holds the third. |
+| Delay | The default is 1008 blocks. The artist can choose another number. Write the chosen number into the public plan. |
 | Staff | Hold none of the three. |
 
 Trade-offs to say out loud, once:
@@ -267,7 +267,7 @@ P3b-2 runs these steps in this order, on signet, with a disposable identity. Eac
 | --- | --- |
 | 1. Confirm the O2A signet node is running, electrs is at the same height, and the toolchain can reach that electrs. | Heights match, and a toolchain TCP check to electrs succeeds. |
 | 2. Create a new entity index for this rehearsal. Derive roles 0, 1, 2, and 4. | The public plan lists x-only keys and the entity index. The seed is on the artist device only. |
-| 3. Choose the recovery set with the artist. Default offer: 2 of 3, artist holds two, staff hold zero. Record the delay the artist picked. | The public plan has threshold, delay, and recovery key ids. |
+| 3. Choose the recovery set with the artist. Default offer: 2 of 3, the artist's two shares in different physical places, staff hold zero, delay 1008 blocks unless the artist changes it. | The public plan has threshold, delay, and recovery key ids. |
 | 4. Compute the seal address and match it with Core `getdescriptorinfo` and `deriveaddresses`. | The two address strings are identical. |
 | 5. Fund that address with `-named sendtoaddress` and `replaceable=false`. | Every input sequence is `4294967294` or `4294967295`. |
 | 6. Wait until `confirmations` is at least 6. | The raw transaction shows 6 or more. |

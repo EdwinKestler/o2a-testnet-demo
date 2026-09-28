@@ -1,0 +1,48 @@
+{
+  "txid": "fbeb8ad0b712f2457d8e5e2fbe7078ad33e0eff1424a9ca3630726eecf3eeb76",
+  "hash": "4a92e67e2475f671aa94a3d6ea8b5df6c27d782d61d52309f18f9d07e06c8ed8",
+  "version": 2,
+  "size": 205,
+  "vsize": 154,
+  "weight": 616,
+  "locktime": 128,
+  "vin": [
+    {
+      "txid": "88841c777a53fd6133f98ad52eb8b772b232802072220423849a80c34ca22c28",
+      "vout": 0,
+      "scriptSig": {
+        "asm": "",
+        "hex": ""
+      },
+      "txinwitness": [
+        "8a6865790241603cb16772ad7101441fc4c27db018ade23958cef6caf983851bf21a3413e5669ca1b4ce3743dd13a22d57096f27ad554095fbe37950c75a72bc"
+      ],
+      "sequence": 4294967293
+    }
+  ],
+  "vout": [
+    {
+      "value": 0.00100000,
+      "n": 0,
+      "scriptPubKey": {
+        "asm": "1 eb7ee42cd7788f1dbaea8e805aa139a1d46b8643857414626c4397619de6bb75",
+        "desc": "rawtr(eb7ee42cd7788f1dbaea8e805aa139a1d46b8643857414626c4397619de6bb75)#c9szydae",
+        "hex": "5120eb7ee42cd7788f1dbaea8e805aa139a1d46b8643857414626c4397619de6bb75",
+        "address": "bcrt1padlwgtxh0z83mwh236q94gfe582xhpjrs46pgcnvgwtkr80xhd6ssrt5ve",
+        "type": "witness_v1_taproot"
+      }
+    },
+    {
+      "value": 49.99896900,
+      "n": 1,
+      "scriptPubKey": {
+        "asm": "1 53c12b40f290eef0f30c0c841d1ce4d29f74f751ac54fb37d874a5d8f4444df1",
+        "desc": "rawtr(53c12b40f290eef0f30c0c841d1ce4d29f74f751ac54fb37d874a5d8f4444df1)#hsc57msm",
+        "hex": "512053c12b40f290eef0f30c0c841d1ce4d29f74f751ac54fb37d874a5d8f4444df1",
+        "address": "bcrt1p20qjks8jjrh0pucvpjzp688y620hfa634320kd7cwjja3azyfhcsh2yp9e",
+        "type": "witness_v1_taproot"
+      }
+    }
+  ],
+  "hex": "02000000000101282ca24cc3809a8423042272208032b272b7b82ed58af93361fd537a771c84880000000000fdffffff02a086010000000000225120eb7ee42cd7788f1dbaea8e805aa139a1d46b8643857414626c4397619de6bb75445f042a0100000022512053c12b40f290eef0f30c0c841d1ce4d29f74f751ac54fb37d874a5d8f4444df101408a6865790241603cb16772ad7101441fc4c27db018ade23958cef6caf983851bf21a3413e5669ca1b4ce3743dd13a22d57096f27ad554095fbe37950c75a72bc80000000"
+}

@@ -411,7 +411,7 @@ fn issue(data_dir: &Path, electrum: &str, seal: Outpoint) -> Result<()> {
     runtime.contracts.import_issuer(demo_issuer())?;
     let contract_id = runtime.issue(genesis_params(GenesisInput {
         root_xonly: keys.root.xonly,
-        entity_id: o2a_demo_core::entity_id(keys.root.xonly),
+        entity_id: o2a_demo_core::entity_id(&object.payload),
         controller_xonly: keys.controller_0.xonly,
         policy_hash: o2a_demo_core::recovery_policy_hash(&o2a_demo_core::demo_recovery_policy()),
         state_commitment: object.digest,

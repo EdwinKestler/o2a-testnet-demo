@@ -20,8 +20,8 @@ pub use chain::{
 pub use decode::{decode_payload, evaluate_name_claim, ClaimAuthorization};
 pub use encode::{
     bytes_field, common_header, content_reference, encode_recovery_policy, encode_resulting_state,
-    encode_seal_policy, entity_id as entity_id_on, key_id, list_items, option_fixed, text_field,
-    ControllerEntry, RecoveryPolicy, ResultingState, SealBinding,
+    encode_seal_policy, entity_id as entity_id_of_payload, key_id, list_items, option_fixed,
+    text_field, ControllerEntry, RecoveryPolicy, ResultingState, SealBinding,
 };
 pub use eval::{
     adapter_key_distinct, adapter_scheme, capability_known, evidence_ids_valid, genesis_root_ok,
@@ -32,7 +32,7 @@ pub use eval::{
 };
 pub use seal::{recovery_leaf, script_num, seal_script, SealScript, NUMS_X};
 
-pub const SPEC_COMMIT: &str = "c7b08716d017d1f6125e6a728fb098673a09d433";
+pub const SPEC_COMMIT: &str = "0ef16c2132ea54cdfd4aa86a34a748f998f388d8";
 pub const CANONICAL_RULES: [&str; 4] = [
     "../o2a-protocol/specs/canonical-encoding.md",
     "../o2a-protocol/specs/cryptographic-profile.md",
@@ -105,9 +105,17 @@ pub fn unsafe_seed() -> Vec<u8> {
 }
 
 /// Derives the disposable regtest entity 0 keys from the published unsafe seed.
+pub fn demo_entity_index() -> u32 {
+    std::env::var("O2A_DEMO_ENTITY")
+        .ok()
+        .and_then(|value| value.parse().ok())
+        .unwrap_or(0)
+}
+
 pub fn demo_keys() -> DemoKeys {
     let seed = unsafe_seed();
-    let key = |role: u32, index: u32| derive::identity_key(&seed, 1, 0, role, index);
+    let entity = demo_entity_index();
+    let key = |role: u32, index: u32| derive::identity_key(&seed, 1, entity, role, index);
     DemoKeys {
         root: key(0, 0),
         controller_0: key(1, 0),
@@ -146,21 +154,22 @@ pub fn tagged_hash(tag: &str, payload: &[u8]) -> [u8; 32] {
     sha256::Hash::from_engine(engine).to_byte_array()
 }
 
-pub fn entity_id(root_xonly: [u8; 32]) -> [u8; 32] {
-    entity_id_on(root_xonly, NETWORK_REGTEST)
+/// EntityID of one exact genesis payload. The payload's `signer_entity` is 32 zero bytes.
+pub fn entity_id(genesis_payload: &[u8]) -> [u8; 32] {
+    entity_id_of_payload(genesis_payload)
 }
 
-/// EntityID for a known network and a BIP340 x-only root.
+/// Rejects an unknown network or a root that is not a BIP340 x-only key.
 ///
-/// An unknown network or an unparsable root returns before any hash.
-pub fn entity_id_checked(network: u8, root: &[u8; 32]) -> Result<[u8; 32], &'static str> {
+/// The EntityID itself is [`entity_id`] of the genesis payload, not of the root.
+pub fn entity_id_checked(network: u8, root: &[u8; 32]) -> Result<(), &'static str> {
     if !matches!(network, 0..=4) {
         return Err("unknown Bitcoin network");
     }
     if XOnlyPublicKey::from_slice(root).is_err() {
         return Err("root is not a BIP340 x-only public key");
     }
-    Ok(entity_id_on(*root, network))
+    Ok(())
 }
 
 pub fn recovery_policy_hash(policy: &RecoveryPolicy) -> [u8; 32] {
@@ -272,11 +281,10 @@ fn sign(tag: &'static str, payload: Vec<u8>, key: DemoKey) -> SignedObject {
 }
 
 pub fn genesis_with(root: DemoKey, state: &ResultingState) -> SignedObject {
-    let entity = entity_id(root.xonly);
     let mut payload = common_header(
         NETWORK_REGTEST,
         1,
-        entity,
+        [0u8; 32],
         None,
         key_id(0, root.xonly),
         0,
@@ -306,15 +314,14 @@ pub fn genesis(next_seal: [u8; 36]) -> SignedObject {
 
 pub fn controller_rotation_with(
     signer: DemoKey,
-    entity_root: [u8; 32],
+    history_entity: [u8; 32],
     prior_state: [u8; 32],
     state: &ResultingState,
 ) -> SignedObject {
-    let entity = entity_id(entity_root);
     let mut payload = common_header(
         NETWORK_REGTEST,
         2,
-        entity,
+        history_entity,
         Some(prior_state),
         key_id(1, signer.xonly),
         1,
@@ -331,9 +338,10 @@ pub fn controller_rotation(
     next_seal: [u8; 36],
 ) -> SignedObject {
     let keys = demo_keys();
+    let genesis = genesis(previous_seal);
     controller_rotation_with(
         keys.controller_0,
-        keys.root.xonly,
+        entity_id(&genesis.payload),
         prior_state,
         &demo_rotation_state(1, prior_state, previous_seal, next_seal),
     )
@@ -341,7 +349,7 @@ pub fn controller_rotation(
 
 /// Signs one recovery payload per signer. Signers are emitted in key-id order.
 pub fn recovery_authorizations(
-    entity_root: [u8; 32],
+    history_entity: [u8; 32],
     prior_state: [u8; 32],
     policy: &RecoveryPolicy,
     not_before_height: u32,
@@ -359,7 +367,6 @@ pub fn recovery_authorizations(
     {
         return Err("duplicate recovery signer");
     }
-    let entity = entity_id(entity_root);
     let policy_hash = recovery_policy_hash(policy);
     let mut body = vec![3];
     body.extend_from_slice(&policy_hash);
@@ -371,7 +378,7 @@ pub fn recovery_authorizations(
             let mut payload = common_header(
                 NETWORK_REGTEST,
                 3,
-                entity,
+                history_entity,
                 Some(prior_state),
                 key_id(2, signer.xonly),
                 2,
@@ -562,7 +569,7 @@ mod tests {
         assert_eq!(transition_next_seal(&transition), Ok([3; 36]));
         assert_ne!(genesis.digest, transition.digest);
         let recovery = recovery_authorizations(
-            demo_keys().root.xonly,
+            entity_id(&genesis.payload),
             [2; 32],
             &demo_recovery_policy(),
             112,

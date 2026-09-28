@@ -128,6 +128,8 @@ pub struct HistoryInput {
     pub spend_confirmations: u32,
     pub required_depth: u32,
     pub valid_transition: bool,
+    /// Confirmations of every seal-creating transaction. `None` inside the list means absent.
+    pub seal_creating_confirmations: Option<Vec<Option<u32>>>,
 }
 
 /// Mirrors `identity_history_outcome` in `check_protocol_objects.py`.
@@ -138,6 +140,18 @@ pub fn identity_history_state(input: &HistoryInput) -> &'static str {
         || input.seal.is_none()
     {
         return "INCOMPLETE";
+    }
+    if let Some(creations) = &input.seal_creating_confirmations {
+        if creations.is_empty() || creations.iter().any(Option::is_none) {
+            return "INCOMPLETE";
+        }
+        if creations
+            .iter()
+            .flatten()
+            .any(|confirmations| *confirmations < input.required_depth)
+        {
+            return "PENDING_CONFIRMATION";
+        }
     }
     if input.seal == Some(SealWatch::Unspent) {
         return "CURRENT";

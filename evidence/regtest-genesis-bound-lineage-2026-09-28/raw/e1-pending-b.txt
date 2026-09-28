@@ -1,0 +1,17 @@
+entity_id=3ec753a7b05168f107415522437e52163bea1f596527752d849fc5f33de1fddb
+entity_index=1
+best_height=106
+best_block_hash=27d248886a27b43948bd4b196ab5d47320c65d0d19236d5c6e1e1d21fa162f02
+source_url=tcp://electrs:50001
+required_depth=6
+anchor_txid=d39822450db62d9ecb3f90fa578679b5d983ee98dbf0b2749aa3d37072620902
+anchor_height=106
+current_outpoint=d39822450db62d9ecb3f90fa578679b5d983ee98dbf0b2749aa3d37072620902:0
+identity_history_state=PENDING_CONFIRMATION
+bitcoin=seal-creating transaction is below the required depth
+rgb=consignment imported
+o2a=objects accepted
+header_trust=headers come from one electrs instance; this is a trust assumption, not a light client
+
+ Container o2a-testnet-demo-toolchain-run-73bd944b8052 Creating 
+ Container o2a-testnet-demo-toolchain-run-73bd944b8052 Created 

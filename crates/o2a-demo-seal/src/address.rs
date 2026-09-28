@@ -109,12 +109,13 @@ pub fn prepare_state(stage: &str) -> Result<PrepareText, &'static str> {
     };
     let script = seal_for_state(&state)?;
     let keys = demo_keys();
+    let entity = o2a_demo_core::demo_entity_index();
     let paths = if stage == "genesis" {
         format!(
-            "m/1'/0'/1'/0' m/1'/0'/4'/0' m/1'/0'/2'/0' m/1'/0'/4'/2' m/1'/0'/2'/1' m/1'/0'/4'/3' m/1'/0'/2'/2' m/1'/0'/4'/4'"
+            "m/1'/{entity}'/1'/0' m/1'/{entity}'/4'/0' m/1'/{entity}'/2'/0' m/1'/{entity}'/4'/2' m/1'/{entity}'/2'/1' m/1'/{entity}'/4'/3' m/1'/{entity}'/2'/2' m/1'/{entity}'/4'/4'"
         )
     } else {
-        format!("m/1'/0'/1'/1' m/1'/0'/4'/1'")
+        format!("m/1'/{entity}'/1'/1' m/1'/{entity}'/4'/1'")
     };
     let _ = keys;
     let policy = encode_seal_policy(&state.controller_bindings, &state.recovery_bindings);

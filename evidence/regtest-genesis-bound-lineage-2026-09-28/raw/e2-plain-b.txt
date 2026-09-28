@@ -1,0 +1,17 @@
+entity_id=aca129959b83c0b6780bd265ec5a18fde8cb04f81e8810624ecb7f8ca348cd89
+entity_index=2
+best_height=127
+best_block_hash=359ecafde0d5ee21392e27462a6a0be3067e2f1f970d4432907054d0b86e68c7
+source_url=tcp://electrs:50001
+required_depth=1
+anchor_txid=8840e2fc281303150f41f411e1bd6e3edebe356485b5dfcf164d4bb7abe04b52
+anchor_height=126
+current_outpoint=8840e2fc281303150f41f411e1bd6e3edebe356485b5dfcf164d4bb7abe04b52:0
+identity_history_state=SEAL_CLOSED_WITHOUT_VALID_TRANSITION
+bitcoin=seal spend is included at the required depth
+rgb=consignment imported
+o2a=no valid transition closes the seal
+header_trust=headers come from one electrs instance; this is a trust assumption, not a light client
+
+ Container o2a-testnet-demo-toolchain-run-5d34b30caaf9 Creating 
+ Container o2a-testnet-demo-toolchain-run-5d34b30caaf9 Created 

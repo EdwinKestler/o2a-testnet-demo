@@ -1,0 +1,17 @@
+# Rehearsal override. Enables a wallet on the existing signet volume.
+# The base file stays wallet-disabled. Use both files together:
+#   docker compose -p signet-infra --file docker-compose.yml --file compose.wallet.yaml up --detach
+services:
+  bitcoind:
+    command:
+      - -signet=1
+      - -server=1
+      - -rest=1
+      - -txindex=1
+      - -listen=1
+      - -port=38333
+      - -rpcbind=0.0.0.0
+      - -rpcallowip=127.0.0.1
+      - -rpcallowip=172.30.31.0/24
+      - -rpcauth=${RPC_AUTH_LINE}
+      - -printtoconsole=1

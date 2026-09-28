@@ -1,0 +1,10 @@
+stage=genesis
+address=bcrt1px8q3f498nqkzpx2hypwg2mjc7fqy4htk4yms4xsap833cmncn95qwld58r
+script_pubkey=512031c114d4a7982c209957205c856e58f2404add76a9370a9a1d09e31c6e789968
+policy=010001000000a50df1ea258250c5612688a23a0242d712805a0330de0f7dcfb760f0f4ae2990d21305da2d4ef9285657b612b6f509b36e2845acf251f859aa27e265221b5fd4030000003c31cbc74c8ba4d0247e0b66ed17a6de2bfb98c6396f43847ce04a8d7df9afba3949a79dcd706e555538b5d67e5c52f8190959efa47cb7a6c9f7a7625d2944d3598baf8ec46036ba14e48f96ba35acc6ad75c8b3dd9583db8a6fce686fd2b10a214d98e9c8c953ecd2354c84d5feea89016e836d807c74c1478ccded31a569fcd0131a576ce686a5ba664d87de24f9cd0aa3053f35d3fcef7e86cf2d7e6a9c7e60198f04094fd13127065bbb8f44b596521cfff54adbad829e711fdb5ef7ebb9
+paths=m/1'/1'/1'/0' m/1'/1'/4'/0' m/1'/1'/2'/0' m/1'/1'/4'/2' m/1'/1'/2'/1' m/1'/1'/4'/3' m/1'/1'/2'/2' m/1'/1'/4'/4'
+descriptor=tr(50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0,{pk(d21305da2d4ef9285657b612b6f509b36e2845acf251f859aa27e265221b5fd4),and_v(v:multi_a(2,214d98e9c8c953ecd2354c84d5feea89016e836d807c74c1478ccded31a569fc,3949a79dcd706e555538b5d67e5c52f8190959efa47cb7a6c9f7a7625d2944d3,60198f04094fd13127065bbb8f44b596521cfff54adbad829e711fdb5ef7ebb9),older(10))})
+fee_address=bcrt1paaphx7mxrkhpy3fel08k96fgul89tl5rwxweh7v4fevc72mav7gqphcvvt
+ Container o2a-testnet-demo-toolchain-run-0a998d93b12c Creating 
+ Container o2a-testnet-demo-toolchain-run-0a998d93b12c Created 
+DISPOSABLE IDENTITY: never use this demo identity or seed for funds or production

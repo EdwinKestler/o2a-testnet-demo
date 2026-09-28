@@ -1,0 +1,14 @@
+# Attach the demo toolchain to the signet Compose network.
+# dev/compose.yaml stays unchanged. From the demo repository root:
+#   docker compose -p o2a-testnet-demo --file dev/compose.yaml --file dev/compose.signet-route.yaml --profile tools run --rm toolchain bash -lc '...'
+# Signet electrs is signet-infra-electrs-1 port 60601.
+services:
+  toolchain:
+    networks:
+      - build
+      - regtest
+      - signet
+networks:
+  signet:
+    external: true
+    name: signet-infra_signet

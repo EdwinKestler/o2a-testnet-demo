@@ -1,0 +1,7 @@
+{
+  "descriptor": "tr(50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0,{pk(e707c3d5bba628ef9755d66751b7c0414c4d03ea6a00dec93845417ac71493a6),and_v(v:multi_a(2,b9818d6bde2affd18889af2456a035099a58005da7c11bca749ffb125c018c7a,b9e1d6060bea6df0266d15dbfe57e6c66b9662326a038568679b3bafe6386b50,ec62c623b5a42561e5f1cd4c4242fe46cacbf380d265de5c505f24e0c4339a4c),older(10))})#dvnu2grm",
+  "checksum": "dvnu2grm",
+  "isrange": false,
+  "issolvable": true,
+  "hasprivatekeys": false
+}

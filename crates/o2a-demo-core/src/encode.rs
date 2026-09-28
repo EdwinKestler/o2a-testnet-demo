@@ -1,4 +1,4 @@
-//! Canonical O2A-CANON-1 byte layout at spec c7b0871.
+//! Canonical O2A-CANON-1 byte layout at spec 0ef16c2.
 //!
 //! Lists are a little-endian `u32` count followed by the items. Options are
 //! `0x00`, or `0x01` plus the fixed value.
@@ -59,12 +59,8 @@ pub fn key_id(role: u8, xonly: [u8; 32]) -> [u8; 32] {
     tagged_hash("O2A/v0.1/key-id", &preimage)
 }
 
-pub fn entity_id(root_xonly: [u8; 32], network: u8) -> [u8; 32] {
-    let mut preimage = Vec::with_capacity(35);
-    preimage.extend_from_slice(&u16(1));
-    preimage.push(network);
-    preimage.extend_from_slice(&root_xonly);
-    tagged_hash("O2A/v0.1/entity-id", &preimage)
+pub fn entity_id(genesis_payload: &[u8]) -> [u8; 32] {
+    tagged_hash("O2A/v0.1/entity-id", genesis_payload)
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]

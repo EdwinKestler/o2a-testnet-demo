@@ -74,9 +74,6 @@ fn protocol_payloads() -> Vec<(&'static str, Vec<u8>)> {
     let seal3 = hx32("6e5382b91922ab39a3995429c0a60fd2caa301c060cb9b2b428f20865e9d11d8");
     let state = [0x22u8; 32];
     let next_state = [0x23u8; 32];
-    let root_entity = entity_id(root);
-    let event_entity = entity_id(recovery);
-    let album_entity = entity_id(album);
     let recovery_id = key_id(2, recovery);
     let policy = RecoveryPolicy {
         version: 1,
@@ -138,8 +135,45 @@ fn protocol_payloads() -> Vec<(&'static str, Vec<u8>)> {
         payload.append(&mut body);
         (name, payload)
     };
+    let genesis_body = {
+        let mut body = 2u16.to_le_bytes().to_vec();
+        body.extend_from_slice(&root);
+        body.extend(encode_resulting_state(&genesis_state));
+        body
+    };
+    let root_entity = entity_id(
+        &signed(
+            "entity_genesis",
+            1,
+            1,
+            0,
+            [0u8; 32],
+            None,
+            root,
+            genesis_body.clone(),
+        )
+        .1,
+    );
+    let event_entity = entity_id(
+        &signed("event_genesis", 1, 1, 0, [0u8; 32], None, recovery, {
+            let mut body = 8u16.to_le_bytes().to_vec();
+            body.extend_from_slice(&recovery);
+            body.extend(encode_resulting_state(&genesis_state));
+            body
+        })
+        .1,
+    );
+    let album_entity = entity_id(
+        &signed("album_genesis", 1, 1, 0, [0u8; 32], None, album, {
+            let mut body = 9u16.to_le_bytes().to_vec();
+            body.extend_from_slice(&album);
+            body.extend(encode_resulting_state(&genesis_state));
+            body
+        })
+        .1,
+    );
     let mut cases = vec![
-        signed("entity_genesis", 1, 1, 0, root_entity, None, root, {
+        signed("entity_genesis", 1, 1, 0, [0u8; 32], None, root, {
             let mut body = 2u16.to_le_bytes().to_vec();
             body.extend_from_slice(&root);
             body.extend(encode_resulting_state(&genesis_state));
@@ -420,6 +454,162 @@ fn protocol_object_bytes_match_the_authority_commit() {
             !signature_accepts(other, &payload, signature, public),
             "{name} cross-domain"
         );
+    }
+}
+
+#[test]
+fn entity_id_regression_matches_the_authority_commit() {
+    let fixture = parse_json(&git_show(
+        "tests/vectors/entity-id-regression/entity-id-regression-v0.1.json",
+    ));
+    let packages = fixture.obj("packages");
+    let legit = packages.obj("G-legit");
+    let legit_payload = hx(legit.string("genesis"));
+    assert_eq!(&legit_payload[5..37], &[0u8; 32]);
+    assert_eq!(
+        hex::encode(entity_id(&legit_payload)),
+        legit.string("entity_id")
+    );
+    for name in [
+        "G-attacker-own-seal",
+        "G-attacker-same-seal",
+        "G-attacker-takeover",
+        "G-mutated-entity-type",
+    ] {
+        let package = packages.obj(name);
+        let payload = hx(package.string("genesis"));
+        assert_eq!(&payload[5..37], &[0u8; 32], "{name} signer_entity");
+        assert_eq!(
+            hex::encode(entity_id(&payload)),
+            package.string("entity_id"),
+            "{name}"
+        );
+        assert_ne!(
+            package.string("entity_id"),
+            legit.string("entity_id"),
+            "{name}"
+        );
+    }
+    let named = hx(packages.obj("G-attacker-names-legit-id").string("genesis"));
+    assert_ne!(&named[5..37], &[0u8; 32]);
+    assert_eq!(
+        packages
+            .obj("G-attacker-names-legit-id")
+            .string("entity_id"),
+        legit.string("entity_id")
+    );
+    let a_legit = packages.obj("A-legit");
+    let a_own = packages.obj("A-attacker-own-seal");
+    assert_eq!(a_legit.string("entity_id"), a_own.string("entity_id"));
+    assert_ne!(
+        entity_id(&hx(a_legit.string("genesis"))),
+        entity_id(&hx(a_own.string("genesis")))
+    );
+    let b_legit = packages.obj("B-legit");
+    let b_same = packages.obj("B-attacker-same-seal");
+    assert_eq!(b_legit.string("entity_id"), b_same.string("entity_id"));
+    assert_ne!(
+        entity_id(&hx(b_legit.string("genesis"))),
+        entity_id(&hx(b_same.string("genesis")))
+    );
+    let rotation = hx(fixture
+        .obj("transitions")
+        .obj("G-legit-rotation")
+        .string("payload"));
+    assert_eq!(hex::encode(&rotation[5..37]), legit.string("entity_id"));
+    let depth = |confirmations: Option<u32>, seal, spent, valid| HistoryInput {
+        has_bitcoin_view: true,
+        has_best_block: true,
+        observed_height: Some(200),
+        seal: Some(seal),
+        spend_proof: spent,
+        spend_confirmations: if spent { 6 } else { 0 },
+        required_depth: 6,
+        valid_transition: valid,
+        seal_creating_confirmations: Some(vec![confirmations]),
+    };
+    assert_eq!(
+        identity_history_state(&depth(Some(3), SealWatch::Unspent, false, false)),
+        "PENDING_CONFIRMATION"
+    );
+    assert_eq!(
+        identity_history_state(&depth(Some(6), SealWatch::Unspent, false, false)),
+        "CURRENT"
+    );
+    assert_eq!(
+        identity_history_state(&depth(None, SealWatch::Unspent, false, false)),
+        "INCOMPLETE"
+    );
+    assert_eq!(
+        identity_history_state(&HistoryInput {
+            has_bitcoin_view: true,
+            has_best_block: true,
+            observed_height: Some(200),
+            seal: Some(SealWatch::Spent),
+            spend_proof: true,
+            spend_confirmations: 6,
+            required_depth: 6,
+            valid_transition: false,
+            seal_creating_confirmations: Some(vec![Some(10), Some(3)]),
+        }),
+        "PENDING_CONFIRMATION"
+    );
+    assert_eq!(
+        identity_history_state(&HistoryInput {
+            has_bitcoin_view: true,
+            has_best_block: true,
+            observed_height: Some(200),
+            seal: Some(SealWatch::Spent),
+            spend_proof: true,
+            spend_confirmations: 6,
+            required_depth: 6,
+            valid_transition: false,
+            seal_creating_confirmations: Some(vec![Some(6)]),
+        }),
+        "SEAL_CLOSED_WITHOUT_VALID_TRANSITION"
+    );
+    let Json::Object(package_fields) = packages else {
+        panic!("packages is not an object");
+    };
+    let mut names: Vec<&str> = package_fields
+        .iter()
+        .map(|(name, _)| name.as_str())
+        .collect();
+    names.sort_unstable();
+    assert_eq!(
+        names,
+        [
+            "A-attacker-own-seal",
+            "A-attacker-same-seal",
+            "A-attacker-takeover",
+            "A-legit",
+            "B-attacker-own-seal",
+            "B-attacker-same-seal",
+            "B-attacker-takeover",
+            "B-legit",
+            "G-attacker-names-legit-id",
+            "G-attacker-own-seal",
+            "G-attacker-same-seal",
+            "G-attacker-takeover",
+            "G-legit",
+            "G-mutated-entity-type",
+        ]
+    );
+    for name in names {
+        let package = packages.obj(name);
+        let payload = hx(package.string("genesis"));
+        let computed = hex::encode(entity_id(&payload));
+        let stored = package.string("entity_id");
+        if name.starts_with("G-") && name != "G-attacker-names-legit-id" {
+            assert_eq!(&payload[5..37], &[0u8; 32], "{name} signer_entity");
+            assert_eq!(computed, stored, "{name}");
+        } else if name == "G-attacker-names-legit-id" {
+            assert_ne!(&payload[5..37], &[0u8; 32]);
+            assert_eq!(stored, legit.string("entity_id"));
+            assert_ne!(computed, stored);
+        } else {
+            assert_ne!(computed, stored, "{name} still uses a pre-ADR-0008 id");
+        }
     }
 }
 
@@ -1293,6 +1483,7 @@ fn history(
         spend_confirmations,
         required_depth: 1,
         valid_transition,
+        seal_creating_confirmations: None,
     })
 }
 

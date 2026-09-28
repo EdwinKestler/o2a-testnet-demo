@@ -83,8 +83,8 @@ fn at_depth(best_height: u32, height: u32, required_depth: u32) -> bool {
 /// Deterministic lineage result from explicit proofs.
 ///
 /// `INVALID` is a script that does not match the policy.
-/// `INCOMPLETE` is missing observation, a proof that does not meet the header,
-/// or an anchor that is not on the named best chain at the required depth.
+/// `PENDING_CONFIRMATION` is a seal-creating transaction on the named chain
+/// below the required depth. `INCOMPLETE` is a missing proof or observation.
 pub fn evaluate_lineage(evidence: &LineageEvidence, rgb: &'static str) -> LineageReport {
     let header_trust =
         "headers come from one electrs instance; this is a trust assumption, not a light client";
@@ -105,25 +105,44 @@ pub fn evaluate_lineage(evidence: &LineageEvidence, rgb: &'static str) -> Lineag
             header_trust,
         };
     }
-    let creation_ok = evidence.seals.iter().all(|seal| {
-        inclusion_matches(&seal.creation)
-            && at_depth(
-                evidence.best_height,
-                seal.creation.height,
-                evidence.required_depth,
-            )
+    let creations_present = evidence
+        .seals
+        .iter()
+        .all(|seal| inclusion_matches(&seal.creation));
+    let creations_deep = evidence.seals.iter().all(|seal| {
+        at_depth(
+            evidence.best_height,
+            seal.creation.height,
+            evidence.required_depth,
+        )
     });
-    let anchor_ok = match &evidence.anchor {
-        None => true,
-        Some(anchor) => {
-            inclusion_matches(anchor)
-                && at_depth(evidence.best_height, anchor.height, evidence.required_depth)
-        }
-    };
-    if !creation_ok || !anchor_ok {
+    let anchor_present = evidence
+        .anchor
+        .as_ref()
+        .map(inclusion_matches)
+        .unwrap_or(true);
+    let anchor_deep = evidence
+        .anchor
+        .as_ref()
+        .map(|anchor| at_depth(evidence.best_height, anchor.height, evidence.required_depth))
+        .unwrap_or(true);
+    if !creations_present || !anchor_present {
         return LineageReport {
             identity_history_state: "INCOMPLETE",
-            bitcoin: "anchor or seal creation is not on the named best chain at the required depth",
+            bitcoin: "seal-creating transaction is absent from the named best chain",
+            rgb,
+            o2a: if evidence.o2a_ok {
+                "objects accepted"
+            } else {
+                "objects rejected"
+            },
+            header_trust,
+        };
+    }
+    if !creations_deep || !anchor_deep {
+        return LineageReport {
+            identity_history_state: "PENDING_CONFIRMATION",
+            bitcoin: "seal-creating transaction is below the required depth",
             rgb,
             o2a: if evidence.o2a_ok {
                 "objects accepted"
@@ -203,6 +222,50 @@ pub fn evaluate_lineage(evidence: &LineageEvidence, rgb: &'static str) -> Lineag
             o2a: "no valid transition closes the seal",
             header_trust,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn included(height: u32) -> InclusionProof {
+        let txid = [0x44u8; 32];
+        let mut header = [0u8; 80];
+        header[36..68].copy_from_slice(&txid);
+        InclusionProof {
+            txid,
+            index: 0,
+            siblings: Vec::new(),
+            header,
+            height,
+        }
+    }
+
+    fn evidence(best: u32, depth: u32) -> LineageEvidence {
+        LineageEvidence {
+            seals: vec![SealFact {
+                expected_script: vec![0x51],
+                observed_script: vec![0x51],
+                creation: included(100),
+            }],
+            anchor: None,
+            observation: Some(CurrentSealView {
+                unspent: true,
+                spend: None,
+            }),
+            o2a_ok: true,
+            best_height: best,
+            required_depth: depth,
+        }
+    }
+
+    #[test]
+    fn seal_creation_below_depth_is_pending() {
+        let pending = evaluate_lineage(&evidence(102, 6), "rgb");
+        assert_eq!(pending.identity_history_state, "PENDING_CONFIRMATION");
+        let current = evaluate_lineage(&evidence(105, 6), "rgb");
+        assert_eq!(current.identity_history_state, "CURRENT");
     }
 }
 

@@ -1,0 +1,16 @@
+entity_index=3
+best_height=128
+best_block_hash=3ea217362c2db64df2c0ce372a44f9fa09f32c49b89bce470c8bf99f1d030007
+source_url=tcp://electrs:50001
+required_depth=1
+anchor_txid=7b8a4510bb279aa8af1061129aa106ce4cefa187db2ad16429c854284da6f406
+anchor_height=128
+current_outpoint=7b8a4510bb279aa8af1061129aa106ce4cefa187db2ad16429c854284da6f406:1
+identity_history_state=INVALID
+bitcoin=script does not match the policy
+rgb=consignment absent
+o2a=objects rejected
+header_trust=headers come from one electrs instance; this is a trust assumption, not a light client
+
+ Container o2a-testnet-demo-toolchain-run-fa572be6b784 Creating 
+ Container o2a-testnet-demo-toolchain-run-fa572be6b784 Created 
