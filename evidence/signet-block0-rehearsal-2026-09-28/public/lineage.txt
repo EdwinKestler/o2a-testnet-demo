@@ -1,0 +1,9 @@
+contract_id=contract:hmmVcxzV-tZWyrcH-ar~EiC3-z9V6iIm-VVn6uby-S8A0KOo
+cell=UN05_DtjsDYR3IikBvPzBWUKOXqcfhXwZpPmGSnRHrU:0
+seal=51c541bccced93f7722d0171997e08669c96cfdf448f301e840ff03082571d14:0
+digest=fdc326d37bde5d5a009e97f65bf8d012130ebe2b29665c5a22e5c202247f1b06
+name=A
+current=A
+anchor_txid=51c541bccced93f7722d0171997e08669c96cfdf448f301e840ff03082571d14
+consignment=/data/genesis.rgb
+sequence=0
