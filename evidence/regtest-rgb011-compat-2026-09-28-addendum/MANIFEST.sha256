@@ -1,0 +1,4 @@
+bc08dc45fd4d0d40abac3082c63233b9c75d0d6004efedbe0fad4e4883c0ba4c  RUN.md
+bcab15a7669ff2f4f616c17fcf271d0caddd1d447e43422bee27420fa971e414  check-dependency-policy.txt
+b1d6d9e9ded473390f09ec54b856f380b59d5cb332b626b8de75582b0eab8ec3  deny-advisories-bans-sources.txt
+e3e7743600ef1741096e90b98b01d7f4d38563f2562cf7066e0718af0c566b0c  deny-licenses.txt

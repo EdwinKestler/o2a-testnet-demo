@@ -25,11 +25,15 @@ Specification authority: sibling `../o2a-protocol` at commit `b622c9830e98085c52
 4. Bitcoin payment keys have no O2A key role or key ID and never sign O2A
    objects.
 5. RGB 0.11 is never mixed with RGB 0.12.
-6. The dependency and distribution license policy in
-   `../o2a-protocol/docs/22-license-and-adoption-assessment.md` applies.
-   `MPL-2.0-no-copyleft-exception` is permitted only for unmodified
-   `base85 2.0.0`; patching or forking it is a stop. MITNFA and every
-   GPL/LGPL/AGPL expression are stops.
+6. Dependency licenses follow the 2026-09-28 assessment in
+   `../o2a-protocol/docs/22-license-and-adoption-assessment.md`
+   (decision D14 in `../o2a-protocol/docs/24-decision-audit-2026-09.md`).
+   The blocking gate is `cargo deny check advisories bans sources`.
+   `cargo deny check licenses` is report-only. A license outside the routine
+   allowlist is entered in that document's license register.
+   `MPL-2.0-no-copyleft-exception` remains a package-scoped exception for
+   unmodified `base85 2.0.0`. MITNFA is assessed for `hex_lit 0.1.1` and is
+   not added to the allowlist.
 7. Evidence is append-only. A run is never overwritten or deleted; a
    correction or rerun gets a new dated bundle and manifest.
 8. The demo site is the lowest authority level and never restates protocol rules; the O2A specification repository governs.

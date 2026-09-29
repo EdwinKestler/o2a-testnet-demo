@@ -16,7 +16,7 @@ allow = [
     "MIT",
     "MIT-0",
     "Unicode-3.0",
-    # Zlib is on the 2026-09-24 allow list. MITNFA stays absent on purpose.
+    # Reporting baseline. MITNFA is assessed under D14, not allowlisted.
     "Zlib",
 ]
 confidence-threshold = 0.8

@@ -22,12 +22,16 @@ docker compose --file dev/compose.yaml --profile tools run --rm toolchain \
     set -euo pipefail
     cargo check --workspace --locked
     cargo audit --ignore RUSTSEC-2024-0436
-    cargo deny check
+    bash dev/check-dependency-policy.sh
   '
 ```
 
-The advisory exception is the dated maintainer decision recorded in
+`dev/check-dependency-policy.sh` runs `cargo deny check advisories bans sources`
+as the blocking gate, then runs `cargo deny check licenses` and records that
+exit code without failing the script. License findings are an assessment under
+decision D14. The advisory exception is the dated maintainer decision recorded in
 `DEMO-GATE.md`; it does not generalize to other unmaintained dependencies.
+The 0.11.1 spike uses `spikes/rgb-0.11.1/check-dependency-policy.sh` the same way.
 
 `o2a-demo-core` conformance reads the sibling specification with `git show`.
 Inside the toolchain image the repository is `/workspace`, so that relative
