@@ -1,0 +1,5 @@
+entity_id=bc7c1031ad9daf1a30d2edd1b4dc91079c89ccb8bd8997e6c08fb97570861e37
+state_id=45e11a2bd42c0dbca3f06bcf5bec672e92d08dc2615c6172699923ad9feb3e9a
+seal=513f69c7d07b1bf6b664f2ca6e723938a73fd8ea8052d8b1ccc07a2ecdbfcede:0
+confirmations=6
+network=signet

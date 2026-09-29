@@ -1,0 +1,68 @@
+# Isolated regtest for the 0.11.1 port lineage.
+# Project o2a-rgb011-port. Do not point this file at the o2a-rgb011 volumes.
+name: o2a-rgb011-port
+
+services:
+  bitcoin:
+    image: o2a-rgb011-bitcoin:latest
+    pull_policy: never
+    platform: linux/amd64
+    command:
+      ["-conf=/etc/bitcoin/bitcoin.conf", "-datadir=/var/lib/bitcoin", "-rpcallowip=172.30.35.0/24", "-rpcallowip=127.0.0.1"]
+    ports:
+      - "127.0.0.1:18446:18443"
+    volumes:
+      - bitcoin-data:/var/lib/bitcoin
+    networks: [regtest]
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop: ["ALL"]
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "bitcoin-cli", "-regtest", "-datadir=/var/lib/bitcoin", "getblockchaininfo"]
+      interval: 2s
+      timeout: 5s
+      retries: 40
+      start_period: 5s
+
+  electrs:
+    image: o2a-rgb011-electrs:latest
+    pull_policy: never
+    platform: linux/amd64
+    environment:
+      RUST_BACKTRACE: "1"
+      RUST_LOG: info
+    command:
+      - --network=regtest
+      - --daemon-dir=/var/lib/bitcoin
+      - --daemon-rpc-addr=bitcoin:18443
+      - --electrum-rpc-addr=0.0.0.0:50001
+      - --monitoring-addr=0.0.0.0:4224
+      - --db-dir=/var/lib/electrs
+    ports:
+      - "127.0.0.1:50022:50001"
+    depends_on:
+      bitcoin:
+        condition: service_healthy
+    volumes:
+      - bitcoin-data:/var/lib/bitcoin:ro
+      - electrs-data:/var/lib/electrs
+    networks: [regtest]
+    read_only: true
+    tmpfs:
+      - /tmp:size=256m,mode=1777
+    cap_drop: ["ALL"]
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  regtest:
+    ipam:
+      config: !override
+        - subnet: 172.30.35.0/24
+
+volumes:
+  bitcoin-data:
+  electrs-data:

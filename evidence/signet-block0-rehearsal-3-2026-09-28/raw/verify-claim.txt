@@ -1,0 +1,11 @@
+entity_id=bc7c1031ad9daf1a30d2edd1b4dc91079c89ccb8bd8997e6c08fb97570861e37
+Consignment is valid | tx_ord_map: | 
+source=bitcoin-rpc getrawtransaction+getblockheader
+best_height=324129
+identity_history_state=CURRENT
+bitcoin=current seal is unspent and the supplied proofs meet the header
+rgb=Consignment is valid
+o2a=objects accepted
+header_trust=headers come from one electrs instance; this is a trust assumption, not a light client
+
+name_claim=valid

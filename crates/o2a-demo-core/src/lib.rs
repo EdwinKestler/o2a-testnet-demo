@@ -33,7 +33,7 @@ pub use eval::{
 };
 pub use seal::{recovery_leaf, script_num, seal_script, SealScript, NUMS_X};
 
-pub const SPEC_COMMIT: &str = "b622c9830e98085c5270a604dc14fa7bec1bf2c2";
+pub const SPEC_COMMIT: &str = "0a8d54f30b431661adefdbf1d4cdb10a42eca47a";
 pub const CANONICAL_RULES: [&str; 4] = [
     "../o2a-protocol/specs/canonical-encoding.md",
     "../o2a-protocol/specs/cryptographic-profile.md",
@@ -361,16 +361,16 @@ pub fn genesis_with(root: DemoKey, state: &ResultingState) -> SignedObject {
     sign(GENESIS_TAG, payload, root)
 }
 
-/// Recomputes the seal script from the signed state that names `outpoint`.
+/// Decodes the signed state that names `outpoint`.
 ///
 /// A history with no genesis payload is `missing genesis`. The seal record is
 /// not an input.
-pub fn script_for_named_seal(
+pub fn state_named_by_signed(
     payloads: &[&[u8]],
     outpoint: &[u8; 36],
-) -> Result<Vec<u8>, &'static str> {
+) -> Result<ResultingState, &'static str> {
     let mut saw_genesis = false;
-    let mut script = None;
+    let mut found = None;
     for payload in payloads {
         if payload.len() < 5 {
             return Err("truncated payload");
@@ -384,16 +384,24 @@ pub fn script_for_named_seal(
             saw_genesis = true;
         }
         if state.next_seal == *outpoint {
-            if script.is_some() {
+            if found.is_some() {
                 return Err("more than one state names this seal");
             }
-            script = Some(seal_for_state(&state)?.script_pubkey);
+            found = Some(state);
         }
     }
     if !saw_genesis {
         return Err("missing genesis");
     }
-    script.ok_or("no state names this seal")
+    found.ok_or("no state names this seal")
+}
+
+/// Recomputes the seal script from the signed state that names `outpoint`.
+pub fn script_for_named_seal(
+    payloads: &[&[u8]],
+    outpoint: &[u8; 36],
+) -> Result<Vec<u8>, &'static str> {
+    Ok(seal_for_state(&state_named_by_signed(payloads, outpoint)?)?.script_pubkey)
 }
 
 pub fn seal_for_state(state: &ResultingState) -> Result<SealScript, &'static str> {
@@ -834,6 +842,30 @@ mod tests {
         };
         assert_eq!(
             script_for_named_seal(&[&transition], &outpoint),
+            Err("missing genesis")
+        );
+    }
+
+    #[test]
+    fn signed_state_is_the_decoded_object() {
+        let outpoint = [0x45; 36];
+        let state = fresh_state(outpoint, 0x91);
+        let payload = genesis_with(fresh_key(0x14), &state).payload;
+        let decoded = state_named_by_signed(&[&payload], &outpoint).unwrap();
+        assert_eq!(decoded, state);
+        let script = seal_for_state(&decoded).unwrap().script_pubkey;
+        let demo_script = seal_for_state(&demo_genesis_state(outpoint))
+            .unwrap()
+            .script_pubkey;
+        let hostile = b"hostile-record-script".to_vec();
+        assert_ne!(script, demo_script);
+        assert_ne!(script, hostile);
+        assert_eq!(
+            script_for_named_seal(&[&payload], &outpoint).unwrap(),
+            script
+        );
+        assert_eq!(
+            state_named_by_signed(&[], &outpoint),
             Err("missing genesis")
         );
     }

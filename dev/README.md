@@ -31,7 +31,10 @@ as the blocking gate, then runs `cargo deny check licenses` and records that
 exit code without failing the script. License findings are an assessment under
 decision D14. The advisory exception is the dated maintainer decision recorded in
 `DEMO-GATE.md`; it does not generalize to other unmaintained dependencies.
-The 0.11.1 spike uses `spikes/rgb-0.11.1/check-dependency-policy.sh` the same way.
+The 0.11.1 adapter uses `spikes/rgb-0.11.1/check-dependency-policy.sh` the same way.
+Its workspace is separate. Run it with
+`cargo test --manifest-path spikes/rgb-0.11.1/Cargo.toml --locked`.
+A plain `cargo test` in the parent workspace builds `o2a-demo-core` only.
 
 `o2a-demo-core` conformance reads the sibling specification with `git show`.
 Inside the toolchain image the repository is `/workspace`, so that relative

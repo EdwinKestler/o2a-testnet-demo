@@ -21,23 +21,39 @@ pub struct Node {
 
 impl Node {
     pub fn connect() -> Result<Self, String> {
+        Self::connect_wallet(true)
+    }
+
+    /// `create_miner` is for the disposable regtest wallet. Signet reads leave it false.
+    pub fn connect_wallet(create_miner: bool) -> Result<Self, String> {
         let url = std::env::var("BITCOIN_RPC").unwrap_or_else(|_| "http://127.0.0.1:18445".into());
         let (host, port) = parse_http(&url)?;
-        let cookie_path =
-            std::env::var("BITCOIN_COOKIE").unwrap_or_else(|_| "/tmp/rgb011.cookie".into());
-        let cookie = std::fs::read_to_string(&cookie_path)
-            .map_err(|err| format!("cookie {cookie_path}: {err}"))?;
-        let auth = base64(cookie.trim().as_bytes());
+        let auth = if let (Ok(user), Ok(pass)) = (
+            std::env::var("BITCOIN_RPC_USER"),
+            std::env::var("BITCOIN_RPC_PASSWORD"),
+        ) {
+            base64(format!("{user}:{pass}").as_bytes())
+        } else {
+            let cookie_path =
+                std::env::var("BITCOIN_COOKIE").unwrap_or_else(|_| "/tmp/rgb011.cookie".into());
+            let cookie = std::fs::read_to_string(&cookie_path)
+                .map_err(|err| format!("cookie {cookie_path}: {err}"))?;
+            base64(cookie.trim().as_bytes())
+        };
         let node = Self {
             host,
             port,
             auth,
-            miner: "miner".into(),
+            miner: std::env::var("BITCOIN_WALLET").unwrap_or_else(|_| "miner".into()),
         };
-        match node.call(false, "createwallet", json!(["miner"])) {
-            Ok(_) => {}
-            Err(err) if err.contains("already exists") || err.contains("Database already exists") => {}
-            Err(err) => return Err(err),
+        if create_miner {
+            match node.call(false, "createwallet", json!([node.miner])) {
+                Ok(_) => {}
+                Err(err)
+                    if err.contains("already exists")
+                        || err.contains("Database already exists") => {}
+                Err(err) => return Err(err),
+            }
         }
         Ok(node)
     }
@@ -118,7 +134,10 @@ impl Node {
             .and_then(Value::as_str)
             .ok_or("missing tx hex")?
             .to_string();
-        let height = tx.get("blockheight").and_then(Value::as_u64).map(|v| v as u32);
+        let height = tx
+            .get("blockheight")
+            .and_then(Value::as_u64)
+            .map(|v| v as u32);
         let time = tx
             .get("blocktime")
             .and_then(Value::as_i64)
@@ -136,9 +155,14 @@ pub struct ElectrumResolver {
 impl ElectrumResolver {
     pub fn open() -> Result<Self, String> {
         let addr = std::env::var("ELECTRUM").unwrap_or_else(|_| "127.0.0.1:50021".into());
+        let rpc = if chain_net() == ChainNet::BitcoinSignet {
+            Node::connect_wallet(false)?
+        } else {
+            Node::connect()?
+        };
         Ok(Self {
             addr,
-            rpc: Node::connect()?,
+            rpc,
             next_id: 1,
         })
     }
@@ -146,7 +170,8 @@ impl ElectrumResolver {
     fn call(&mut self, method: &str, params: Value) -> Result<Value, String> {
         let id = self.next_id;
         self.next_id += 1;
-        let mut stream = TcpStream::connect(&self.addr).map_err(|err| format!("electrum: {err}"))?;
+        let mut stream =
+            TcpStream::connect(&self.addr).map_err(|err| format!("electrum: {err}"))?;
         stream
             .set_read_timeout(Some(Duration::from_secs(20)))
             .map_err(|err| err.to_string())?;
@@ -170,7 +195,8 @@ impl ElectrumResolver {
             }
         }
         let text = String::from_utf8(buffer).map_err(|err| err.to_string())?;
-        let value: Value = serde_json::from_str(&text).map_err(|err| format!("electrum json: {err}"))?;
+        let value: Value =
+            serde_json::from_str(&text).map_err(|err| format!("electrum json: {err}"))?;
         if let Some(err) = value.get("error").filter(|item| !item.is_null()) {
             return Err(err.to_string());
         }
@@ -184,6 +210,15 @@ impl ElectrumResolver {
             .and_then(Value::as_u64)
             .map(|height| height as u32)
             .ok_or_else(|| format!("electrum tip {result}"))
+    }
+}
+
+pub fn chain_net() -> ChainNet {
+    match std::env::var("RGB_CHAIN").ok().as_deref() {
+        None | Some("") | Some("regtest") => ChainNet::BitcoinRegtest,
+        Some("signet") => ChainNet::BitcoinSignet,
+        Some("mainnet") => panic!("mainnet is not authorized"),
+        Some(other) => panic!("unknown RGB_CHAIN {other}"),
     }
 }
 
@@ -215,7 +250,10 @@ impl ResolveWitness for ElectrumResolver {
             },
             next_id: 1,
         };
-        let looked = probe.call("blockchain.transaction.get", json!([witness_id.to_string(), true]));
+        let looked = probe.call(
+            "blockchain.transaction.get",
+            json!([witness_id.to_string(), true]),
+        );
         let tx_json = match looked {
             Ok(value) => value,
             Err(err) if err.to_lowercase().contains("no such") || err.contains("not found") => {
@@ -232,7 +270,10 @@ impl ResolveWitness for ElectrumResolver {
         let raw = hex::decode(hex).map_err(|_| WitnessResolverError::InvalidResolverData)?;
         let tx: Transaction =
             deserialize(&raw).map_err(|_| WitnessResolverError::InvalidResolverData)?;
-        let confirmations = tx_json.get("confirmations").and_then(Value::as_u64).unwrap_or(0);
+        let confirmations = tx_json
+            .get("confirmations")
+            .and_then(Value::as_u64)
+            .unwrap_or(0);
         if confirmations == 0 {
             return Ok(WitnessStatus::Resolved(tx, WitnessOrd::Tentative));
         }
@@ -276,8 +317,8 @@ impl ResolveWitness for ElectrumResolver {
         Ok(WitnessStatus::Resolved(tx, WitnessOrd::Mined(position)))
     }
 
-    fn check_chain_net(&self, chain_net: ChainNet) -> Result<(), WitnessResolverError> {
-        if chain_net == ChainNet::BitcoinRegtest {
+    fn check_chain_net(&self, offered: ChainNet) -> Result<(), WitnessResolverError> {
+        if offered == chain_net() {
             Ok(())
         } else {
             Err(WitnessResolverError::WrongChainNet)
@@ -295,7 +336,9 @@ fn parse_http(url: &str) -> Result<(String, u16), String> {
     let rest = url
         .strip_prefix("http://")
         .ok_or_else(|| format!("rpc url {url}"))?;
-    let (host, port) = rest.split_once(':').ok_or_else(|| format!("rpc url {url}"))?;
+    let (host, port) = rest
+        .split_once(':')
+        .ok_or_else(|| format!("rpc url {url}"))?;
     let port = port
         .trim_end_matches('/')
         .parse()
@@ -308,7 +351,8 @@ fn base64(data: &[u8]) -> String {
     let mut out = String::new();
     let mut index = 0;
     while index + 3 <= data.len() {
-        let chunk = ((data[index] as u32) << 16) | ((data[index + 1] as u32) << 8) | data[index + 2] as u32;
+        let chunk =
+            ((data[index] as u32) << 16) | ((data[index + 1] as u32) << 8) | data[index + 2] as u32;
         out.push(TABLE[((chunk >> 18) & 63) as usize] as char);
         out.push(TABLE[((chunk >> 12) & 63) as usize] as char);
         out.push(TABLE[((chunk >> 6) & 63) as usize] as char);

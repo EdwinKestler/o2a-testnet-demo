@@ -1,6 +1,7 @@
 //! Regtest compatibility checks for RGB 0.11.1. No wallet claims the seal UTXOs.
 
 mod chain;
+mod lineage;
 mod schema;
 mod spend;
 
@@ -15,14 +16,14 @@ use o2a_demo_core::{
     demo_genesis_state, demo_keys, demo_rotation_state, entity_id, genesis_with, seal_for_state,
     state_id,
 };
-use rgbstd::bitcoin::hashes::Hash;
 use rgbstd::bitcoin::consensus::encode::deserialize;
+use rgbstd::bitcoin::hashes::Hash;
 use rgbstd::bitcoin::{Address, Amount, Network, OutPoint, ScriptBuf, Transaction, Txid};
 use rgbstd::containers::{Consignment, ConsignmentExt, Fascia};
 use rgbstd::contract::AllocatedState;
 use rgbstd::persistence::{ContractStateRead, Stock};
 use rgbstd::validation::{Status, ValidationConfig, WitnessOrdProvider};
-use rgbstd::{ChainNet, Operation, Opout, OutputSeal, SecretSeal};
+use rgbstd::{Operation, Opout, OutputSeal, SecretSeal};
 use schemata::NIA_SCHEMA_ID;
 use serde_json::{json, Value};
 use strict_encoding::{StrictDeserialize, StrictSerialize};
@@ -34,7 +35,16 @@ const MINER_FEE: u64 = 15_000;
 const NEXT_SATS: u64 = 100_000;
 
 fn main() {
-    if let Err(err) = run() {
+    let command = std::env::args().nth(1);
+    let result = match command.as_deref() {
+        Some("lineage") => lineage::run(),
+        Some("plan") => lineage::plan(),
+        Some("signet-genesis") => lineage::signet_genesis(),
+        Some("signet-claim") => lineage::signet_claim(),
+        Some("signet-verify") => lineage::signet_verify(),
+        _ => run(),
+    };
+    if let Err(err) = result {
         eprintln!("setup failed: {err}");
         std::process::exit(1);
     }
@@ -83,7 +93,8 @@ impl WitnessOrdProvider for TentativeOrd {
 }
 
 fn run() -> Result<(), String> {
-    let dir = PathBuf::from(std::env::var("RGB011_EVIDENCE").map_err(|_| "RGB011_EVIDENCE is required")?);
+    let dir =
+        PathBuf::from(std::env::var("RGB011_EVIDENCE").map_err(|_| "RGB011_EVIDENCE is required")?);
     let mut log = Log::open(dir)?;
     let _ = rgb::resolvers::ContractIssueResolver;
     if std::env::var("O2A_DEMO_SEED_FILE").is_err() {
@@ -112,18 +123,19 @@ fn run() -> Result<(), String> {
         "rgb-api link ContractIssueResolver is present; RgbWallet and rgb-lib are not called"
     ));
 
-    let prepared = match std::panic::catch_unwind(std::panic::AssertUnwindSafe(schema::identity_schema)) {
-        Ok(schema) => schema,
-        Err(_) => {
-            log.case(
-                "C1",
-                "O2A identity schema builds and a genesis validates",
-                "identity_schema panicked while resolving O2aDigest",
-                false,
-            );
-            return Ok(());
-        }
-    };
+    let prepared =
+        match std::panic::catch_unwind(std::panic::AssertUnwindSafe(schema::identity_schema)) {
+            Ok(schema) => schema,
+            Err(_) => {
+                log.case(
+                    "C1",
+                    "O2A identity schema builds and a genesis validates",
+                    "identity_schema panicked while resolving O2aDigest",
+                    false,
+                );
+                return Ok(());
+            }
+        };
     let schema_id = prepared.schema.schema_id();
     let validators_none = prepared.schema.genesis.validator.is_none()
         && prepared
@@ -151,7 +163,9 @@ fn run() -> Result<(), String> {
     let real_script = seal_for_state(&real_placeholder).map_err(|err| err.to_string())?;
     let scripts_ignore_outpoint = genesis_script.script_pubkey == real_script.script_pubkey
         && genesis_script.scripts == real_script.scripts;
-    log.line(&format!("o2a_script_ignores_outpoint {scripts_ignore_outpoint}"));
+    log.line(&format!(
+        "o2a_script_ignores_outpoint {scripts_ignore_outpoint}"
+    ));
 
     let seal_script = ScriptBuf::from_bytes(genesis_script.script_pubkey.clone());
     let next_script = ScriptBuf::from_bytes(rotation_script.script_pubkey.clone());
@@ -269,7 +283,10 @@ fn run() -> Result<(), String> {
         13,
     );
     match &revoke {
-        Ok(transition) => log.line(&format!("revoke_offline opid {} not_broadcast", transition.id())),
+        Ok(transition) => log.line(&format!(
+            "revoke_offline opid {} not_broadcast",
+            transition.id()
+        )),
         Err(err) => log.line(&format!("revoke_offline error {err}")),
     }
 
@@ -304,7 +321,9 @@ fn run() -> Result<(), String> {
         seal_a.outpoint,
         Amount::from_sat(100_000),
         &genesis_script,
-        spend::LeafSpend::Controller { key: keys.seal_controller_0 },
+        spend::LeafSpend::Controller {
+            key: keys.seal_controller_0,
+        },
         funded.outs["fee4"],
         Amount::from_sat(60_000),
         &fee.keypair,
@@ -318,9 +337,27 @@ fn run() -> Result<(), String> {
     let spent = match spent {
         Ok(spent) => spent,
         Err(err) => {
-            log.case("C3", "PSBT embeds and commits the rotate transition", &err, false);
+            log.case(
+                "C3",
+                "PSBT embeds and commits the rotate transition",
+                &err,
+                false,
+            );
             log.case("C4", "broadcast, mine, two validators agree", &err, false);
-            finish_rest(&mut log, &node, &mut stock, &prepared, &genesis_script, &fee, &keys, &funded, &seal_r, &seal_c, &seal_d1, &seal_d2)?;
+            finish_rest(
+                &mut log,
+                &node,
+                &mut stock,
+                &prepared,
+                &genesis_script,
+                &fee,
+                &keys,
+                &funded,
+                &seal_r,
+                &seal_c,
+                &seal_d1,
+                &seal_d2,
+            )?;
             return Ok(());
         }
     };
@@ -360,7 +397,11 @@ fn run() -> Result<(), String> {
         Amount::from_sat(110_000),
         &genesis_script,
         spend::LeafSpend::Recovery {
-            keys: [keys.seal_recovery_0, keys.seal_recovery_1, keys.seal_recovery_2],
+            keys: [
+                keys.seal_recovery_0,
+                keys.seal_recovery_1,
+                keys.seal_recovery_2,
+            ],
         },
         funded.outs["fee5"],
         Amount::from_sat(61_000),
@@ -388,13 +429,33 @@ fn run() -> Result<(), String> {
                 pass && !accepted_early,
             );
             if pass {
-                let _ = consume_and_validate(&mut log, &node, &mut stock, &prepared.types, &recovery, "c5");
+                let _ = consume_and_validate(
+                    &mut log,
+                    &node,
+                    &mut stock,
+                    &prepared.types,
+                    &recovery,
+                    "c5",
+                );
             }
         }
         Err(err) => log.case("C5", "recovery leaf spend", &err, false),
     }
 
-    finish_rest(&mut log, &node, &mut stock, &prepared, &genesis_script, &fee, &keys, &funded, &seal_r, &seal_c, &seal_d1, &seal_d2)?;
+    finish_rest(
+        &mut log,
+        &node,
+        &mut stock,
+        &prepared,
+        &genesis_script,
+        &fee,
+        &keys,
+        &funded,
+        &seal_r,
+        &seal_c,
+        &seal_d1,
+        &seal_d2,
+    )?;
     log.line("checks_finished");
     Ok(())
 }
@@ -437,16 +498,27 @@ fn issued_contract(
         "{label} entity {} digest {} state {} outpoint {txid}:{vout}",
         hex::encode(entity),
         hex::encode(digest),
-        hex::encode(state_id(&entity, &o2a_demo_core::encode_resulting_state(&state)))
+        hex::encode(state_id(
+            &entity,
+            &o2a_demo_core::encode_resulting_state(&state)
+        ))
     ));
     let issued = schema::issue_at(prepared, digest, outpoint, BLINDING, timestamp)?;
     let contract_id = ConsignmentExt::contract_id(&*issued);
-    let opout = Opout::new(ConsignmentExt::genesis(&*issued).id(), schema::OS_IDENTITY, 0);
+    let opout = Opout::new(
+        ConsignmentExt::genesis(&*issued).id(),
+        schema::OS_IDENTITY,
+        0,
+    );
     let bytes = consignment_bytes(&*issued)?;
     log.write(&format!("{label}.strict"), &bytes)?;
-    let report = dual_validate::<false>(&bytes, &prepared.types).unwrap_or_else(|err| format!("ERROR {err}"));
+    let report = dual_validate::<false>(&bytes, &prepared.types)
+        .unwrap_or_else(|err| format!("ERROR {err}"));
     let valid = report.starts_with("Consignment is valid");
-    let imported = stock.import_contract(issued.into_valid_contract(), chain::ElectrumResolver::open()?);
+    let imported = stock.import_contract(
+        issued.into_valid_contract(),
+        chain::ElectrumResolver::open()?,
+    );
     if let Err(err) = &imported {
         log.line(&format!("{label} import {err}"));
     }
@@ -495,33 +567,51 @@ fn fund_one(node: &chain::Node, script: &ScriptBuf, sats: u64) -> Result<OutPoin
         .and_then(|items| items.first())
         .ok_or("no mature wallet output")?
         .clone();
-    let inputs = json!([{ "txid": utxo["txid"], "vout": utxo["vout"] }]);
+    let inputs =
+        json!([{ "txid": utxo["txid"], "vout": utxo["vout"], "sequence": 4_294_967_294u32 }]);
     let address = Address::from_script(script, Network::Regtest).map_err(|err| err.to_string())?;
     let raw = node
-        .call(true, "createrawtransaction", json!([inputs, [{ address.to_string(): btc(sats) }]]))?
+        .call(
+            true,
+            "createrawtransaction",
+            json!([inputs, [{ address.to_string(): btc(sats) }], 0, false]),
+        )?
         .as_str()
         .ok_or("createrawtransaction")?
         .to_string();
     let funded = match node.call(
         true,
         "fundrawtransaction",
-        json!([raw, { "changePosition": 1, "fee_rate": 5 }]),
+        json!([raw, { "changePosition": 1, "fee_rate": 5, "replaceable": false }]),
     ) {
         Ok(value) => value,
-        Err(_) => node.call(true, "fundrawtransaction", json!([raw, { "changePosition": 1 }]))?,
+        Err(_) => node.call(
+            true,
+            "fundrawtransaction",
+            json!([raw, { "changePosition": 1, "replaceable": false }]),
+        )?,
     };
-    let funded_hex = funded.get("hex").and_then(Value::as_str).ok_or("fund hex")?;
+    let funded_hex = funded
+        .get("hex")
+        .and_then(Value::as_str)
+        .ok_or("fund hex")?;
     let signed = node.call(true, "signrawtransactionwithwallet", json!([funded_hex]))?;
     if signed.get("complete").and_then(Value::as_bool) != Some(true) {
         return Err(format!("wallet did not sign the funding tx: {signed}"));
     }
-    let hex = signed.get("hex").and_then(Value::as_str).ok_or("signed hex")?.to_string();
+    let hex = signed
+        .get("hex")
+        .and_then(Value::as_str)
+        .ok_or("signed hex")?
+        .to_string();
     let tx: Transaction = deserialize(&hex::decode(&hex).map_err(|err| err.to_string())?)
         .map_err(|err| err.to_string())?;
     let vout = tx
         .output
         .iter()
-        .position(|output| output.value.to_sat() == sats && output.script_pubkey.as_bytes() == script.as_bytes())
+        .position(|output| {
+            output.value.to_sat() == sats && output.script_pubkey.as_bytes() == script.as_bytes()
+        })
         .ok_or("funded tx is missing the requested output")? as u32;
     let txid_text = node
         .call(false, "sendrawtransaction", json!([hex]))?
@@ -546,7 +636,9 @@ fn canonical_outpoint(txid: Txid, vout: u32) -> [u8; 36] {
     out
 }
 
-fn consignment_bytes<const TRANSFER: bool>(consignment: &Consignment<TRANSFER>) -> Result<Vec<u8>, String> {
+fn consignment_bytes<const TRANSFER: bool>(
+    consignment: &Consignment<TRANSFER>,
+) -> Result<Vec<u8>, String> {
     Ok(consignment
         .to_strict_serialized::<MAX_CONSIGNMENT>()
         .map_err(|err| err.to_string())?
@@ -556,7 +648,8 @@ fn consignment_bytes<const TRANSFER: bool>(consignment: &Consignment<TRANSFER>) 
 fn load_consignment<const TRANSFER: bool>(bytes: &[u8]) -> Result<Consignment<TRANSFER>, String> {
     let confined = Confined::<Vec<u8>, 0, MAX_CONSIGNMENT>::try_from(bytes.to_vec())
         .map_err(|err| format!("consignment bounds: {err:?}"))?;
-    Consignment::<TRANSFER>::from_strict_serialized::<MAX_CONSIGNMENT>(confined).map_err(|err| err.to_string())
+    Consignment::<TRANSFER>::from_strict_serialized::<MAX_CONSIGNMENT>(confined)
+        .map_err(|err| err.to_string())
 }
 
 fn report(status: &Status) -> String {
@@ -578,7 +671,7 @@ fn validate_one<const TRANSFER: bool>(bytes: &[u8], types: &TypeSystem) -> Resul
     let consignment = load_consignment::<TRANSFER>(bytes)?;
     let resolver = chain::ElectrumResolver::open()?;
     let config = ValidationConfig {
-        chain_net: ChainNet::BitcoinRegtest,
+        chain_net: chain::chain_net(),
         safe_height: None,
         trusted_typesystem: types.clone(),
         build_opouts_dag: false,
@@ -593,7 +686,9 @@ fn dual_validate<const TRANSFER: bool>(bytes: &[u8], types: &TypeSystem) -> Resu
     let first = validate_one::<TRANSFER>(bytes, types)?;
     let second = validate_one::<TRANSFER>(bytes, types)?;
     if first != second {
-        return Err(format!("validator mismatch\n--- 1 ---\n{first}\n--- 2 ---\n{second}"));
+        return Err(format!(
+            "validator mismatch\n--- 1 ---\n{first}\n--- 2 ---\n{second}"
+        ));
     }
     Ok(first)
 }
@@ -659,7 +754,8 @@ fn broadcast_commit(
         Ok(text) => text,
         Err(err) => format!("consume error {err}"),
     };
-    let pass = chain_text.contains("validators_agree true") && chain_text.contains("Consignment is valid");
+    let pass =
+        chain_text.contains("validators_agree true") && chain_text.contains("Consignment is valid");
     Ok(ChainResult {
         text: format!("mined {height} tx {} {chain_text}", spent.txid),
         pass,
@@ -674,16 +770,18 @@ fn consume_and_validate(
     spent: &spend::CommittedSpend,
     label: &str,
 ) -> Result<String, String> {
-    let consume_note = match stock.consume_fascia(spent.fascia.clone(), chain::ElectrumResolver::open()?) {
-        Ok(()) => "consume mined".to_string(),
-        Err(err) => {
-            stock
-                .consume_fascia(spent.fascia.clone(), TentativeOrd)
-                .map_err(|fallback| format!("consume mined: {err}; tentative: {fallback}"))?;
-            let update = stock.update_witnesses(chain::ElectrumResolver::open()?, 1, vec![spent.txid]);
-            format!("consume tentative after {err}; update {update:?}")
-        }
-    };
+    let consume_note =
+        match stock.consume_fascia(spent.fascia.clone(), chain::ElectrumResolver::open()?) {
+            Ok(()) => "consume mined".to_string(),
+            Err(err) => {
+                stock
+                    .consume_fascia(spent.fascia.clone(), TentativeOrd)
+                    .map_err(|fallback| format!("consume mined: {err}; tentative: {fallback}"))?;
+                let update =
+                    stock.update_witnesses(chain::ElectrumResolver::open()?, 1, vec![spent.txid]);
+                format!("consume tentative after {err}; update {update:?}")
+            }
+        };
     let next = OutputSeal::with(spent.txid, 1u32);
     let transfer = stock
         .transfer_from_fascia(
@@ -697,7 +795,10 @@ fn consume_and_validate(
     let bytes = consignment_bytes(&transfer)?;
     log.write(&format!("{label}-transfer.strict"), &bytes)?;
     let report = dual_validate::<true>(&bytes, types).unwrap_or_else(|err| format!("ERROR {err}"));
-    log.write(format!("{label}-validators.txt").as_str(), report.as_bytes())?;
+    log.write(
+        format!("{label}-validators.txt").as_str(),
+        report.as_bytes(),
+    )?;
     let agree = !report.starts_with("ERROR") && !report.contains("validator mismatch");
     let _ = node;
     Ok(format!(
@@ -732,7 +833,10 @@ fn relative_lock(node: &chain::Node, hex: &str) -> Result<String, String> {
             .as_array()
             .and_then(|items| items.first())
             .ok_or("testmempoolaccept")?;
-        let allowed = item.get("allowed").and_then(Value::as_bool).unwrap_or(false);
+        let allowed = item
+            .get("allowed")
+            .and_then(Value::as_bool)
+            .unwrap_or(false);
         if allowed {
             allowed_at = Some(height);
             break;
@@ -745,7 +849,9 @@ fn relative_lock(node: &chain::Node, hex: &str) -> Result<String, String> {
         node.mine(1)?;
     }
     let Some(allowed_at) = allowed_at else {
-        return Ok(format!("FAIL never allowed start {start} early {early_text} last {last_reject}"));
+        return Ok(format!(
+            "FAIL never allowed start {start} early {early_text} last {last_reject}"
+        ));
     };
     let broadcast_at = node.height()?;
     let sent = node.call(false, "sendrawtransaction", json!([hex]))?;
@@ -783,7 +889,12 @@ fn finish_rest(
             log.write("c6-plain.hex", hex_tx.as_bytes())?;
             let sent = node.raw(false, "sendrawtransaction", json!([hex_tx]))?;
             if sent.get("error").is_some_and(|err| !err.is_null()) {
-                log.case("C6", "plain spend leaves the previous RGB validation without an error", &sent.to_string(), false);
+                log.case(
+                    "C6",
+                    "plain spend leaves the previous RGB validation without an error",
+                    &sent.to_string(),
+                    false,
+                );
             } else {
                 let height = node.mine(1)?;
                 let again = dual_validate::<false>(&seal_c.bytes, &prepared.types)
@@ -823,7 +934,9 @@ fn finish_rest(
                 seal_d2.outpoint,
                 Amount::from_sat(130_000),
                 genesis_script,
-                spend::LeafSpend::Controller { key: keys.seal_controller_0 },
+                spend::LeafSpend::Controller {
+                    key: keys.seal_controller_0,
+                },
                 funded.outs["fee7"],
                 Amount::from_sat(62_000),
                 &fee.keypair,
@@ -847,7 +960,8 @@ fn finish_rest(
                         );
                     } else {
                         let height = node.mine(1)?;
-                        let _ = consume_and_validate(log, node, stock, &prepared.types, &spent, "c7");
+                        let _ =
+                            consume_and_validate(log, node, stock, &prepared.types, &spent, "c7");
                         let bitcoin = chain_spent(node, seal_d1.outpoint);
                         let again = dual_validate::<false>(&seal_d1.bytes, &prepared.types)
                             .unwrap_or_else(|err| format!("ERROR {err}"));
@@ -878,11 +992,18 @@ fn finish_rest(
 }
 
 fn chain_spent(node: &chain::Node, outpoint: OutPoint) -> String {
-    match node.call(false, "gettxout", json!([outpoint.txid.to_string(), outpoint.vout, false])) {
+    match node.call(
+        false,
+        "gettxout",
+        json!([outpoint.txid.to_string(), outpoint.vout, false]),
+    ) {
         Ok(Value::Null) => "spent".into(),
         Ok(value) => format!(
             "unspent confirmations {}",
-            value.get("confirmations").and_then(Value::as_u64).unwrap_or(0)
+            value
+                .get("confirmations")
+                .and_then(Value::as_u64)
+                .unwrap_or(0)
         ),
         Err(err) => format!("gettxout error {err}"),
     }

@@ -1,0 +1,3 @@
+The stand-in seed stayed outside the repository.
+Verifier A, verifier B, and the restore ran with the seed variable unset.
+The seed file is not in this bundle.

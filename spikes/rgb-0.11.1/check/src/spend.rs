@@ -3,19 +3,19 @@
 use o2a_demo_core::{DemoKey, SealScript, NUMS_X};
 use psrgbt::RgbPsbtExt;
 use rgbstd::bitcoin::absolute::LockTime;
-use rgbstd::bitcoin::hashes::Hash;
 use rgbstd::bitcoin::consensus::encode::serialize;
+use rgbstd::bitcoin::hashes::Hash;
 use rgbstd::bitcoin::key::{Keypair, Parity, TapTweak};
 use rgbstd::bitcoin::secp256k1::{Message, Secp256k1, SecretKey};
 use rgbstd::bitcoin::sighash::{Prevouts, SighashCache, TapSighashType};
-use rgbstd::bitcoin::taproot::{ControlBlock, LeafVersion, TapLeafHash, TapNodeHash, TaprootMerkleBranch};
-use rgbstd::bitcoin::transaction::Version;
-use rgbstd::bitcoin::{
-    Amount, OutPoint, ScriptBuf, Sequence, Transaction, TxIn, TxOut, Witness,
+use rgbstd::bitcoin::taproot::{
+    ControlBlock, LeafVersion, TapLeafHash, TapNodeHash, TaprootMerkleBranch,
 };
+use rgbstd::bitcoin::transaction::Version;
+use rgbstd::bitcoin::{Amount, OutPoint, ScriptBuf, Sequence, Transaction, TxIn, TxOut, Witness};
 use rgbstd::containers::Fascia;
 use rgbstd::txout::CloseMethod;
-use rgbstd::{Operation, OpId, Transition, Txid};
+use rgbstd::{OpId, Operation, Transition, Txid};
 
 pub struct LocalKey {
     pub keypair: Keypair,
@@ -112,16 +112,19 @@ pub fn commit_opret(
         script_pubkey: fee_script(fee_key),
     });
     let secp = Secp256k1::new();
-    let internal = rgbstd::bitcoin::XOnlyPublicKey::from_slice(&NUMS_X).map_err(|err| err.to_string())?;
+    let internal =
+        rgbstd::bitcoin::XOnlyPublicKey::from_slice(&NUMS_X).map_err(|err| err.to_string())?;
     psbt.inputs[0].tap_internal_key = Some(internal);
-    psbt.inputs[0].tap_merkle_root = Some(
-        TapNodeHash::from_slice(&seal.merkle_root).map_err(|err| err.to_string())?,
-    );
+    psbt.inputs[0].tap_merkle_root =
+        Some(TapNodeHash::from_slice(&seal.merkle_root).map_err(|err| err.to_string())?);
     psbt.set_rgb_close_method(CloseMethod::OpretFirst);
     psbt.set_opret_host();
     psbt.set_as_unmodifiable();
-    psbt.push_rgb_transition(transition).map_err(|err| err.to_string())?;
-    let fascia = psbt.rgb_commit().map_err(|err| format!("rgb_commit: {err}"))?;
+    psbt.push_rgb_transition(transition)
+        .map_err(|err| err.to_string())?;
+    let fascia = psbt
+        .rgb_commit()
+        .map_err(|err| format!("rgb_commit: {err}"))?;
     let committed = psbt.unsigned_tx.clone();
     if committed.compute_txid() != fascia.witness_id() {
         return Err(format!(
@@ -146,7 +149,9 @@ pub fn commit_opret(
     psbt.inputs[0].final_script_witness = Some(seal_witness);
     psbt.inputs[1].final_script_sig = Some(ScriptBuf::new());
     psbt.inputs[1].final_script_witness = Some(fee_witness);
-    let tx = psbt.extract_tx().map_err(|err| format!("extract: {err:?}"))?;
+    let tx = psbt
+        .extract_tx()
+        .map_err(|err| format!("extract: {err:?}"))?;
     if tx.compute_txid() != fascia.witness_id() {
         return Err("signed txid moved after the commitment".into());
     }
@@ -202,7 +207,11 @@ pub fn tapret_probe(transition: Transition, with_tree: bool) -> String {
     let (xonly, _) = internal.keypair.x_only_public_key();
     let script = if with_tree {
         let leaf = ScriptBuf::from_bytes(vec![0x51]);
-        ScriptBuf::new_p2tr(&secp, xonly, Some(TapNodeHash::from_script(&leaf, LeafVersion::TapScript)))
+        ScriptBuf::new_p2tr(
+            &secp,
+            xonly,
+            Some(TapNodeHash::from_script(&leaf, LeafVersion::TapScript)),
+        )
     } else {
         ScriptBuf::new_p2tr(&secp, xonly, None)
     };
@@ -306,7 +315,8 @@ fn seal_witness(
     }
     let control = control_block(seal, leaf_index)?;
     let secp = Secp256k1::new();
-    let output = rgbstd::bitcoin::XOnlyPublicKey::from_slice(&seal.output_key).map_err(|err| err.to_string())?;
+    let output = rgbstd::bitcoin::XOnlyPublicKey::from_slice(&seal.output_key)
+        .map_err(|err| err.to_string())?;
     if !control.verify_taproot_commitment(&secp, output, &script) {
         return Err("control block does not match the seal output key".into());
     }
@@ -331,7 +341,8 @@ fn control_block(seal: &SealScript, leaf_index: usize) -> Result<ControlBlock, S
         } else {
             Parity::Even
         },
-        internal_key: rgbstd::bitcoin::XOnlyPublicKey::from_slice(&NUMS_X).map_err(|err| err.to_string())?,
+        internal_key: rgbstd::bitcoin::XOnlyPublicKey::from_slice(&NUMS_X)
+            .map_err(|err| err.to_string())?,
         merkle_branch: TaprootMerkleBranch::try_from(nodes).map_err(|err| err.to_string())?,
     })
 }
@@ -343,7 +354,11 @@ fn fee_witness(
     prevouts: &[TxOut],
 ) -> Result<Witness, String> {
     let sighash = SighashCache::new(tx)
-        .taproot_key_spend_signature_hash(input_index, &Prevouts::All(prevouts), TapSighashType::Default)
+        .taproot_key_spend_signature_hash(
+            input_index,
+            &Prevouts::All(prevouts),
+            TapSighashType::Default,
+        )
         .map_err(|err| err.to_string())?;
     let secp = Secp256k1::new();
     let tweaked = fee_key.tap_tweak(&secp, None);

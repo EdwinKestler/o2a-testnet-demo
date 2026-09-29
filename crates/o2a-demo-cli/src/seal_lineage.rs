@@ -4,7 +4,6 @@ use std::str::FromStr;
 use std::fs;
 
 use amplify::confinement::SmallOrdSet;
-use amplify::ByteArray;
 use anyhow::{bail, Context, Result};
 use bpstd::psbt::PsbtConstructor;
 use bpstd::signers::TestnetSigner;
@@ -12,8 +11,8 @@ use bpstd::{Derive, Descriptor, NormalIndex, Outpoint, ScriptPubkey, Terminal, W
 use o2a_demo_core::{
     controller_rotation_with, demo_delay_blocks, demo_entity_index, demo_genesis_state, demo_keys,
     demo_network, demo_rotation_state, demo_threshold, encode_resulting_state, entity_id,
-    genesis_with, key_id, official_name_claim, official_name_nonce, recovery_authorizations,
-    seal_bindings_valid, state_id, ResultingState,
+    genesis_with, key_id, official_name_claim, official_name_nonce, seal_bindings_valid, state_id,
+    ResultingState,
 };
 use o2a_demo_rgb::{
     controller_rotation, demo_issuer, genesis_params, recover, GenesisInput, RotationInput,
@@ -323,6 +322,16 @@ pub fn transition(
     kind: &str,
     broadcast: bool,
 ) -> Result<()> {
+    let signed_path = data_dir.join(format!("{kind}.o2a"));
+    if !signed_path.exists() {
+        bail!(
+            "signed {kind}.o2a is absent; the spend decodes that object and does not synthesize state"
+        );
+    }
+    let object = read_signed(&signed_path)?;
+    o2a_demo_core::verify(&object).map_err(anyhow::Error::msg)?;
+    let next_state =
+        o2a_demo_core::decode_identity_state(&object.payload).map_err(anyhow::Error::msg)?;
     let store = SealStore::open(data_dir)?;
     let from = store.read(from_name)?;
     let stored = crate::read_fields(&data_dir.join("lineage.txt"))?;
@@ -330,44 +339,14 @@ pub fn transition(
     let previous_cell = CellAddr::from_str(crate::field(&stored, "cell")?)?;
     let previous = Outpoint::from_str(&from.outpoint)?;
     let next = Outpoint::from_str(to_outpoint)?;
+    if next_state.next_seal != canonical_outpoint(next) {
+        bail!("signed object names a different next seal");
+    }
+    let spent = state_named_from_dir(data_dir, &canonical_outpoint(previous))?;
     let fee = Outpoint::from_str(fee_outpoint)?;
     let fee_script = ScriptPubkey::from_checked(hex::decode(fee_script_hex)?);
-    let keys = demo_keys();
-    let prior = previous_cell.opid.to_byte_array();
-    let sequence = crate::field(&stored, "sequence")
-        .ok()
-        .and_then(|value| value.parse::<u64>().ok())
-        .unwrap_or(0)
-        .saturating_add(1);
-    let state = demo_rotation_state(
-        sequence,
-        prior,
-        canonical_outpoint(previous),
-        canonical_outpoint(next),
-    );
-    let spent = state_for_stage(&from.stage)?;
-    let (signer, rgb_call_recover) = if kind == "recover" {
-        (keys.recovery_0, true)
-    } else if kind == "rotate-1" {
-        (keys.controller_1, false)
-    } else {
-        (keys.controller_0, false)
-    };
+    let rgb_call_recover = kind == "recover";
     let history = history_entity(data_dir)?;
-    let object = if rgb_call_recover {
-        let auths = recovery_authorizations(
-            history,
-            prior,
-            &o2a_demo_core::demo_recovery_policy(),
-            from.confirmation_height + 10,
-            &state,
-            &[keys.recovery_0, keys.recovery_2],
-        )
-        .map_err(anyhow::Error::msg)?;
-        auths[0].clone()
-    } else {
-        controller_rotation_with(signer, history, prior, &state)
-    };
     if !rgb_call_recover {
         o2a_demo_core::verify_controller_rotation(&object).map_err(anyhow::Error::msg)?;
     }
@@ -379,9 +358,13 @@ pub fn transition(
     let rgb_input = RotationInput {
         previous_cell,
         controller_xonly: if rgb_call_recover {
-            keys.controller_1.xonly
+            next_state
+                .controllers
+                .first()
+                .map(|entry| entry.xonly)
+                .unwrap_or(object.signer_xonly)
         } else {
-            signer.xonly
+            object.signer_xonly
         },
         state_commitment: object.digest,
         next_seal,
@@ -398,33 +381,13 @@ pub fn transition(
     let defined_cell = CellAddr::new(operation.opid(), 0);
     let change_script = chain.wallet.next_address().script_pubkey();
     let style = if rgb_call_recover {
-        let mut slots = [
-            keys.seal_recovery_0,
-            keys.seal_recovery_1,
-            keys.seal_recovery_2,
-        ];
-        slots.sort_by_key(|key| key.xonly);
         SpendStyle::Recovery {
-            slots: slots
-                .into_iter()
-                .map(|key| {
-                    if key.xonly == keys.seal_recovery_0.xonly
-                        || key.xonly == keys.seal_recovery_2.xonly
-                    {
-                        Some(key)
-                    } else {
-                        None
-                    }
-                })
-                .collect(),
+            slots: recovery_slots_from(&spent)?,
         }
     } else {
-        let seal_key = if kind == "rotate-1" {
-            keys.seal_controller_1
-        } else {
-            keys.seal_controller_0
-        };
-        SpendStyle::Controller { signer: seal_key }
+        SpendStyle::Controller {
+            signer: controller_signer(&spent)?,
+        }
     };
     let mut open = open_spend(
         &SpendRequest {
@@ -481,7 +444,6 @@ pub fn transition(
     println!("raw_tx={raw}");
     let path = data_dir.join(format!("{kind}.raw"));
     std::fs::write(&path, &raw)?;
-    write_object(&data_dir.join(format!("{kind}.o2a")), &object)?;
     println!("history_entity={}", hex::encode(history));
     println!("defined_cell={defined_cell}");
     println!("o2a_digest={}", hex::encode(object.digest));
@@ -510,24 +472,32 @@ pub fn transition(
         fs::write(
             data_dir.join("lineage.txt"),
             format!(
-                "contract_id={contract_id}\ncell={defined_cell}\nseal={to_outpoint}\ndigest={}\nname={next_name}\ncurrent={next_name}\nanchor_txid={anchor}\nconsignment={}\nsequence={sequence}\n",
+                "contract_id={contract_id}\ncell={defined_cell}\nseal={to_outpoint}\ndigest={}\nname={next_name}\ncurrent={next_name}\nanchor_txid={anchor}\nconsignment={}\nsequence={}\n",
                 hex::encode(object.digest),
-                consignment.display()
+                consignment.display(),
+                next_state.sequence
             ),
         )?;
         println!("current={next_name}");
         println!("consignment={}", consignment.display());
     }
-    let _ = (signer, state);
     Ok(())
 }
 
 pub fn close_plain(data_dir: &Path, name: &str, destination_hex: &str) -> Result<()> {
+    let raw = close_plain_hex(data_dir, name, destination_hex)?;
+    println!("raw_tx={raw}");
+    println!("close_plain=no_rgb_commitment");
+    Ok(())
+}
+
+fn close_plain_hex(data_dir: &Path, name: &str, destination_hex: &str) -> Result<String> {
     let record = SealStore::open(data_dir)?.read(name)?;
-    let keys = demo_keys();
-    let state = state_for_stage(&record.stage)?;
+    let outpoint = canonical_outpoint(Outpoint::from_str(&record.outpoint)?);
+    let state = state_named_from_dir(data_dir, &outpoint)?;
+    let signer = controller_signer(&state)?;
     let destination = ScriptPubkey::from_checked(hex::decode(destination_hex)?);
-    let raw = o2a_demo_seal::close_plain_tx(
+    o2a_demo_seal::close_plain_tx(
         SpendRequest {
             seal: Outpoint::from_str(&record.outpoint)?,
             seal_value: record.value_sats,
@@ -540,16 +510,9 @@ pub fn close_plain(data_dir: &Path, name: &str, destination_hex: &str) -> Result
             fee_sats: 1_000,
             state,
         },
-        if record.stage == "genesis" {
-            keys.seal_controller_0
-        } else {
-            keys.seal_controller_1
-        },
+        signer,
         destination,
-    )?;
-    println!("raw_tx={raw}");
-    println!("close_plain=no_rgb_commitment");
-    Ok(())
+    )
 }
 
 pub fn verify(
@@ -678,6 +641,9 @@ pub fn export_consignment(data_dir: &Path, electrum: &str, path: &Path) -> Resul
 
 pub fn presign_recovery(data_dir: &Path, name: &str, destination_hex: &str) -> Result<()> {
     let record = SealStore::open(data_dir)?.read(name)?;
+    let outpoint = canonical_outpoint(Outpoint::from_str(&record.outpoint)?);
+    let state = state_named_from_dir(data_dir, &outpoint)?;
+    let slots = recovery_slots_from(&state)?;
     let destination = ScriptPubkey::from_checked(hex::decode(destination_hex)?);
     let raw = script_path_tx(
         &SpendRequest {
@@ -690,12 +656,9 @@ pub fn presign_recovery(data_dir: &Path, name: &str, destination_hex: &str) -> R
             fee_script: destination.clone(),
             change_script: destination.clone(),
             fee_sats: 1_000,
-            state: state_for_stage(&record.stage)?,
+            state,
         },
-        SpendStyle::RecoveryClose {
-            slots: recovery_slots(),
-            destination,
-        },
+        SpendStyle::RecoveryClose { slots, destination },
     )?;
     println!("raw_tx={raw}");
     println!("presign_recovery=bip68");
@@ -746,6 +709,7 @@ mod verifier_regression {
         ResultingState, SealBinding,
     };
     use std::fs;
+    use std::str::FromStr;
 
     fn fresh(fill: u8) -> DemoKey {
         DemoKey::from_secret([fill; 32]).unwrap()
@@ -835,34 +799,164 @@ mod verifier_regression {
         );
         let _ = fs::remove_dir_all(&dir);
     }
-}
 
-fn state_for_stage(stage: &str) -> Result<ResultingState> {
-    match stage {
-        "genesis" => Ok(demo_genesis_state([0; 36])),
-        "rotate" | "recover" => Ok(demo_rotation_state(1, [0; 32], [0; 36], [0; 36])),
-        other => bail!("unknown seal stage {other}"),
+    fn zero_outpoint() -> (String, [u8; 36]) {
+        let text = "0000000000000000000000000000000000000000000000000000000000000000:0";
+        let parsed = bpstd::Outpoint::from_str(text).unwrap();
+        (text.to_string(), crate::canonical_outpoint(parsed))
+    }
+
+    fn write_seal(dir: &std::path::Path, outpoint: &str, script_hex: &str) {
+        fs::create_dir_all(dir.join("seals")).unwrap();
+        fs::write(
+            dir.join("seals/A.txt"),
+            format!(
+                "name=A\noutpoint={outpoint}\npolicy_hex=00\nscript_pubkey={script_hex}\npaths=\nstage=genesis\nfunding_txid=00\nconfirmation_height=1\nvalue_sats=50000\n"
+            ),
+        )
+        .unwrap();
+    }
+
+    #[test]
+    fn spend_decodes_the_signed_genesis_and_ignores_the_record_script() {
+        let (outpoint_text, outpoint) = zero_outpoint();
+        let state = o2a_demo_core::demo_genesis_state(outpoint);
+        let object = genesis_with(o2a_demo_core::demo_keys().root, &state);
+        let dir = std::env::temp_dir().join(format!("o2a-spend-decode-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        write_genesis(&dir, &object.payload);
+        let hostile = "0014aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+        write_seal(&dir, &outpoint_text, hostile);
+        let decoded = super::state_named_from_dir(&dir, &outpoint).unwrap();
+        assert_eq!(decoded, state);
+        let script = o2a_demo_core::seal_for_state(&decoded)
+            .unwrap()
+            .script_pubkey;
+        let record = fs::read_to_string(dir.join("seals/A.txt")).unwrap();
+        assert!(!record.contains(&hex::encode(&script)));
+        assert_ne!(script, hex::decode(hostile).unwrap());
+        let raw = super::close_plain_hex(&dir, "A", "51").unwrap();
+        let seal_xonly = hex::encode(decoded.controller_bindings[0].seal_xonly);
+        assert!(raw.contains(&seal_xonly));
+        assert!(!raw.contains(hostile));
+        let recovery = super::presign_recovery(&dir, "A", "51");
+        assert!(recovery.is_ok());
+        let missing = super::transition(
+            &dir,
+            "tcp://127.0.0.1:1",
+            "A",
+            &outpoint_text,
+            &outpoint_text,
+            1,
+            "51",
+            "rotate",
+            false,
+        )
+        .unwrap_err()
+        .to_string();
+        assert!(missing.contains("does not synthesize"));
+        let _ = fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn custom_signed_genesis_is_not_the_demo_seed_state() {
+        let outpoint = [0x45u8; 36];
+        let root = fresh(0x31);
+        let controller = fresh(0x32);
+        let state = ResultingState {
+            sequence: 0,
+            previous_state: None,
+            previous_seal: None,
+            next_seal: outpoint,
+            controllers: vec![ControllerEntry {
+                xonly: controller.xonly,
+                capabilities: vec![2, 4],
+            }],
+            recovery: RecoveryPolicy {
+                version: 1,
+                sequence: 0,
+                threshold: 1,
+                key_ids: vec![key_id(2, fresh(0x33).xonly)],
+                delay_blocks: 1008,
+                cancellation_rule: 1,
+            },
+            controller_bindings: vec![SealBinding {
+                authorizing_key_id: key_id(1, controller.xonly),
+                seal_xonly: [0x46; 32],
+            }],
+            recovery_bindings: vec![SealBinding {
+                authorizing_key_id: key_id(2, fresh(0x34).xonly),
+                seal_xonly: [0x47; 32],
+            }],
+            lifecycle_status: 1,
+        };
+        let object = genesis_with(root, &state);
+        let dir = std::env::temp_dir().join(format!("o2a-custom-spend-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        write_genesis(&dir, &object.payload);
+        let decoded = super::state_named_from_dir(&dir, &outpoint).unwrap();
+        assert_eq!(decoded.recovery.delay_blocks, 1008);
+        assert_eq!(decoded.controller_bindings[0].seal_xonly, [0x46; 32]);
+        let script = o2a_demo_core::seal_for_state(&decoded)
+            .unwrap()
+            .script_pubkey;
+        let demo = o2a_demo_core::seal_for_state(&o2a_demo_core::demo_genesis_state(outpoint))
+            .unwrap()
+            .script_pubkey;
+        assert_ne!(script, demo);
+        assert_ne!(script, b"hostile-record-script".to_vec());
+        let _ = fs::remove_dir_all(&dir);
     }
 }
 
-fn recovery_slots() -> Vec<Option<o2a_demo_core::DemoKey>> {
+fn state_named_from_dir(data_dir: &Path, outpoint: &[u8; 36]) -> Result<ResultingState> {
+    let payloads = identity_payloads(data_dir)?;
+    let refs: Vec<&[u8]> = payloads.iter().map(Vec::as_slice).collect();
+    o2a_demo_core::state_named_by_signed(&refs, outpoint).map_err(anyhow::Error::msg)
+}
+
+fn demo_seal_by_xonly(xonly: [u8; 32]) -> Result<o2a_demo_core::DemoKey> {
     let keys = demo_keys();
-    let mut slots = [
+    [
+        keys.seal_controller_0,
+        keys.seal_controller_1,
         keys.seal_recovery_0,
         keys.seal_recovery_1,
         keys.seal_recovery_2,
-    ];
-    slots.sort_by_key(|key| key.xonly);
-    slots
-        .into_iter()
-        .map(|key| {
-            if key.xonly == keys.seal_recovery_0.xonly || key.xonly == keys.seal_recovery_2.xonly {
-                Some(key)
-            } else {
-                None
-            }
-        })
-        .collect()
+    ]
+    .into_iter()
+    .find(|key| key.xonly == xonly)
+    .context("signed seal binding does not match a demo seal key")
+}
+
+fn controller_signer(state: &ResultingState) -> Result<o2a_demo_core::DemoKey> {
+    let binding = state
+        .controller_bindings
+        .iter()
+        .min_by_key(|binding| binding.seal_xonly)
+        .context("signed state has no controller binding")?;
+    demo_seal_by_xonly(binding.seal_xonly)
+}
+
+fn recovery_slots_from(state: &ResultingState) -> Result<Vec<Option<o2a_demo_core::DemoKey>>> {
+    let mut bindings = state.recovery_bindings.clone();
+    bindings.sort_by_key(|binding| binding.seal_xonly);
+    let threshold = usize::from(state.recovery.threshold);
+    let mut signed = 0usize;
+    let mut slots = Vec::with_capacity(bindings.len());
+    for binding in bindings {
+        let key = demo_seal_by_xonly(binding.seal_xonly)?;
+        if signed < threshold {
+            slots.push(Some(key));
+            signed += 1;
+        } else {
+            slots.push(None);
+        }
+    }
+    if signed < threshold {
+        bail!("signed recovery set is below the decoded threshold");
+    }
+    Ok(slots)
 }
 
 fn result_string(text: &str) -> Result<String> {

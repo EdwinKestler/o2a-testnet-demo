@@ -6,7 +6,10 @@ members = [
     "crates/o2a-demo-seal",
     "crates/o2a-seal-smoke",
 ]
-# The 0.11.1 spike is a separate workspace. It must not join this 0.12 graph.
+# Default build is the RGB-free core. The 0.12 crates stay members so the
+# archived adapter still resolves, and they are not built by a plain cargo test.
+default-members = ["crates/o2a-demo-core"]
+# The 0.11.1 adapter is a separate workspace. It must not join this 0.12 graph.
 exclude = ["spikes/rgb-0.11.1"]
 resolver = "2"
 
