@@ -1,200 +1,193 @@
-# Guion de demo en vivo — O2A sobre Bitcoin signet
+# Guion de demo en vivo — O2A
 
-**Versión:** plantilla para decisión · **Audiencia de este documento:** equipo comercial
-**Estado del proyecto:** demostración en red de prueba. No es producto. No es mainnet.
+**Versión:** plan actual, con ADR-0008, ADR-0009, ADR-0010 y el ensayo 3
+**Audiencia de este documento:** equipo comercial
+**Estado del proyecto:** demostración. No es un lanzamiento. No es producto. Mainnet está fuera de alcance.
 
-Cada `[corchete]` es una decisión pendiente. El texto dentro es un ejemplo, no la decisión.
-Cuando todos los corchetes estén resueltos, el guion pasa a ingeniería para construir el milestone 2.
+La red del evento en vivo espera una decisión: `[red del evento: autorización explícita del maintainer]`. Signet es la red del ensayo. Este texto no fija la red del evento.
+
+Cada corchete es una decisión que el maintainer todavía no ha tomado. El texto dentro es un ejemplo, no la decisión. Este guion no escribe el nombre real de ningún artista.
 
 ---
 
 ## 1. Qué vamos a demostrar, en una frase
 
-> Un artista crea una identidad que no depende de ninguna plataforma, la usa para firmar
-> `[una atestación de un evento]`, y dos verificadores que no confían entre sí llegan al mismo
-> resultado usando solo Bitcoin.
+> El primer EntityID de O2A se acuña en vivo. El sello ya está financiado, con 6 confirmaciones. En el escenario se firma la génesis, el EntityID aparece de inmediato, dos verificadores dicen CURRENT, el artista firma el nombre oficial y se restaura la copia de respaldo.
 
 Lo que el público debe entender al salir:
 
-- La identidad la controla el artista con sus propias llaves, no nosotros ni nadie.
-- Lo que firma el artista se puede verificar sin pedirle permiso a ninguna empresa.
-- Bitcoin pone el orden y el sello; nadie puede reescribir la historia.
+- La identidad la controla el artista con sus propias llaves.
+- El nombre oficial es una declaración firmada. Firmarla no gasta una transacción de Bitcoin.
+- Dos verificadores, en dos laptops, llegan a la misma palabra: CURRENT.
 
-Lo que **no** vamos a afirmar:
+En el escenario entra esto:
 
-- Que esto está en producción o en mainnet.
-- Que las identidades creadas hoy persisten (son de prueba y se descartan).
-- Que reemplaza el sistema de ticketing actual.
+| En el escenario | Fuera del escenario |
+| --- | --- |
+| Génesis firmada delante del público. El EntityID aparece al firmar. | Rotación, recuperación y revocación. ADR-0009 las deja fuera hasta que el programa RGB sea final. |
+| El claim `official_name`. | Una atestación. No está en el conjunto congelado. |
+| Dos verificadores dicen CURRENT. | Una tercera identidad para un venue o un promotor. |
+| Restaurar el paquete desde la copia de respaldo. | Gastar el sello. |
+
+El sello se financia al menos 48 horas antes. En el ensayo 3, las 6 confirmaciones tardaron 38 minutos y 35 segundos. Por eso la espera ocurre antes de que entre el público. Con el sello ya profundo, la firma, las dos comprobaciones, el nombre y la restauración cupieron en menos de 2 segundos de reloj de programa.
+
+Lo que el público también debe oír, en voz alta, antes de crear la identidad: es de prueba y se descarta.
 
 ---
 
 ## 2. Glosario para hablar con el público
 
-| Término técnico | Cómo lo decimos en la demo |
-|---|---|
-| EntityID | La identidad del artista: un identificador único que solo él controla |
-| Controlador | La llave con la que el artista firma hoy; se puede rotar sin perder la identidad |
-| Atestación | Una declaración firmada por el artista: "yo confirmo X" |
-| Sello / anclaje en Bitcoin | El momento en que la declaración queda fijada en Bitcoin y ya no se puede alterar |
-| Paquete de prueba | El archivo que cualquiera puede verificar sin conectarse a nosotros |
-| Verificador | Un programa independiente que dice "válido" o "inválido" sin consultar a nadie |
-| Signet | Red de prueba de Bitcoin: bloques cada 10 minutos, bitcoins sin valor |
+| Término | Cómo lo decimos |
+| --- | --- |
+| EntityID | El identificador de esta génesis. Aparece en cuanto se firma. |
+| Sello | La salida de Bitcoin ya confirmada que la génesis nombra. Su identificador de salida forma parte del EntityID. |
+| CURRENT | La palabra del verificador cuando Bitcoin, RGB y O2A coinciden. |
+| Nombre oficial | El claim `official_name`. Lo firma el controlador. No es una transacción de Bitcoin. |
+| Raíz | La llave que firma la génesis. Después no opera la identidad. |
+| Controlador | La llave que firma el nombre oficial. |
+| Recuperación | 2 de 3, después de una demora. No se ejecuta en el escenario. |
+| Signet | La red del ensayo. Las monedas de prueba no tienen valor. |
+| RGB | El carrier de las transiciones futuras, cuando el programa sea final. Hoy el escenario usa la génesis. |
 
 ---
 
-## 3. Decisiones que definen la demo
+## 3. Decisiones
 
-| # | Decisión | Opciones | Elegido |
-|---|---|---|---|
-| D1 | Sujeto de la identidad | artista real participante / artista ficticio con nombre de fantasía | `[artista real: nombre]` |
-| D2 | Qué se atesta en vivo | un evento (fecha, venue) / un ticket / un lanzamiento (álbum) | `[evento: nombre, fecha, venue]` |
-| D3 | Quién verifica en la sala | dos laptops nuestras / una nuestra + una de RGB-WG / el público con explorador público | `[una nuestra + una de RGB-WG]` |
-| D4 | Duración del segmento en vivo | 8 / 12 / 20 minutos | `[12 minutos]` |
-| D5 | Qué se pre-ancla antes del evento | la génesis de la identidad / génesis + primera rotación / nada | `[génesis pre-anclada]` |
-| D6 | Formato | escenario con pantalla / mesa de trabajo con invitados / video grabado con respaldo en vivo | `[escenario]` |
-| D7 | Segundo actor en escena | venue real / promotor / ninguno | `[venue: nombre]` |
+| # | Decisión | Estado |
+| --- | --- | --- |
+| D1 | Sujeto de la identidad | `[sujeto: sin nombre real]` |
+| D2 | Qué se firma en vivo | Fijo. El claim `official_name`. |
+| D3 | Quién verifica en la sala | `[verificadores: dos laptops nuestras, o nuestras laptops más un verificador público en los teléfonos del público]` |
+| D4 | Duración del segmento en vivo | `[duración del segmento]` |
+| D5 | Qué se prepara antes del evento | Fijo. El sello se financia al menos 48 horas antes y llega a 6 confirmaciones. La génesis se firma en el escenario. |
+| D6 | Formato | `[formato del evento]` |
+| D7 | Segundo actor en escena | `[segundo actor: ninguno]` |
 
-Regla que no se negocia: **antes de crear cualquier identidad se le dice al participante que es
-de prueba y se va a descartar.** Esto se dice en voz alta en la demo.
+D3 tiene dos opciones abiertas. Una es dos laptops nuestras. La otra es nuestras laptops más un verificador público en los teléfonos del público. Un verificador de un tercero, si se conserva, se nombra como un verificador independiente.
+
+D7 queda como ninguno hasta que alguien lo cambie. Sigue siendo una decisión abierta.
+
+La red del evento es la decisión de la primera línea de este documento. Signet queda como red de ensayo.
+
+Regla que no se negocia: antes de crear cualquier identidad se le dice al participante que es de prueba y se va a descartar. Esto se dice en voz alta.
 
 ---
 
 ## 4. Los tres actos
 
-### Acto 1 — La identidad existe y es del artista (≈ `[3]` min)
+El sello ya está financiado y tiene 6 confirmaciones antes de que se abra la puerta. El escenario no espera bloques.
+
+### Acto 1 — Aparece el primer EntityID
 
 **Lo que ve el público**
 
-1. Presentamos a `[artista, D1]`. Explicamos en una frase qué es una identidad autocustodiada.
-2. En pantalla: la identidad ya existe en signet (pre-anclada, D5). Mostramos el identificador
-   y el bloque de Bitcoin donde quedó sellada, en un explorador público.
-3. `[opcional]` El artista rota su llave de control en vivo: "cambié de teléfono, sigo siendo yo".
-   La transacción entra a la mempool; el público la ve aparecer en el explorador.
+1. Se presenta el sujeto de D1, sin leer un nombre real que no esté en el plan público.
+2. El artista confirma el sello y la política en su dispositivo y firma la génesis.
+3. El EntityID aparece en la pantalla en ese momento. También aparece el código QR de ese identificador.
 
 **Lo que pasa por debajo**
 
-- Génesis del contrato RGB de identidad anclado en signet días antes.
-- Rotación de controlador = transición RGB + objeto O2A firmado, anclados en una transacción.
+- El sello lleva al menos 48 horas financiado y 6 confirmaciones.
+- La firma usa el adaptador rgb-protocol 0.11.1, con cierre Opret.
+- `signer_entity` son 32 bytes en cero. La raíz firma. El EntityID es el hash etiquetado de esa génesis.
 
-**Frase clave:** "Nadie le dio esta identidad. La derivó de sus propias llaves."
+**Frase clave:** "Nadie le dio esta identidad. La firmó con sus llaves, y el identificador aparece ahora."
 
----
-
-### Acto 2 — El artista firma algo que importa (≈ `[5]` min)
+### Acto 2 — Dos verificadores dicen CURRENT
 
 **Lo que ve el público**
 
-1. `[artista]` firma `[la atestación del evento, D2]`: "confirmo que me presento en
-   `[venue, D7]` el `[fecha]`".
-2. `[si D7 = venue]` El venue, con su propia identidad, firma una contra-atestación:
-   "confirmo que `[artista]` está en cartelera ese día".
-3. Se genera el **paquete de prueba**: un archivo. Lo mostramos como lo que es, un archivo que
-   se puede mandar por correo, imprimir como QR o guardar.
-4. La transacción que ancla la atestación se transmite. Mempool visible en el explorador.
+1. Dos personas, en dos laptops, reciben el paquete público. Ninguna tiene la semilla.
+2. Las dos dicen CURRENT. La pantalla muestra las dos líneas.
+3. Si las dos líneas no coinciden, las dos se quedan visibles.
 
 **Lo que pasa por debajo**
 
-- Objeto O2A `[attestation / event manifest]` con encoding canónico, firmado por el controlador.
-- Anclaje en signet; el sello del RGB queda cerrado.
+- Cada laptop corre la comprobación del paquete contra Bitcoin.
+- Lo ideal es que cada laptop use un backend de Bitcoin distinto.
+- El ensayo 3 hizo las dos comprobaciones en dos carpetas de una sola máquina. El escenario usa dos laptops.
 
-**Frase clave:** "Esto no vive en nuestros servidores. Vive en un archivo y en Bitcoin."
+**Frase clave:** "No tienen que confiar en nosotros. Las dos máquinas leen el mismo paquete."
 
-**Tiempo muerto esperado:** entre transmitir y confirmar pasan hasta 10 minutos. Aquí va la
-explicación de por qué importa (fraude de promotores, artistas suplantados, reventa sin
-trazabilidad). Ver sección 6.
-
----
-
-### Acto 3 — Dos verificadores que no se conocen dicen lo mismo (≈ `[4]` min)
+### Acto 3 — El nombre oficial y la copia de respaldo
 
 **Lo que ve el público**
 
-1. El paquete de prueba se entrega a `[los dos verificadores, D3]`. Ninguno tiene acceso a
-   nuestra infraestructura; solo tienen el archivo y su propia conexión a Bitcoin.
-2. Los dos corren la verificación. En pantalla, lado a lado, el mismo resultado:
-   - Bitcoin: anclado en bloque `[N]`, sello gastado correctamente.
-   - RGB: historia válida.
-   - O2A: autorización válida, firma del controlador vigente.
-3. `[opcional, si sobra tiempo]` Mostramos un paquete alterado: un byte cambiado. Ambos
-   verificadores lo rechazan.
+1. El artista firma el nombre oficial con la llave de control.
+2. La pantalla muestra ese nombre junto al EntityID.
+3. En otra máquina, sin la semilla, se restaura el paquete. El mismo EntityID vuelve a salir CURRENT.
 
 **Lo que pasa por debajo**
 
-- Tres capas de verificación independientes que nunca se colapsan en una.
-- El verificador no consulta ninguna API nuestra durante la evaluación.
+- El claim es un objeto firmado. No se transmite una transacción de Bitcoin para el nombre.
+- Hay dos copias del paquete: una se la lleva el artista y la otra queda con el operador de respaldo.
+- Ahí termina el escenario. No hay otra firma.
 
-**Frase clave:** "No tienen que confiar en nosotros. Tienen que confiar en Bitcoin y en las
-matemáticas, y eso ya lo hacen."
+**Frase clave:** "El nombre es su declaración. La identidad es el EntityID. La copia se puede comprobar sin la semilla."
 
 ---
 
 ## 5. Plan B por acto
 
-| Falla posible | Respuesta preparada |
-|---|---|
-| La transacción no confirma en el tiempo del segmento | Mostrar la mempool (ya es prueba de transmisión) y una atestación confirmada el día anterior |
-| Cae la conexión del venue | El nodo signet corre local en la laptop; la verificación del Acto 3 funciona igual. Solo se pierde la vista del explorador público |
-| Falla la laptop principal | Nodo de respaldo en `[GCP, VM pequeña]` sincronizado; video grabado del segmento completo |
-| Un verificador da resultado distinto | No se improvisa. Se detiene la demo y se dice que se investiga. Un resultado distinto es exactamente lo que el sistema debe detectar |
+| Momento | Falla | Qué se hace | Qué se dice |
+| --- | --- | --- | --- |
+| Antes del escenario | El sello no tiene 6 confirmaciones | No se llama final. La página no dice CURRENT. Si hace falta fee, se usa un hijo que pague por el padre. El identificador de la transacción no cambia. | "El pago es el mismo. Seguimos esperando confirmaciones." |
+| Acto 1 | El dispositivo falla antes de firmar | Se detiene. No se inventa otra identidad en el escenario. | "No inventamos una segunda identidad aquí." |
+| Acto 1 | El dispositivo falla después de firmar | Se muestra el EntityID solo si el archivo firmado ya salió del dispositivo. | "Mostramos el identificador del archivo firmado, o esperamos." |
+| Acto 2 | Los dos verificadores no coinciden | Se dejan las dos líneas en pantalla. | "Las dos comprobaciones no coinciden. No lo llamamos final." |
+| Acto 2 | Cae la red de la sala | La firma ya está en el archivo. Los verificadores comprueban cuando ven un backend de signet. | "La firma está en el archivo. La comprobación pública sigue cuando vemos la cadena." |
+| Acto 3 | Falla la restauración | Se conservan las dos copias y se le dice al artista antes de que se vaya. | "Conservamos las dos copias." |
 
 ---
 
 ## 6. El caso, en el lenguaje del equipo comercial
 
-`[Ajustar a los dolores reales que el equipo ve en el mercado]`
+`[dolores del mercado que el equipo comercial confirme]`
 
-- **Promotores falsos.** Hoy cualquiera anuncia un show con el nombre de un artista. Con O2A,
-  el artista firma o no firma. Si no firmó, no hay atestación, y eso se puede comprobar en
-  segundos sin llamar a nadie.
-- **Suplantación en redes y venta directa.** La identidad del artista no es una cuenta que se
-  hackea; son llaves que él controla y puede rotar.
-- **Trazabilidad para venues y promotores.** Cada actor tiene su propia identidad; una
-  cartelera se convierte en un conjunto de firmas cruzadas verificables.
-- **Portabilidad.** Nada de esto depende de nuestra plataforma. Ese es el argumento, no la
-  debilidad: la plataforma vende servicio encima de una capa que el mercado puede verificar.
+- **Promotores falsos.** El artista firma el nombre oficial de esta identidad, o no lo firma. Si no firmó, no hay claim, y eso se puede comprobar sin llamar a nadie.
+- **Suplantación.** La identidad son llaves que el artista controla. En este escenario no se rota una llave. La recuperación existe y se explica en las preguntas.
+- **Una sola declaración comprobable.** El público se lleva el EntityID y el nombre firmado. Un segundo actor no forma parte del plan fijo.
+- **Portabilidad.** El paquete se comprueba en otra máquina. Esa comprobación no pide permiso a un servidor nuestro.
 
-Lo que el equipo comercial **no** debe prometer todavía:
+Lo que el equipo comercial no promete con este guion:
 
-- Fechas de producción.
-- Integración con la venta de tickets actual.
-- Que las identidades creadas en la demo sean las definitivas.
+- Una fecha de producción.
+- Integración con la venta de boletos.
+- Que la identidad de la demo sea la identidad definitiva del artista.
+- Una rotación en vivo, una atestación en vivo, o una red de evento ya elegida.
 
 ---
 
 ## 7. Preguntas que van a hacer
 
 | Pregunta | Respuesta corta |
-|---|---|
-| ¿Esto es cripto / tokens? | No. No hay token. Usamos Bitcoin solo para fijar el orden de los hechos. |
-| ¿Cuánto cuesta cada firma? | Una transacción de Bitcoin; hoy en red de prueba, sin costo. En mainnet, centavos, y varias atestaciones pueden ir en una sola. |
-| ¿Y si el artista pierde sus llaves? | El protocolo tiene recuperación con umbral y demora. `[No se demuestra hoy]`. |
-| ¿Por qué no una base de datos nuestra? | Porque entonces hay que confiar en nosotros. El punto es que no haga falta. |
-| ¿Cuándo en producción? | Cuando la librería RGB tenga versión final. Estamos trabajando con su equipo; ya les enviamos correcciones. |
+| --- | --- |
+| ¿Esto es cripto o tokens? | No hay token. Bitcoin fija el sello del EntityID y el orden de esa salida. |
+| ¿Cuánto cuesta cada firma? | El nombre oficial no cuesta una transacción de Bitcoin. Es un objeto firmado. El sello se paga antes, con al menos 48 horas y 6 confirmaciones. En el ensayo las monedas son de signet y no tienen valor. |
+| ¿Por qué RGB? | RGB es el carrier de las transiciones, cuando el programa sea final. Hoy el escenario firma la génesis y un claim. El claim no paga una transacción. El sello de Bitcoin es el ancla del EntityID. |
+| ¿Y si el artista pierde la llave? | La recuperación es 2 de 3, con demora. La oferta por defecto es 1008 bloques. Hacen falta dos de las tres llaves de recuperación. Cualquiera de esas dos puede actuar solo después de la demora. La recuperación no se hace en el escenario. |
+| ¿Por qué no una base de datos nuestra? | Porque entonces hay que confiar en nosotros. Las dos laptops leen el mismo paquete. |
+| ¿Cuándo en producción? | No hay fecha. ADR-0009 deja las transiciones fuera hasta que el programa RGB sea final. Esta demo no es un lanzamiento. |
 
 ---
 
 ## 8. Checklist previo al evento
 
-- [ ] Nodo signet sincronizado con `[7]` días de anticipación; `status.py` sale 0
-- [ ] Nodo de respaldo `[GCP]` sincronizado
-- [ ] sBTC del faucet confirmados en el wallet de la demo
-- [ ] Génesis de `[artista]` y `[venue]` anclados y confirmados (D5)
-- [ ] Paquete de prueba del día anterior verificado en ambas máquinas (Plan B)
-- [ ] Video de respaldo grabado del segmento completo
-- [ ] Participante informado de que la identidad es de prueba (regla no negociable)
-- [ ] Explorador público abierto en signet, con la dirección del anclaje a mano
-- [ ] Restart policy de bitcoind cambiada a `unless-stopped` solo para el día del evento
+- [ ] El sello está financiado.
+- [ ] El sello tiene 6 confirmaciones.
+- [ ] Ninguna entrada de esa transacción señala reemplazo.
+- [ ] Hay dos laptops de verificación. Lo ideal es que usen backends de Bitcoin distintos.
+- [ ] Hay dos copias de respaldo: una para el artista y una para el operador de respaldo.
+- [ ] El participante oyó que la identidad es de prueba y se descarta.
+- [ ] La semilla no está en la laptop del operador ni en las laptops de los verificadores.
+- [ ] La red del ensayo es signet. La red del evento sigue abierta en la decisión de la primera sección.
 
 ---
 
 ## 9. Quién decide qué
 
-| Corchete | Decide | Fecha límite |
-|---|---|---|
-| D1, D2, D7 (sujeto, objeto, segundo actor) | `[comercial + maintainer]` | `[fecha]` |
-| D3 (verificadores) | `[maintainer con RGB-WG]` | `[fecha]` |
-| D4, D6 (duración, formato) | `[comercial]` | `[fecha]` |
-| D5 (pre-anclaje) | ingeniería, según D4 | tras D4 |
+| Decisión abierta | Quién la cierra | Fecha |
+| --- | --- | --- |
+| D1, D3, D4, D6, D7 y la red del evento | `[maintainer, con el equipo comercial en D1, D4, D6 y D7]` | `[fecha límite]` |
 
-Con D1–D7 resueltos, ingeniería tiene lo necesario para el milestone 2: el objeto de
-atestación, el comando del CLI y la evidencia de verificación por dos clientes.
+D2 y D5 ya están fijas. Con las filas abiertas resueltas, el escenario tiene sujeto, verificadores, duración, formato, segundo actor y red.

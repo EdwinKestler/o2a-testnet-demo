@@ -1,8 +1,12 @@
 # RGB identity program for the disposable demo
 
-**Status:** demo-only program for RGB 0.12 RC3. These program bytes and IDs do
-not settle dependency-gate item 2, do not enter the normative O2A
-specification, and may change or disappear with the demo lineage.
+**Status:** Archived: RGB-WG 0.12 adapter.
+
+The maintained adapter is [rgb-0.11.1-adapter.md](rgb-0.11.1-adapter.md).
+This file records the RGB-WG 0.12 RC3 program. The sentences below belong to
+that archived program, including its old network wording. These program bytes
+and IDs do not settle dependency-gate item 2 and do not enter the normative
+O2A specification.
 
 ## Boundary
 
