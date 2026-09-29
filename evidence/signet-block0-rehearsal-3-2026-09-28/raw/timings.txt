@@ -1,0 +1,15 @@
+start 0.000
+heights 0.575
+fund_final 0.645
+descriptor 0.794
+genesis 0.872
+signer_entity 0.918
+screen_init 0.957
+verify_a 1.069
+verify_b 1.149
+screen_verifiers 1.243
+claim 1.256
+screen_claim 1.376
+restore 1.477
+unspent 1.578
+balance 1.644

@@ -1,7 +1,13 @@
 # O2A Demo Gate
 
 **Status:** mandatory boundary for the disposable testnet demonstration.
-Specification authority: sibling `../o2a-protocol` at commit `b622c9830e98085c5270a604dc14fa7bec1bf2c2`.
+Specification authority: sibling `../o2a-protocol` at commit `0a8d54f30b431661adefdbf1d4cdb10a42eca47a`.
+
+Maintained RGB line: rgb-protocol `0.11.1`, close method Opret. The adapter
+lives in the separate workspace `spikes/rgb-0.11.1`. `o2a-demo-core` has no
+RGB dependency and is the only default Cargo member. The RGB 0.12 RC3 adapter
+remains in this workspace as archived legacy and is not part of the default
+build. RGB 0.11 and RGB 0.12 are never resolved in one dependency graph.
 
 ## Rules carried from the specification
 
@@ -42,10 +48,17 @@ Specification authority: sibling `../o2a-protocol` at commit `b622c9830e98085c52
 ## Demo relaxations
 
 - Implementation code is allowed in this repository.
-- `rgb-runtime` is pinned to RGB-WG `rgb` `v0.12.0-rc.3`, commit
+- The maintained carrier is crates.io `rgb-consensus`, `rgb-schemas`,
+  `rgb-ops`, `rgb-api`, and `rgb-psbt-utils` at exactly `0.11.1`, with
+  `rgb-strict-encoding` and `rgb-strict-types` at `1.0.4`. The close method
+  is Opret. `rgb-lib` is not a dependency. The `rgb-api` features `bp`,
+  `bdk`, and `fs` stay off.
+- The archived `rgb-runtime` pin remains RGB-WG `rgb` `v0.12.0-rc.3`, commit
   `a1e6b41524131f6d6f183b2235fdaacb5c1abb31`, with
-  `default-features = false` and features `resolver-electrum` and `fs`.
-  `rgb-wallet` is not a dependency.
+  `default-features = false` and features `resolver-electrum` and `fs`,
+  patched to EdwinKestler `f1e5a68992700ce208da81682ff092c0d5576e82`.
+  That graph is not the default build. Its evidence and the patched fork
+  stay in place. `rgb-wallet` is not a dependency.
 - Upstream patches are allowed only through `[patch.crates-io]` pointing to a
   named branch. Every patch must be recorded in `PATCHES.md` and cite the
   matching item in `../o2a-protocol/docs/upstream-needs.md`. The two `bp-std`
@@ -60,13 +73,20 @@ Specification authority: sibling `../o2a-protocol` at commit `b622c9830e98085c52
 
 ## Seal-policy contract type
 
-The seal-policy lineage is a new RGB contract type. Codex name
+The archived 0.12 seal-policy lineage is a Codex contract. Codex name
 `O2ASealPolicyDemo`. Codex id
 `21NiO7HR-YJ7lZHf-QqU5lFX-~hZoADX-_~cM26a-NeJbFdg#history-paper-polka`.
 Issuer id
 `21NiO7HR-YJ7lZHf-QqU5lFX-~hZoADX-_~cM26a-NeJbFdg/0#kq5rkg`.
 Methods are `issue`, `rotateController`, `revoke`, and `recover`. Each
 verifier is the same success program. RGB still validates no O2A semantics.
+
+The maintained 0.11.1 schema is a different contract. Type library
+`O2AIdentity011`, schema name `O2aIdentity`, global state `3101`, assignment
+`4101`, transitions `8101` rotate, `8102` recover, and `8103` revoke.
+Validators are unset. The compatibility run recorded schema id
+`rgb:sch:oqE1HKzG_NrzhV2M0tn~mkfJfic5ztF6iUr8s8YbdDE#ivan-robin-exotic`.
+That id is not the 0.12 Codex id.
 
 ## Recovery thresholds
 

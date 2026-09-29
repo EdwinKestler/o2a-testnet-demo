@@ -1,0 +1,66 @@
+H0 108
+network regtest
+rgb-protocol 0.11.1 Opret
+disposable demo-lineage evidence; no Phase 0 gate closure
+fee_xonly 63d1db1088ec2fd9d83d429e1e098414c506c3ddce588db614b533b97796d16a
+CASE RBF
+expected: a non-seal replaceable payment changes txid
+observed: txid1 3ac3b01acc5b2bf47ec45e945362ef8fe8ef99411d9597e9960a726799e8256a txid2 dfd628c76b3d1207c7ec65f094a47ef04812c479757a52ae4126cfd67148d34f txid_changed true
+result: PASS
+e11 entity 11 address bcrt1p3k05zv7vc6yqr52s3urw2tmwyu86jrphn7uyp5nu4778w0cv2sqqpm7jcy descriptor tr(50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0,{pk(1f576efe4b8ffea184bd4ccec5a3902c43bad33f0839541343bc82d83f73aa83),and_v(v:multi_a(2,5dc8a122a02310d407638ffab14b5c80c485cb9ec85efd7300ad691601401f77,a1138018875f58c75d55af2a61510bb6a3ce1a9baeaf537f4543ea2a82b1c4d2,c0a89c80702c124537ff27486d80671d391e4ebbd940ba7862f985da21385219),older(10))})
+e12 entity 12 address bcrt1px823gslddwgzugcjfmdaqzwwayr5956mgqmjjv99yz4ltggxsejqhngsxq descriptor tr(50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0,{pk(5465055b741e38eaf1a023f87c42f421fb02cdfc1413cffceb4b07cdfb08b8b9),and_v(v:multi_a(2,4fa0d96ea08332f5b3741b5f06d2c947493a8a9d5bbbc13a94d972472db5f141,97a8210d7191a61c340c8df07fe5ed7f1f84e9b499eb5d683ceb8385abc070e3,ed85b9b0764205911f00d030ff827399a96fb1ba6f033cd6b6990ebe1fc70cde),older(10))})
+e13 entity 13 address bcrt1p6zvxr7x9hspve02gk2rum7yfxmd7xae93cu42s2xfpuewgqxstqsxny2gg descriptor tr(50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0,{pk(e45abde6291ca5ad4f3953a7e22e56449d6079c91ec3d4376daf84b7c1df2b2c),and_v(v:multi_a(2,646f0a537ed6175e9dfbc9ab9c866bc09efe56701a2cd131abc80fe1b97f6096,da04fd455f7004a1463984367b879dc40dd064adfe9b12305d15e6bab0962c9d,fe2b5eb5660d5cef1d6f413c1798f419752ad8934749fdc6f538b99dd6726397),older(10))})
+e15 entity 15 address bcrt1pv6v78gvjvuq7vc6l5xf0s6ud0g7ha7wcps7vw3phyz566d6rgh5shyzg4v descriptor tr(50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0,{pk(c7958894dc781ea2cbf2902f9c324cd739749db19efe1788d7cc35ecc1407937),and_v(v:multi_a(2,12c5ae3bb24c75d280bff95899d552bc2d34eb84341b0d979f82df1e0e6f46a0,36da2dc4eb53c0b827570f5429899187f72c5c7aed2c98041781d5f87af03535,49bef40da9794445ef0f25f7e0d849b20cf183eb3f7a065e8f51434823a329b5),older(10))})
+e16 entity 16 address bcrt1puvygl86vsf846h8x48ndmlw2dsfdg72k46qvn79nsyzk8lmv4lmqze0pdh descriptor tr(50929b74c1a04954b78b4b6035e97a5e078a5a0f28ec96d547bfee9ace803ac0,{pk(7bb818cc5e940f75b17b90fa20b7a74ca56885df0d0f664c5e5b32d1d79af43d),and_v(v:multi_a(2,14b54e206ee604c4efdda865147af59f27e5d208f09afa44a72c8fabeec66dd4,15eeeaecf83dcfc91a8c634cf472359b2b83e2054347084852c039301f8128c4,cb639b06040f9faa8cf987a0833a863a5a803ff27525a66d0e4b8d9609aa9846),older(10))})
+fund e11 28d630c0a2a2e35b97931b6f4d0a7ad5248026ded5a59539a2e993db2e681af4:0 sequences [4294967294, 4294967294]
+fund e12 76bf1e5226133f8086b1128d2fce055a54a7d1dfb132d4e6c2aa3fb7f61e5775:0 sequences [4294967294, 4294967294]
+fund e13 f0124378bc8c2ac90a268c15d2d297fadf7fb94f692d0242a824a155f7849092:0 sequences [4294967294]
+fund e15 054a541ea5b49c625052ccb71cc2271df78024d5b5c59e67ca2f4b3797528cf9:0 sequences [4294967294]
+fund e16 74a16d053b23747e75a1e15d526e4864db2c7857f67fd47d7af11ab483604c77:0 sequences [4294967294]
+fund fee11 1d4651a398d6221bfd58655f7bff10b57e6afa09c41df55fe13260a13f2e7883:0 sequences [4294967294]
+fund fee12 3ba08f620c17f0c21d7bdca7b6afaa766dda44934e5a120586579d91f4ad5f61:0 sequences [4294967294]
+fund fee13 c85b7285d755224965d376b2d9ba0def030673523cd168bbea91c183aea42418:0 sequences [4294967294]
+fund fee15 15ec19230e71cd5bb28d0e5295fdb73cffd52aa1e86f6543a2622185bc9ea6df:0 sequences [4294967294]
+CASE CPFP
+expected: seal funding stays replaceable=false and a child spends only the change
+observed: parent 28d630c0a2a2e35b97931b6f4d0a7ad5248026ded5a59539a2e993db2e681af4 child "3b650a23dbb9fbd0413cf082b33cb7372dd602112248eea3e24d9168bd2f2aad" parent_txid_unchanged true change_vout 1
+result: PASS
+F 110
+e11 entity_index 11 entity 5acacad52c3e80d15970e70f914a5a6fe0c9f2e82936862e216c636e2d652818 state 7c9b72c094282b359b4ac15ca0043a6b0ad6351cd6f03d9bb51541de173aa6fe
+CASE PENDING
+expected: genesis at the confirmation block is PENDING_CONFIRMATION for depth 2
+observed: source=bitcoin-rpc getrawtransaction+getblockheader | best_height=110 | identity_history_state=PENDING_CONFIRMATION | bitcoin=seal-creating transaction is below the required depth | rgb=Consignment is valid | o2a=objects accepted | header_trust=headers come from one electrs instance; this is a trust assumption, not a light client | 
+result: PASS
+CASE CURRENT
+expected: one more block makes the same genesis CURRENT
+observed: source=bitcoin-rpc getrawtransaction+getblockheader | best_height=111 | identity_history_state=CURRENT | bitcoin=current seal is unspent and the supplied proofs meet the header | rgb=Consignment is valid | o2a=objects accepted | header_trust=headers come from one electrs instance; this is a trust assumption, not a light client | 
+result: PASS
+CASE ROTATE
+expected: rotation spends the decoded genesis seal and the successor is CURRENT
+observed: mined 112 consume mined validators_agree true Consignment is valid | tx_ord_map: | 5db435c0ba9dcd051d4aec4d6e1d76440650dcc972169b2d119bf6b10d9a4299 Mined(WitnessPos { layer1: Bitcoin, height: 112, timestamp: 1790652876 }) |  source=bitcoin-rpc getrawtransaction+getblockheader | best_height=113 | identity_history_state=CURRENT | bitcoin=current seal is unspent and the supplied proofs meet the header | rgb=Consignment is valid | o2a=objects accepted | header_trust=headers come from one electrs instance; this is a trust assumption, not a light client | 
+result: PASS
+e12 entity_index 12 entity be3551e477661f7c23d4ef0be6d9b67726fe33d8ec92c0e2f6a0ff3219ff50e5 state 348dee36cec5786e9b51dff79dd46797809075184f29ab546d07443c983adab3
+CASE RECOVER
+expected: BIP68 recovery is non-final before maturity and the successor is CURRENT
+observed: funded_at 110 start 113 early {"code":-26,"message":"non-BIP68-final"} last_reject non-BIP68-final allowed_at 119 broadcast_at 119 mined 120 tx "a55b9560f075b2a1ad7563c7ea3b2447bf6dc218bf6537ba190fb5ada64621f9" consume mined validators_agree true Consignment is valid | tx_ord_map: | a55b9560f075b2a1ad7563c7ea3b2447bf6dc218bf6537ba190fb5ada64621f9 Mined(WitnessPos { layer1: Bitcoin, height: 120, timestamp: 1790652885 }) |  source=bitcoin-rpc getrawtransaction+getblockheader | best_height=121 | identity_history_state=CURRENT | bitcoin=current seal is unspent and the supplied proofs meet the header | rgb=Consignment is valid | o2a=objects accepted | header_trust=headers come from one electrs instance; this is a trust assumption, not a light client | 
+result: PASS
+CASE SAME-SEAL
+expected: two entity indexes share one outpoint; the one not continued is SEAL_CLOSED
+observed: ids 57c1b47a62821707030aafc9727ae898a6689e5c690caa25678b85bcd1c72885 81defbdac6da2ca34035cd3f7fd9957828af5766731bec33529476273543896b distinct true contracts rgb:5Kot2y65-QkNQKFx-qYaKrbU-FjONSpt-YQ~LtGd-5C_KXyU rgb:AdxOAJOH-UGko29y-iIMQxro-FKO1QQl-ikdVZql-ZbRlypI rgb_other valid continued CURRENT other SEAL_CLOSED note mined 122 consume mined validators_agree true Consignment is valid | tx_ord_map: | 8d7c0f25de75cd7375b2645cb5035925afeceaff9a19b9ac31057e477670dacf Mined(WitnessPos { layer1: Bitcoin, height: 122, timestamp: 1790652886 }) | 
+result: PASS
+e15a entity_index 15 entity 0199abf14bed9205cc216bb8562bdeb4e7fbe6716df2c8c2c07edb452068c5bf state e24ae49ef2af804511eb1ffea2fbc3114f24f47055c86cff611df1ae6c22910c
+CASE REISSUE
+expected: two contracts on one seal; the contract not continued is SEAL_CLOSED while its consignment still validates
+observed: same_digest true contracts rgb:j8zWGUjf-j3AL0Ct-ssvo~6h-3nU9Gvt-Td9JneS-yIKUits rgb:hBguMDYZ-SAr39BT-8XXhf82-zuAYW4B-NTcJLhE-98IHLw4 rgb_second valid rgb_other valid continued CURRENT other SEAL_CLOSED
+result: PASS
+e16 entity_index 16 entity be6a9b85565f08f842785db6987ebf006518d6ecf7b0a6a78e969ed661b8ccd6 state fceb355451eb2e7e8ed5271a4bfc136057549619ff4b23bd88370ac2d46f70e1
+CASE PLAIN
+expected: a plain close has no O2A transition; RGB still validates the genesis consignment
+observed: mined 128 tx 67271fd9ec8c58a792884a6e8faf9df274f1d2343303f3b80d8756decbff6058 source=bitcoin-rpc getrawtransaction+getblockheader | best_height=129 | identity_history_state=SEAL_CLOSED_WITHOUT_VALID_TRANSITION | bitcoin=seal spend is included at the required depth | rgb=Consignment is valid | o2a=no valid transition closes the seal | header_trust=headers come from one electrs instance; this is a trust assumption, not a light client |  Consignment is valid | tx_ord_map: | 
+result: PASS
+CASE REORG
+expected: invalidateblock and reconsiderblock stay above H0
+observed: h0 108 h0_hash 3f7e4a7404599036d852d03aa68136da66ad0e36726c9f8c61a826385b64966c before 129 dropped 128 restored_height 129 above_h0 true restored true
+result: PASS
+lineage_finished
+LINEAGE_EXIT:0

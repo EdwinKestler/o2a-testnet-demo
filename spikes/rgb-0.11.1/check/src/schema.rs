@@ -7,9 +7,8 @@ use rgbstd::stl::{rgb_contract_stl, StandardTypes};
 use rgbstd::txout::BlindSeal;
 use rgbstd::validation::Scripts;
 use rgbstd::{
-    AssignmentType, ChainNet, GenesisSeal, GlobalStateSchema, GlobalStateType, GraphSeal,
-    Identity, Occurrences, Opout, OwnedStateSchema, Outpoint, Schema, Transition, TransitionType,
-    TypeSystem,
+    AssignmentType, ChainNet, GenesisSeal, GlobalStateSchema, GlobalStateType, GraphSeal, Identity,
+    Occurrences, Opout, Outpoint, OwnedStateSchema, Schema, Transition, TransitionType, TypeSystem,
 };
 use strict_types::{
     LibBuilder, StrictDecode, StrictDumb, StrictEncode, StrictSerialize, StrictType,
@@ -24,8 +23,9 @@ pub const TS_REVOKE: TransitionType = TransitionType::with(8103);
 
 pub const TS_ISSUE: i64 = 1_759_017_600;
 
-#[derive(Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug)]
-#[derive(StrictType, StrictEncode, StrictDecode)]
+#[derive(
+    Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Debug, StrictType, StrictEncode, StrictDecode,
+)]
 #[strict_type(lib = LIB_NAME_O2A)]
 pub struct O2aDigest(pub [u8; 32]);
 
@@ -126,6 +126,24 @@ pub fn issue_at(
     blinding: u64,
     timestamp: i64,
 ) -> Result<rgbstd::containers::ValidConsignment<false>, String> {
+    issue_on(
+        prepared,
+        ChainNet::BitcoinRegtest,
+        digest,
+        outpoint,
+        blinding,
+        timestamp,
+    )
+}
+
+pub fn issue_on(
+    prepared: &IdentitySchema,
+    chain: ChainNet,
+    digest: [u8; 32],
+    outpoint: Outpoint,
+    blinding: u64,
+    timestamp: i64,
+) -> Result<rgbstd::containers::ValidConsignment<false>, String> {
     let seal: BlindSeal<rgbstd::Txid> =
         BlindSeal::with_blinding(outpoint.txid, outpoint.vout, blinding);
     let genesis_seal: GenesisSeal = seal;
@@ -134,7 +152,7 @@ pub fn issue_at(
         prepared.schema.clone(),
         prepared.types.clone(),
         empty_scripts(),
-        ChainNet::BitcoinRegtest,
+        chain,
     )
     .add_global_state("digest", O2aDigest(digest))
     .map_err(|err| err.to_string())?

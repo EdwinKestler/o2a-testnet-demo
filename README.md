@@ -8,10 +8,13 @@ The static material in [`site/`](site/) supports the live demo and is not protoc
 
 The workspace contains:
 
-- `o2a-demo-core`: deterministic O2A encoding, signing, and verification;
-- `o2a-demo-rgb`: the RGB 0.12 RC3 adapter; and
-- `o2a-demo-cli`: orchestration commands for identity creation, controller
-  rotation, attestation issuance, and package verification.
+- `o2a-demo-core`: deterministic O2A encoding, signing, and verification.
+  It has no RGB dependency and is the default Cargo member.
+- `spikes/rgb-0.11.1`: the maintained rgb-protocol 0.11.1 adapter, Opret,
+  in its own Cargo workspace.
+- `o2a-demo-rgb`: the archived RGB 0.12 RC3 adapter. It stays in the
+  workspace so that graph still resolves, and it is not a default member.
+- `o2a-demo-cli`: orchestration commands for the archived adapter.
 
 Only identity creation and controller rotation are implemented in the first
 execution milestone. Attestations are command-surface placeholders for the
