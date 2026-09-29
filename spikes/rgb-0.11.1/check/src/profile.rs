@@ -383,6 +383,8 @@ pub struct CliArgs {
     pub command: Option<String>,
     pub authorize: bool,
     pub seal: Option<String>,
+    pub json: bool,
+    pub dir: Option<String>,
 }
 
 pub fn split_args(args: &[String]) -> Result<CliArgs, String> {
@@ -390,6 +392,8 @@ pub fn split_args(args: &[String]) -> Result<CliArgs, String> {
     let mut command = None;
     let mut seal = None;
     let mut expect_seal = false;
+    let mut json = false;
+    let mut dir = None;
     for arg in args {
         if expect_seal {
             if arg.starts_with('-') || arg.is_empty() {
@@ -401,10 +405,17 @@ pub fn split_args(args: &[String]) -> Result<CliArgs, String> {
         }
         if arg == "--authorize-mainnet" {
             authorize = true;
+        } else if arg == "--json" {
+            json = true;
         } else if arg == "--seal" {
             expect_seal = true;
         } else if command.is_none() && !arg.starts_with('-') {
             command = Some(arg.clone());
+        } else if command.as_deref() == Some("publish-package")
+            && dir.is_none()
+            && !arg.starts_with('-')
+        {
+            dir = Some(arg.clone());
         } else {
             return Err(format!("unknown argument {arg}"));
         }
@@ -412,10 +423,18 @@ pub fn split_args(args: &[String]) -> Result<CliArgs, String> {
     if expect_seal {
         return Err("genesis --seal requires an outpoint".into());
     }
+    if json && !matches!(command.as_deref(), Some("verify") | Some("signet-verify")) {
+        return Err("--json is only valid with verify".into());
+    }
+    if command.as_deref() == Some("publish-package") && dir.is_none() {
+        return Err("publish-package requires a destination directory".into());
+    }
     Ok(CliArgs {
         command,
         authorize,
         seal,
+        json,
+        dir,
     })
 }
 
@@ -440,8 +459,6 @@ fn parse_name(value: &str) -> Result<NetworkKind, String> {
 
 #[cfg(test)]
 mod tests {
-    use std::sync::{Mutex, MutexGuard};
-
     use o2a_demo_core::{
         encode_resulting_state, entity_id, genesis_for, genesis_state_from, keys_for,
         official_name_claim, official_name_nonce, seal_for_state, state_id, verify,
@@ -450,42 +467,8 @@ mod tests {
 
     use super::*;
 
-    static ENV: Mutex<()> = Mutex::new(());
-
-    struct EnvLock {
-        _guard: MutexGuard<'static, ()>,
-        saved: Vec<(String, Option<String>)>,
-    }
-
-    impl Drop for EnvLock {
-        fn drop(&mut self) {
-            for (key, value) in &self.saved {
-                unsafe {
-                    match value {
-                        Some(saved) => std::env::set_var(key, saved),
-                        None => std::env::remove_var(key),
-                    }
-                }
-            }
-        }
-    }
-
-    fn lock_env(pairs: &[(&str, Option<&str>)]) -> EnvLock {
-        let guard = ENV.lock().expect("env lock");
-        let mut saved = Vec::new();
-        for (key, value) in pairs {
-            saved.push(((*key).to_string(), std::env::var(key).ok()));
-            unsafe {
-                match value {
-                    Some(next) => std::env::set_var(key, next),
-                    None => std::env::remove_var(key),
-                }
-            }
-        }
-        EnvLock {
-            _guard: guard,
-            saved,
-        }
+    fn lock_env(pairs: &[(&str, Option<&str>)]) -> crate::test_env::EnvLock {
+        crate::test_env::lock_env(pairs)
     }
 
     fn must_err<T>(result: Result<T, String>) -> String {
@@ -728,6 +711,24 @@ mod tests {
         assert!(missing.contains("outpoint"), "{missing}");
         let unknown = must_err(split_args(&["plan".into(), "extra".into()]));
         assert!(unknown.contains("unknown argument"), "{unknown}");
+        let json = split_args(&["verify".into(), "--json".into()]).expect("json");
+        assert!(json.json);
+        assert!(json.dir.is_none());
+        let alias = split_args(&["--json".into(), "signet-verify".into()]).expect("alias");
+        assert!(alias.json);
+        let rejected = must_err(split_args(&["plan".into(), "--json".into()]));
+        assert!(
+            rejected.contains("--json is only valid with verify"),
+            "{rejected}"
+        );
+        let missing = must_err(split_args(&["publish-package".into()]));
+        assert!(missing.contains("destination directory"), "{missing}");
+        let package =
+            split_args(&["publish-package".into(), "/tmp/o2a-package".into()]).expect("package");
+        assert_eq!(package.dir.as_deref(), Some("/tmp/o2a-package"));
+        assert!(!package.json);
+        let extra = must_err(split_args(&["verify".into(), "/tmp/o2a-package".into()]));
+        assert!(extra.contains("unknown argument"), "{extra}");
     }
 
     #[test]

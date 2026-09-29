@@ -1,10 +1,14 @@
 //! Regtest compatibility checks for RGB 0.11.1. No wallet claims the seal UTXOs.
 
 mod chain;
+mod format;
 mod lineage;
 mod profile;
 mod schema;
 mod spend;
+
+#[cfg(test)]
+mod test_env;
 
 use std::fmt::Write as _;
 use std::fs::{self, File};
@@ -50,7 +54,7 @@ fn main() {
         Some("plan") => lineage::plan(authorize),
         Some("genesis") => lineage::genesis(authorize, parsed.seal.as_deref()),
         Some("claim") => lineage::claim(authorize),
-        Some("verify") => lineage::stage_verify(authorize),
+        Some("verify") => lineage::stage_verify(authorize, parsed.json),
         Some("signet-genesis") => {
             eprintln!(
                 "note: signet-genesis is deprecated; use genesis --seal <outpoint>. This alias sets no network."
@@ -63,8 +67,25 @@ fn main() {
         }
         Some("signet-verify") => {
             eprintln!("note: signet-verify is deprecated; use verify. This alias sets no network.");
-            lineage::stage_verify(authorize)
+            lineage::stage_verify(authorize, parsed.json)
         }
+        Some("publish-package") => (|| -> Result<(), String> {
+            // Offline and keyless. The profile supplies the network label only.
+            let dest = parsed
+                .dir
+                .clone()
+                .ok_or("publish-package requires a destination directory")?;
+            let active = profile::load()?;
+            let source = PathBuf::from(
+                std::env::var("RGB011_EVIDENCE").map_err(|_| "RGB011_EVIDENCE is required")?,
+            );
+            format::publish_package(
+                &source,
+                std::path::Path::new(&dest),
+                active.kind.label(),
+                active.network_byte,
+            )
+        })(),
         _ => run(authorize),
     };
     if let Err(err) = result {

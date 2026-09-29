@@ -17,7 +17,10 @@ pub use chain::{
     evaluate_lineage, format_lineage_report, inclusion_matches, merkle_root, CurrentSealView,
     InclusionProof, LineageEvidence, LineageReport, SealFact,
 };
-pub use decode::{decode_identity_state, decode_payload, evaluate_name_claim, ClaimAuthorization};
+pub use decode::{
+    decode_identity_state, decode_payload, evaluate_name_claim, official_name_of,
+    ClaimAuthorization,
+};
 pub use encode::{
     bytes_field, common_header, content_reference, encode_recovery_policy, encode_resulting_state,
     encode_seal_policy, entity_id as entity_id_of_payload, key_id, list_items, option_fixed,
@@ -1009,5 +1012,29 @@ mod tests {
             ),
             Err("cross-role x-only reuse")
         );
+    }
+
+    #[test]
+    fn official_name_roundtrips_from_the_signed_claim() {
+        let keys = demo_keys();
+        let state = genesis_state_from(&keys, [7u8; 36]);
+        let genesis = genesis_for(NETWORK_REGTEST, keys.root, &state);
+        let entity = entity_id(&genesis.payload);
+        let decoded = decode_identity_state(&genesis.payload).expect("genesis state");
+        let sid = state_id(&entity, &encode_resulting_state(&decoded));
+        let name = "Rehearsal Name";
+        let claim = official_name_claim(
+            NETWORK_REGTEST,
+            entity,
+            sid,
+            keys.controller_0,
+            name,
+            official_name_nonce(&entity, name),
+        )
+        .expect("claim");
+        let parsed = decode::parse_claim(&claim.payload).expect("parse");
+        assert_eq!(parsed.predicate, "official_name");
+        assert_eq!(parsed.object, name.as_bytes());
+        assert_eq!(official_name_of(&claim.payload).expect("name"), name);
     }
 }

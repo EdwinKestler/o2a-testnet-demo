@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "o2a.public-package/v1",
+  "title": "O2A public package hints v1",
+  "description": "Every field is a hint. Verifiers recompute entity_id, state_id, seal_outpoint, and official_name from genesis.o2a and claim.o2a. created_at_height is the tool-written public.txt hint. This file is not an input to verify.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "network",
+    "entity_id",
+    "state_id",
+    "seal_outpoint",
+    "official_name",
+    "created_at_height"
+  ],
+  "properties": {
+    "format": {
+      "type": "string",
+      "const": "o2a.public-package/v1"
+    },
+    "network": {
+      "type": "string",
+      "enum": ["regtest", "signet", "mainnet"]
+    },
+    "entity_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "state_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "seal_outpoint": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}:[0-9]+$"
+    },
+    "official_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at_height": {
+      "type": "integer",
+      "minimum": 0
+    }
+  }
+}

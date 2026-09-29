@@ -14,10 +14,10 @@ use o2a_demo_core::{
     controller_rotation_with, decode_identity_state, demo_entity_index, demo_genesis_state,
     demo_keys, encode_resulting_state, entity_id, evaluate_lineage, evaluate_name_claim,
     format_lineage_report, genesis_for, genesis_state_from, genesis_with, inclusion_matches,
-    key_id, keys_for, official_name_claim, official_name_nonce, recovery_authorizations,
-    seal_for_state, state_id, state_named_by_signed, verify, ClaimAuthorization, ControllerEntry,
-    CurrentSealView, DemoKey, DemoKeys, InclusionProof, LineageEvidence, ResultingState,
-    SealBinding, SealFact, SignedObject, NUMS_X,
+    key_id, keys_for, official_name_claim, official_name_nonce, official_name_of,
+    recovery_authorizations, seal_for_state, state_id, state_named_by_signed, verify,
+    ClaimAuthorization, ControllerEntry, CurrentSealView, DemoKey, DemoKeys, InclusionProof,
+    LineageEvidence, ResultingState, SealBinding, SealFact, SignedObject, NUMS_X,
 };
 #[cfg(test)]
 use rgbstd::bitcoin::absolute::LockTime;
@@ -987,6 +987,17 @@ fn plain_close(
     })
 }
 
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct StageObservation {
+    text: String,
+    state: &'static str,
+    bitcoin: &'static str,
+    unspent: bool,
+    confirmations: u64,
+    best_height: u32,
+    best_block_hash: String,
+}
+
 fn o2a_report(
     node: &super::chain::Node,
     identity: &Identity,
@@ -995,7 +1006,7 @@ fn o2a_report(
     o2a_ok: bool,
     rgb: &'static str,
 ) -> Result<String, String> {
-    o2a_report_with(node, identity, current, spend, o2a_ok, rgb, DEPTH)
+    Ok(o2a_report_with(node, identity, current, spend, o2a_ok, rgb, DEPTH)?.text)
 }
 
 fn o2a_report_with(
@@ -1006,13 +1017,39 @@ fn o2a_report_with(
     o2a_ok: bool,
     rgb: &'static str,
     depth: u32,
-) -> Result<String, String> {
+) -> Result<StageObservation, String> {
     let first = o2a_once(node, identity, current, spend, o2a_ok, rgb, depth)?;
     let second = o2a_once(node, identity, current, spend, o2a_ok, rgb, depth)?;
     if first != second {
-        return Err(format!("o2a validators differ\n{first}\n{second}"));
+        return Err(format!(
+            "o2a validators differ\n{}\nbest_block_hash={}\n{}\nbest_block_hash={}",
+            first.text, first.best_block_hash, second.text, second.best_block_hash
+        ));
     }
     Ok(first)
+}
+
+fn tip(node: &super::chain::Node) -> Result<(u32, String), String> {
+    let info = node.call(false, "getblockchaininfo", json!([]))?;
+    let blocks = info
+        .get("blocks")
+        .and_then(Value::as_u64)
+        .ok_or("best chain height is missing")? as u32;
+    let hash = info
+        .get("bestblockhash")
+        .and_then(Value::as_str)
+        .ok_or("best block hash is missing")?
+        .to_ascii_lowercase();
+    if hash.len() != 64 || !hash.chars().all(|ch| ch.is_ascii_hexdigit()) {
+        return Err("best block hash is not 64 hex characters".into());
+    }
+    let counted = node.height()?;
+    if blocks != counted {
+        return Err(format!(
+            "tip height {blocks} disagrees with getblockcount {counted}"
+        ));
+    }
+    Ok((blocks, hash))
 }
 
 fn o2a_once(
@@ -1023,7 +1060,7 @@ fn o2a_once(
     o2a_ok: bool,
     rgb: &'static str,
     depth: u32,
-) -> Result<String, String> {
+) -> Result<StageObservation, String> {
     let canonical = super::canonical_outpoint(current.txid, current.vout);
     let payloads = [identity.genesis.payload.as_slice()];
     let state = state_named_by_signed(&payloads, &canonical).or_else(|_| {
@@ -1055,12 +1092,12 @@ fn o2a_once(
         Some(txid) if !unspent => Some(inclusion(node, &txid.to_string())?),
         _ => None,
     };
-    let best = node.height()?;
+    let (best, best_block_hash) = tip(node)?;
     let evidence = LineageEvidence {
         seals: vec![SealFact {
             expected_script: expected,
             observed_script: observed,
-            creation,
+            creation: creation.clone(),
         }],
         anchor: Some(inclusion(node, &current.txid.to_string())?),
         observation: Some(CurrentSealView {
@@ -1072,10 +1109,20 @@ fn o2a_once(
         required_depth: depth,
     };
     let report = evaluate_lineage(&evidence, rgb);
-    Ok(format!(
-        "source=bitcoin-rpc getrawtransaction+getblockheader\nbest_height={best}\n{}",
-        format_lineage_report(&report)
-    ))
+    let confirmations = u64::from(best.saturating_add(1).saturating_sub(creation.height));
+    Ok(StageObservation {
+        text: format!(
+            "source={}\nbest_height={best}\n{}",
+            crate::format::SEAL_SOURCE,
+            format_lineage_report(&report)
+        ),
+        state: report.identity_history_state,
+        bitcoin: report.bitcoin,
+        unspent,
+        confirmations,
+        best_height: best,
+        best_block_hash,
+    })
 }
 
 fn successor(prior: &Identity, state: &ResultingState, next: OutPoint) -> Identity {
@@ -1593,6 +1640,7 @@ pub(crate) struct GenesisDraft {
     pub signed: SignedObject,
     pub state: ResultingState,
     pub confirmations: u64,
+    pub created_at_height: u32,
 }
 
 /// Chain checks use the read backend. The signature is produced only after they pass.
@@ -1655,6 +1703,7 @@ pub(crate) fn draft_genesis(
         signed,
         state,
         confirmations: observed.confirmations,
+        created_at_height: observed.inclusion.height,
     })
 }
 
@@ -1792,11 +1841,12 @@ pub fn genesis(authorize: bool, seal: Option<&str>) -> Result<(), String> {
     log.write("genesis.strict", &bytes)?;
     let entity = entity_id(&draft.signed.payload);
     let public = format!(
-        "entity_id={}\nstate_id={}\nseal={outpoint_text}\nconfirmations={}\nnetwork={}\n",
+        "entity_id={}\nstate_id={}\nseal={outpoint_text}\nconfirmations={}\nnetwork={}\ncreated_at_height={}\n",
         hex::encode(entity),
         hex::encode(state_id(&entity, &encode_resulting_state(&draft.state))),
         draft.confirmations,
-        active.kind.label()
+        active.kind.label(),
+        draft.created_at_height
     );
     log.write("public.txt", public.as_bytes())?;
     log.line(&format!("entity_id {}", hex::encode(entity)));
@@ -1834,22 +1884,20 @@ pub fn claim(authorize: bool) -> Result<(), String> {
     Ok(())
 }
 
-pub fn stage_verify(authorize: bool) -> Result<(), String> {
+pub fn stage_verify(authorize: bool, json_out: bool) -> Result<(), String> {
     let active = crate::profile::load()?;
     crate::profile::begin_cli(&active, crate::profile::Operation::Verify, authorize)?;
+    if json_out {
+        let _ = crate::format::verifier_id()?;
+    }
     let dir =
         PathBuf::from(std::env::var("RGB011_EVIDENCE").map_err(|_| "RGB011_EVIDENCE is required")?);
     let genesis = read_object(&dir.join("genesis.o2a"))?;
     verify(&genesis).map_err(|err| err.to_string())?;
     let entity = entity_id(&genesis.payload);
     let state = decode_identity_state(&genesis.payload).map_err(|err| err.to_string())?;
-    let outpoint = parse_outpoint(
-        &std::fs::read_to_string(dir.join("public.txt"))
-            .map_err(|err| err.to_string())?
-            .lines()
-            .find_map(|line| line.strip_prefix("seal="))
-            .ok_or("public.txt has no seal")?,
-    )?;
+    // The outpoint is the next seal committed in the signed genesis.
+    let outpoint = crate::format::outpoint_from_next_seal(&state.next_seal);
     let canonical = super::canonical_outpoint(outpoint.txid, outpoint.vout);
     let decoded =
         state_named_by_signed(&[&genesis.payload], &canonical).map_err(|err| err.to_string())?;
@@ -1860,6 +1908,7 @@ pub fn stage_verify(authorize: bool) -> Result<(), String> {
     let bytes = std::fs::read(dir.join("genesis.strict")).map_err(|err| err.to_string())?;
     let prepared = super::schema::identity_schema();
     let report = super::dual_validate::<false>(&bytes, &prepared.types)?;
+    let rgb_status = super::one_line(&report);
     let identity = Identity {
         entity,
         genesis: genesis.clone(),
@@ -1875,7 +1924,7 @@ pub fn stage_verify(authorize: bool) -> Result<(), String> {
         bytes,
         rgb_ok: report.starts_with("Consignment is valid"),
     };
-    let o2a = o2a_report_with(
+    let observed = o2a_report_with(
         &node,
         &identity,
         outpoint,
@@ -1884,12 +1933,17 @@ pub fn stage_verify(authorize: bool) -> Result<(), String> {
         "Consignment is valid",
         active.required_depth,
     )?;
-    println!("entity_id={}", hex::encode(entity));
-    println!("{}", super::one_line(&report));
-    println!("{o2a}");
-    if dir.join("claim.o2a").exists() {
-        let claim = read_object(&dir.join("claim.o2a"))?;
-        let sid = state_id(&entity, &encode_resulting_state(&state));
+    let sid = state_id(&entity, &encode_resulting_state(&state));
+    let mut reasons = Vec::new();
+    if !identity.rgb_ok {
+        reasons.push(rgb_status.clone());
+    }
+    if observed.state != "CURRENT" {
+        reasons.push(observed.bitcoin.to_string());
+    }
+    let claim_path = dir.join("claim.o2a");
+    let (claim_valid, official_name, claim_failure) = if claim_path.exists() {
+        let claim = read_object(&claim_path)?;
         let controller = state
             .controllers
             .first()
@@ -1903,17 +1957,65 @@ pub fn stage_verify(authorize: bool) -> Result<(), String> {
             key_role: 1,
             capabilities: &controller.capabilities,
         };
-        evaluate_name_claim(
+        match evaluate_name_claim(
             &claim.payload,
             claim.signature,
             claim.signer_xonly,
             active.network_byte,
             &authorization,
-        )
-        .map_err(|err| err.to_string())?;
-        println!("name_claim=valid");
+        ) {
+            Ok(()) => match official_name_of(&claim.payload) {
+                Ok(name) => (true, Some(name), None),
+                Err(err) => {
+                    let err = err.to_string();
+                    reasons.push(err.clone());
+                    (false, None, Some(err))
+                }
+            },
+            Err(err) => {
+                let err = err.to_string();
+                reasons.push(err.clone());
+                (false, None, Some(err))
+            }
+        }
+    } else {
+        reasons.push("official_name claim is absent".into());
+        (false, None, None)
+    };
+    if json_out {
+        let facts = crate::format::VerifyFacts {
+            network: active.kind.label().to_string(),
+            verifier_id: crate::format::verifier_id()?,
+            entity_id: hex::encode(entity),
+            state_id: hex::encode(sid),
+            identity_history_state: observed.state.to_string(),
+            seal_outpoint: crate::format::seal_text(&state.next_seal),
+            confirmations: observed.confirmations,
+            required_depth: active.required_depth,
+            unspent: observed.unspent,
+            source: crate::format::SEAL_SOURCE.to_string(),
+            best_block_hash: observed.best_block_hash.clone(),
+            height: observed.best_height,
+            rgb_status,
+            genesis_valid: true,
+            claim_valid,
+            official_name,
+            reasons,
+        };
+        let document = crate::format::verification_document(&facts)?;
+        print!("{document}");
+    } else {
+        println!("entity_id={}", hex::encode(entity));
+        println!("{}", super::one_line(&report));
+        println!("{}", observed.text);
+        if claim_valid {
+            println!("name_claim=valid");
+        }
     }
-    if !o2a.contains("identity_history_state=CURRENT") || !identity.rgb_ok {
+    if let Some(err) = claim_failure {
+        return Err(err);
+    }
+    if observed.state != "CURRENT" || !identity.rgb_ok {
         return Err("verifier did not report CURRENT".into());
     }
     Ok(())
@@ -1931,6 +2033,10 @@ fn parse_outpoint(text: &str) -> Result<OutPoint, String> {
 
 fn read_object(path: &Path) -> Result<SignedObject, String> {
     let text = std::fs::read_to_string(path).map_err(|err| err.to_string())?;
+    parse_object(&text)
+}
+
+pub(crate) fn parse_object(text: &str) -> Result<SignedObject, String> {
     let mut fields = BTreeMap::new();
     for line in text.lines() {
         if let Some((key, value)) = line.split_once('=') {

@@ -408,6 +408,8 @@ pub struct ParsedClaim {
     pub key_role: u8,
     pub capability: u16,
     pub subject: [u8; 32],
+    pub predicate: String,
+    pub object: Vec<u8>,
 }
 
 /// Mirrors `parse_claim` in `check_vectors.py`.
@@ -426,8 +428,8 @@ pub fn parse_claim(payload: &[u8]) -> Result<ParsedClaim, &'static str> {
     let key_role = reader.u8()?;
     let capability = reader.u16()?;
     let subject = fixed32(&mut reader)?;
-    claim_text(&mut reader)?;
-    claim_bytes(&mut reader)?;
+    let predicate = claim_text(&mut reader)?;
+    let object = claim_bytes(&mut reader)?;
     if reader.u8()? != 0 {
         return Err("fixture requires absent claim context");
     }
@@ -445,14 +447,29 @@ pub fn parse_claim(payload: &[u8]) -> Result<ParsedClaim, &'static str> {
         key_role,
         capability,
         subject,
+        predicate,
+        object,
     })
+}
+
+/// Object bytes of a claim whose predicate is exactly `official_name`.
+pub fn official_name_of(payload: &[u8]) -> Result<String, &'static str> {
+    let claim = parse_claim(payload)?;
+    if claim.predicate != "official_name" {
+        return Err("claim predicate is not official_name");
+    }
+    let name = std::str::from_utf8(&claim.object).map_err(|_| "official name is not UTF-8")?;
+    if name.is_empty() {
+        return Err("official name is empty");
+    }
+    Ok(name.to_string())
 }
 
 fn fixed32(reader: &mut Reader<'_>) -> Result<[u8; 32], &'static str> {
     Ok(reader.take(32)?.try_into().unwrap())
 }
 
-fn claim_text(reader: &mut Reader<'_>) -> Result<(), &'static str> {
+fn claim_text(reader: &mut Reader<'_>) -> Result<String, &'static str> {
     let length = reader.u32()? as usize;
     if length > MAX_TEXT {
         return Err("oversized text field");
@@ -461,17 +478,16 @@ fn claim_text(reader: &mut Reader<'_>) -> Result<(), &'static str> {
     if value.contains(&0) {
         return Err("NUL in canonical text");
     }
-    std::str::from_utf8(value).map_err(|_| "invalid UTF-8")?;
-    Ok(())
+    let text = std::str::from_utf8(value).map_err(|_| "invalid UTF-8")?;
+    Ok(text.to_string())
 }
 
-fn claim_bytes(reader: &mut Reader<'_>) -> Result<(), &'static str> {
+fn claim_bytes(reader: &mut Reader<'_>) -> Result<Vec<u8>, &'static str> {
     let length = reader.u32()? as usize;
     if length > MAX_BYTES {
         return Err("oversized bytes field");
     }
-    reader.take(length)?;
-    Ok(())
+    Ok(reader.take(length)?.to_vec())
 }
 
 fn claim_option32(reader: &mut Reader<'_>) -> Result<(), &'static str> {
