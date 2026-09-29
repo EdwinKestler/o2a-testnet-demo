@@ -52,6 +52,7 @@ fn main() {
     let result = match parsed.command.as_deref() {
         Some("lineage") => lineage::run(authorize),
         Some("plan") => lineage::plan(authorize),
+        Some("preflight") => lineage::preflight(authorize, parsed.seal.as_deref(), parsed.json),
         Some("genesis") => lineage::genesis(authorize, parsed.seal.as_deref()),
         Some("claim") => lineage::claim(authorize),
         Some("verify") => lineage::stage_verify(authorize, parsed.json),

@@ -66,6 +66,18 @@ pub fn plan(authorize: bool) -> Result<(), String> {
         active.bitcoin,
     )
     .map_err(|err| err.to_string())?;
+    if let Ok(dir) = std::env::var("RGB011_EVIDENCE") {
+        let dir = PathBuf::from(dir);
+        std::fs::create_dir_all(&dir).map_err(|err| err.to_string())?;
+        let document = json!({
+            "network": active.kind.label(),
+            "seal_address": address.to_string(),
+            "script_pubkey": hex::encode(&seal.script_pubkey),
+            "required_depth": active.required_depth,
+        });
+        let body = serde_json::to_string_pretty(&document).map_err(|err| err.to_string())? + "\n";
+        std::fs::write(dir.join("plan.json"), body).map_err(|err| err.to_string())?;
+    }
     println!("entity_index={}", demo_entity_index());
     println!("network={}", active.network_byte);
     println!("delay_blocks={}", state.recovery.delay_blocks);
@@ -107,6 +119,92 @@ pub fn plan(authorize: bool) -> Result<(), String> {
         "seal_recovery_2_xonly={}",
         hex::encode(keys.seal_recovery_2.xonly)
     );
+    Ok(())
+}
+
+/// Keyless chain pre-flight. It consumes the public plan and observes the
+/// operator-funded outpoint; it never derives a key and never broadcasts.
+pub fn preflight(authorize: bool, seal: Option<&str>, json_out: bool) -> Result<(), String> {
+    let active = crate::profile::load()?;
+    crate::profile::begin_cli(&active, crate::profile::Operation::Preflight, authorize)?;
+    if !json_out {
+        return Err("preflight requires --json".into());
+    }
+    let outpoint_text = seal
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .ok_or("preflight requires --seal <outpoint>")?;
+    let outpoint = parse_outpoint(outpoint_text)?;
+    let dir =
+        PathBuf::from(std::env::var("RGB011_EVIDENCE").map_err(|_| "RGB011_EVIDENCE is required")?);
+    let plan: Value = serde_json::from_slice(
+        &std::fs::read(dir.join("plan.json")).map_err(|err| format!("plan.json: {err}"))?,
+    )
+    .map_err(|err| format!("plan.json: {err}"))?;
+    let planned_network = plan
+        .get("network")
+        .and_then(Value::as_str)
+        .ok_or("plan.json network is missing")?;
+    if planned_network != active.kind.label() {
+        return Err(format!(
+            "plan network {planned_network} does not match {}",
+            active.kind.label()
+        ));
+    }
+    let planned_address = plan
+        .get("seal_address")
+        .and_then(Value::as_str)
+        .ok_or("plan.json seal_address is missing")?;
+    let planned_script = hex::decode(
+        plan.get("script_pubkey")
+            .and_then(Value::as_str)
+            .ok_or("plan.json script_pubkey is missing")?,
+    )
+    .map_err(|err| format!("plan.json script_pubkey: {err}"))?;
+    let planned_depth = plan
+        .get("required_depth")
+        .and_then(Value::as_u64)
+        .ok_or("plan.json required_depth is missing")? as u32;
+    if planned_depth != active.required_depth {
+        return Err("plan.json required_depth does not match the network profile".into());
+    }
+
+    let node = super::chain::Node::connect_wallet(false)?;
+    let observed = node.observe_funding(&outpoint.txid.to_string(), outpoint.vout)?;
+    if !observed.output_exists {
+        return Err("planned seal output does not exist on the selected chain".into());
+    }
+    if observed.output_script != planned_script {
+        return Err("funded output script does not match plan.json".into());
+    }
+    let chain_address = Address::from_script(
+        ScriptBuf::from_bytes(observed.output_script.clone()).as_script(),
+        active.bitcoin,
+    )
+    .map_err(|err| err.to_string())?
+    .to_string();
+    if chain_address != planned_address {
+        return Err("funded output address does not match plan.json".into());
+    }
+    if !inclusion_matches(&observed.inclusion) || observed.txout_proof.is_empty() {
+        return Err("funding inclusion proof is missing or does not match its header".into());
+    }
+    let node_height = node.height()?;
+    let mut electrs = super::chain::ElectrumResolver::open()?;
+    let electrs_height = electrs.tip()?;
+    let document = json!({
+        "network": active.kind.label(),
+        "node_height": node_height,
+        "electrs_height": electrs_height,
+        "seal_address": chain_address,
+        "seal_outpoint": outpoint_text,
+        "funding_confirmations": observed.confirmations,
+        "required_depth": active.required_depth,
+        "unspent": observed.unspent,
+    });
+    let body = serde_json::to_string_pretty(&document).map_err(|err| err.to_string())? + "\n";
+    std::fs::write(dir.join("preflight.json"), &body).map_err(|err| err.to_string())?;
+    print!("{body}");
     Ok(())
 }
 
@@ -1003,10 +1101,10 @@ fn o2a_report(
     identity: &Identity,
     current: OutPoint,
     spend: Option<Txid>,
-    o2a_ok: bool,
-    rgb: &'static str,
+    valid_transition: bool,
+    rgb: &str,
 ) -> Result<String, String> {
-    Ok(o2a_report_with(node, identity, current, spend, o2a_ok, rgb, DEPTH)?.text)
+    Ok(o2a_report_with(node, identity, current, spend, valid_transition, rgb, DEPTH)?.text)
 }
 
 fn o2a_report_with(
@@ -1014,12 +1112,12 @@ fn o2a_report_with(
     identity: &Identity,
     current: OutPoint,
     spend: Option<Txid>,
-    o2a_ok: bool,
-    rgb: &'static str,
+    valid_transition: bool,
+    rgb: &str,
     depth: u32,
 ) -> Result<StageObservation, String> {
-    let first = o2a_once(node, identity, current, spend, o2a_ok, rgb, depth)?;
-    let second = o2a_once(node, identity, current, spend, o2a_ok, rgb, depth)?;
+    let first = o2a_once(node, identity, current, spend, valid_transition, rgb, depth)?;
+    let second = o2a_once(node, identity, current, spend, valid_transition, rgb, depth)?;
     if first != second {
         return Err(format!(
             "o2a validators differ\n{}\nbest_block_hash={}\n{}\nbest_block_hash={}",
@@ -1052,13 +1150,53 @@ fn tip(node: &super::chain::Node) -> Result<(u32, String), String> {
     Ok((blocks, hash))
 }
 
+fn spending_txid(
+    node: &super::chain::Node,
+    outpoint: OutPoint,
+    script: &[u8],
+) -> Result<Option<Txid>, String> {
+    use rgbstd::bitcoin::hashes::sha256;
+
+    let mut digest = sha256::Hash::hash(script).to_byte_array();
+    digest.reverse();
+    let mut electrs = super::chain::ElectrumResolver::open()?;
+    let history = electrs.call(
+        "blockchain.scripthash.get_history",
+        json!([hex::encode(digest)]),
+    )?;
+    let entries = history
+        .as_array()
+        .ok_or("electrs script history is not an array")?;
+    for entry in entries {
+        let Some(candidate) = entry.get("tx_hash").and_then(Value::as_str) else {
+            continue;
+        };
+        if candidate == outpoint.txid.to_string() {
+            continue;
+        }
+        let (raw, _, _) = node.tx_hex(candidate)?;
+        let transaction: Transaction = deserialize(
+            &hex::decode(raw).map_err(|err| format!("spending transaction hex: {err}"))?,
+        )
+        .map_err(|err| format!("spending transaction: {err}"))?;
+        if transaction
+            .input
+            .iter()
+            .any(|input| input.previous_output == outpoint)
+        {
+            return Ok(Some(transaction.compute_txid()));
+        }
+    }
+    Ok(None)
+}
+
 fn o2a_once(
     node: &super::chain::Node,
     identity: &Identity,
     current: OutPoint,
     spend: Option<Txid>,
-    o2a_ok: bool,
-    rgb: &'static str,
+    valid_transition: bool,
+    rgb: &str,
     depth: u32,
 ) -> Result<StageObservation, String> {
     let canonical = super::canonical_outpoint(current.txid, current.vout);
@@ -1104,7 +1242,8 @@ fn o2a_once(
             unspent,
             spend: spend_proof,
         }),
-        o2a_ok,
+        o2a_ok: verify(&identity.genesis).is_ok(),
+        valid_transition,
         best_height: best,
         required_depth: depth,
     };
@@ -1924,13 +2063,15 @@ pub fn stage_verify(authorize: bool, json_out: bool) -> Result<(), String> {
         bytes,
         rgb_ok: report.starts_with("Consignment is valid"),
     };
+    let expected_seal = seal_for_state(&state).map_err(|err| err.to_string())?;
+    let spend = spending_txid(&node, outpoint, &expected_seal.script_pubkey)?;
     let observed = o2a_report_with(
         &node,
         &identity,
         outpoint,
-        None,
-        true,
-        "Consignment is valid",
+        spend,
+        false,
+        &rgb_status,
         active.required_depth,
     )?;
     let sid = state_id(&entity, &encode_resulting_state(&state));

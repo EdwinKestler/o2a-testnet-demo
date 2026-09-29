@@ -2,7 +2,7 @@
 
 This is the operator runbook for the first O2A EntityID minted live with an artist.
 
-The rehearsal network is the public Bitcoin signet. A rehearsal identity is disposable. The block-0 profile is Bitcoin mainnet, and that identity is permanent. `plan`, `genesis --seal TXID:VOUT`, `claim`, and `verify` are the same commands on both networks. The active profile selects the network byte, the coin type, the address prefix, and the confirmation depth. This rehearsal checklist uses the signet profile. It contains no mainnet key, address, or transaction. No mainnet identity network is running.
+The rehearsal network is the public Bitcoin signet. A rehearsal identity is disposable. The block-0 profile is Bitcoin mainnet, and that identity is permanent. `plan`, `preflight --json --seal TXID:VOUT`, `genesis --seal TXID:VOUT`, `claim`, and `verify` are the same commands on both networks. The active profile selects the network byte, the coin type, the address prefix, and the confirmation depth. This rehearsal checklist uses the signet profile. It contains no mainnet key, address, or transaction. No mainnet identity network is running.
 
 The show follows ADR-0008 for the EntityID, ADR-0009 for the state id and the `official_name` claim, and ADR-0010 for rgb-protocol 0.11.1 with Opret. The adapter is [rgb-0.11.1-adapter.md](rgb-0.11.1-adapter.md).
 
@@ -26,7 +26,7 @@ Every O2A command in this runbook is the 0.11.1 binary built by rehearsal 3:
 cargo build --manifest-path spikes/rgb-0.11.1/Cargo.toml --locked --bin rgb011-check
 ```
 
-The binary is `spikes/rgb-0.11.1/target/debug/rgb011-check`. The commands are `plan`, `genesis --seal TXID:VOUT`, `claim`, and `verify`. `signet-genesis` and `signet-claim` still run. Each alias sets no network and prints a deprecation note. `signet-verify` is the same kind of alias for `verify`.
+The binary is `spikes/rgb-0.11.1/target/debug/rgb011-check`. The commands are `plan`, `preflight --json --seal TXID:VOUT`, `genesis --seal TXID:VOUT`, `claim`, and `verify`. `signet-genesis` and `signet-claim` still run. Each alias sets no network and prints a deprecation note. `signet-verify` is the same kind of alias for `verify`.
 
 `verify --json` prints the document the stage screen displays. `publish-package DEST` writes `genesis.o2a`, `claim.o2a`, and `package.json` into an empty directory. Every value in `package.json` is a hint. A verifier recomputes the ids, the seal outpoint, and the official name from the signed files.
 
@@ -40,13 +40,16 @@ Core is published on `127.0.0.1:38332`. Electrum for this stack is `127.0.0.1:60
 
 `o2a-demo-core` defaults the recovery delay to 10 blocks and the entity index to 0. The ceremony exports `O2A_DEMO_DELAY`, `O2A_DEMO_THRESHOLD`, and `O2A_DEMO_ENTITY` for both `plan` and `genesis`. The seed file stays outside the repository. Set `O2A_NETWORK=signet` for a rehearsal and `O2A_NETWORK=mainnet` for block 0. On mainnet, `plan`, `genesis`, and `claim` also need `--authorize-mainnet` and the typed word `mainnet`. `plan` requires the seed file before it prints an address. `verify` does not ask for that word and leaves the seed unset. The session may sign genesis and the one `official_name` claim. It refuses transitions. When the operator configures mainnet endpoints, transport is read-only. The binary refuses every mainnet broadcast, including from an authorized session. The operator's wallet funds the seal on every network. Signet identities are disposable. The mainnet block-0 identity is permanent.
 
-The projector stays on the operator laptop:
+The projector stays on the operator laptop. Start the one stage-screen path after the inbox exists:
 
 ```text
-python3 docs/block0-screen.py init ENTITYID "Rehearsal Name"
+python3 docs/block0-screen.py watch \
+  --network signet \
+  --verifier-url VERIFIER_URL \
+  --package-url PACKAGE_URL
 ```
 
-That page is written to `/tmp/block0-screen/`, not to `site/`. `init`, `verifier`, and `claim` fill `docs/block0-display.html`. The recorded rehearsal script uses those three commands. The stage screen later in this runbook is the ceremony page. It reads verify JSON files and displays the history state written in each file.
+That page is written to `/tmp/block0-screen/`, not to `site/`. It reads the pre-flight and verifier JSON files and displays each history state exactly as reported.
 
 ## People
 
@@ -68,7 +71,7 @@ A recovery key can, after the delay, authorize a new controller for this identit
 - **Root.** The key that signs the genesis. It comes from the seed. After genesis it does not run the identity.
 - **Controller.** The key that signs the name claim.
 - **Seal.** The already-confirmed signet output that the genesis names. Its outpoint is part of the EntityID.
-- **EntityID.** The 64-character hex id of this genesis. The projector shows this id in large type. The recorded rehearsal page also shows a QR code of these characters. The stage screen shows a QR code of the verifier URL and the package URL.
+- **EntityID.** The 64-character hex id of this genesis. The projector shows this id in large type. The stage screen shows a QR code of the verifier URL and the package URL.
 - **CURRENT.** The word a verifier shows when Bitcoin, RGB, and O2A all agree, at the depth the ceremony is using.
 
 Bitcoin says the seal payment is in the chain at the required depth. RGB says the consignment matches that payment. O2A says the signature is the artist's key. The projector displays the history state each verifier file contains. When that file says CURRENT, the page shows CURRENT.
@@ -90,7 +93,7 @@ The backup operator may use another machine for the restore test after the show.
 
 Rehearsal 3 did not meet this stage rule. Verifier A, verifier B, and the restore were three directories on one host, one electrs, and one node. Both reports were CURRENT and byte-identical. That was a dress rehearsal of the check. The stage uses two laptops.
 
-The projector is plugged into the operator laptop. It shows the local page from `/tmp/block0-screen/index.html` and, beside it, the two verifier results once they are copied onto that page. The page is `docs/block0-display.html` filled in by `docs/block0-screen.py`. That template is the recorded rehearsal page. `render` fills `docs/stage-screen/stage.html` instead, into the same `/tmp/block0-screen/index.html` path. Nothing on that page is published to `site/`. The folder `/tmp/block0-screen/` is outside the git repository.
+The projector is plugged into the operator laptop. It shows the local page from `/tmp/block0-screen/index.html` and, beside it, the two verifier results once they reach the inbox. `docs/block0-screen.py` fills the single template `docs/stage-screen/stage.html`. Nothing on that page is published to `site/`. The folder `/tmp/block0-screen/` is outside the git repository.
 
 ## Keys
 
@@ -145,7 +148,7 @@ The projector, the verifier laptops, and any photo of the room stay on the publi
 
 ### Policy and address
 
-`rgb011-check plan` prints the address, the descriptor, the delay, the threshold, and the public keys. Set the same environment that genesis will use. The binary is `spikes/rgb-0.11.1/target/debug/rgb011-check`.
+`rgb011-check plan` prints the address, the descriptor, the delay, the threshold, and the public keys. It also writes the public, key-free `plan.json` used by `preflight` into `RGB011_EVIDENCE`. Set the same environment that genesis will use. The binary is `spikes/rgb-0.11.1/target/debug/rgb011-check`.
 
 ```text
 O2A_NETWORK=signet \
@@ -154,6 +157,7 @@ O2A_DEMO_DELAY=1008 \
 O2A_DEMO_THRESHOLD=2 \
 O2A_DEMO_ENTITY=NEW_INDEX \
 RGB_CHAIN=signet \
+RGB011_EVIDENCE=EVIDENCE_DIR \
 spikes/rgb-0.11.1/target/debug/rgb011-check plan
 ```
 
@@ -256,7 +260,7 @@ The funding wait is already finished. In rehearsal 3 the signing script reached 
 | 4:00 | Verifier A | Show the claim on laptop A. The operator copies that public line to the projector. |
 | 4:30 | Operator | Stop. Take no more signatures. |
 
-At 1:00 the ceremony projector uses `render` from the Stage screen section. `init`, `verifier`, and `claim` remain the recorded rehearsal page.
+At 1:00 the ceremony projector uses `watch` from the Stage screen section and keeps that one page visible.
 
 Genesis, with the seed file set and the evidence directory outside any published site:
 
@@ -305,22 +309,9 @@ spikes/rgb-0.11.1/target/debug/rgb011-check verify
 
 For a mainnet verifier, set `O2A_NETWORK=mainnet` and `RGB_CHAIN=mainnet`, and point the RPC and Electrum values at the same read-only node that passed the known-transaction pre-flight. The command stays `verify`.
 
-Projector commands, on the operator laptop. The name is the public display name for that rehearsal. Rehearsal 3 used `Rehearsal Name`. Do not put a person's legal name on this page unless the artist has asked for that spelling in the public plan.
-
-```text
-python3 docs/block0-screen.py init ENTITYID "Rehearsal Name"
-python3 docs/block0-screen.py verifier A CURRENT HEIGHT
-python3 docs/block0-screen.py verifier B CURRENT HEIGHT
-python3 docs/block0-screen.py claim "Rehearsal Name"
-```
-
-Open `file:///tmp/block0-screen/index.html` in a browser window with no other tabs. Refresh after each command.
-
-The three commands above are the recorded rehearsal page. The ceremony wall uses the stage screen.
-
 ### Stage screen
 
-The stage screen is one local page. Python writes the visible text into `docs/stage-screen/stage.html` and saves it as `/tmp/block0-screen/index.html`. The browser loads that file and the image `stage-qr.png`. The page prints the `identity_history_state` string from each verify file.
+The stage screen is one local page. Python reads `docs/stage-screen/stage.html`, fills its public fields, and saves the result as `/tmp/block0-screen/index.html`. The browser loads that file and the image `stage-qr.png`. The page prints the `identity_history_state` string from each verify file.
 
 The HTML, CSS, and JavaScript are in this repository. No font file and no script is downloaded. The QR image is written by the local `qrencode` program, the same program the rehearsal page uses.
 
@@ -339,9 +330,22 @@ The primary input is the inbox directory `/tmp/block0-screen/inbox/`.
 | --- | --- |
 | `verifier-a.json` | The `verify --json` document from verifier laptop A |
 | `verifier-b.json` | The `verify --json` document from verifier laptop B |
-| `preflight.json` | The heights, the seal address from the plan, and the funding depth |
+| `preflight.json` | The keyless `preflight --json` result: heights, chain-checked seal address, outpoint, funding depth, and unspent status |
 
-`preflight.json` uses `node_height`, `electrs_height`, `seal_address`, `funding_confirmations`, and `required_depth`. The page prints the funding line as `funding_confirmations / required_depth`, for example `4 / 6`. On mainnet the profile depth is 6. On this signet checklist the profile depth is 1. The operator writes a new `funding_confirmations` value as blocks arrive. The page prints the numbers in the file.
+`plan` writes the public `plan.json` into `RGB011_EVIDENCE`. After the operator's wallet funds the printed address, run the following command on a machine with no O2A seed variables. It reads the selected network's node and electrs, checks that the funded output script and address match `plan.json`, observes the depth and unspent status, and writes `preflight.json`. It never derives a key and never broadcasts.
+
+```text
+env -u O2A_DEMO_SEED_FILE -u O2A_DEMO_ENTITY \
+O2A_NETWORK=signet \
+RGB_CHAIN=signet \
+BITCOIN_RPC=http://127.0.0.1:38332 \
+BITCOIN_COOKIE=PATH_TO_COPIED_COOKIE \
+ELECTRUM=127.0.0.1:60601 \
+RGB011_EVIDENCE=EVIDENCE_DIR \
+spikes/rgb-0.11.1/target/debug/rgb011-check preflight --json --seal TXID:VOUT
+```
+
+Copy the generated file into `/tmp/block0-screen/inbox/preflight.json`. Run the command again as blocks arrive and copy the replacement; never edit `preflight.json` by hand. The page prints `funding_confirmations / required_depth`, for example `4 / 6`. On mainnet the profile depth is 6. On this signet checklist the profile depth is 1.
 
 A missing file shows `missing`. A JSON null shows `null`. A missing `claim_valid` shows `missing`.
 
@@ -374,16 +378,21 @@ PACKAGE_URL
 
 `--verifier-url` and `--package-url` set those two lines. The HTML names the local image `stage-qr.png`. The URLs live in `/tmp/block0-screen/qr-payload.txt` and in the PNG. The projector loads only those local files.
 
-The watched folder is the primary path. `pull` is the fallback when a verifier laptop serves its document on loopback HTTP. `pull` reads `O2A_VERIFIER_A_URL` and `O2A_VERIFIER_B_URL`. Each URL uses `http`, the host `127.0.0.1` or `localhost`, and no user name. A redirect is refused. `pull` writes the two bodies into the inbox and then renders. The projector page still loads only the local files.
+For live transfer, connect the operator and verifier laptops to a private travel router configured before the show: a private LAN, WPA2/WPA3 password shared out of band, client isolation off only for these three devices, WAN disconnected, and fixed DHCP leases. Record each verifier's numeric LAN `IP:port` before doors. Each verifier serves only its public JSON document. Do not expose a home or venue network service.
+
+`pull` reads `O2A_VERIFIER_A_URL` and `O2A_VERIFIER_B_URL`, but connects only to authorities listed in `O2A_PULL_ALLOW`. Entries and URLs must use numeric IP addresses with explicit ports. The transfer is HTTP GET only, accepts only `application/json`, caps each response at 64 KiB, refuses redirects and credentials, validates the JSON object, then writes it into the inbox and renders. The projector page itself still loads only local files.
 
 ```text
-O2A_VERIFIER_A_URL=http://127.0.0.1:PORT/verify.json \
-O2A_VERIFIER_B_URL=http://127.0.0.1:OTHER/verify.json \
+O2A_PULL_ALLOW=192.168.50.10:8080,192.168.50.11:8080 \
+O2A_VERIFIER_A_URL=http://192.168.50.10:8080/verify.json \
+O2A_VERIFIER_B_URL=http://192.168.50.11:8080/verify.json \
 python3 docs/block0-screen.py pull \
   --network signet \
   --verifier-url VERIFIER_URL \
   --package-url PACKAGE_URL
 ```
+
+The file inbox is the fallback: copy `verifier-a.json` and `verifier-b.json` by the prepared USB sticks, then let `watch` render them. Do not loosen the allow-list during the show.
 
 A field that matches the secret denylist (`xprv`, `tprv`, `mnemonic`, `seed.hex`, `O2A_DEMO_SEED`, or a path segment `seed`) stops the command. The message is `refusing a field that matches the secret denylist`. The page already on disk stays as it is. When `watch` stops for that reason, fix the file and start `watch` again.
 
@@ -399,20 +408,6 @@ Run this before doors, with the `--network` value this show will use. Clear any 
 The USB stick handed to each verifier contains the signed genesis, the consignment, the seal outpoint in `public.txt`, and the public plan. It does not contain the seed.
 
 The verifier derives the seal script from the seal policy inside the signed genesis. The seal record only helps locate the outpoint. A script written into the record is not the expected script, even when those policy bytes also appear somewhere else in the genesis. A different recovery delay is a different address. The pre-flight compares that address with Core and does not fund the mismatch.
-
-### What the recorded rehearsal page shows
-
-`init`, `verifier`, and `claim` fill `docs/block0-display.html`. That page shows only these lines:
-
-- The words "O2A identity"
-- The artist's display name
-- The 64-character EntityID
-- A QR code of that EntityID and of nothing else
-- "Verifier A" and the state and height
-- "Verifier B" and the state and height
-- After the claim: "Name claim signed:" and the name
-
-The browser address bar shows a `file://` path under `/tmp/block0-screen/`.
 
 ### What stays off every shared screen
 
@@ -495,7 +490,7 @@ Both verifier directories reported CURRENT. The restore reported CURRENT with th
 
 Run these steps in this order, on signet, with a disposable identity. Each step ends with the line in the "Done when" column. The O2A binary in every signing step is `spikes/rgb-0.11.1/target/debug/rgb011-check`.
 
-Steps 10, 12, and 14 stay so this checklist matches the recorded rehearsal script. The ceremony projector uses the Stage screen section.
+The checklist uses only the stage-screen path. Keep `watch` running and update its inbox; do not switch projector templates.
 
 | Step | Done when |
 | --- | --- |
@@ -505,14 +500,14 @@ Steps 10, 12, and 14 stay so this checklist matches the recorded rehearsal scrip
 | 4. Match the plan address with Core `getdescriptorinfo` and `deriveaddresses`. | The two address strings are identical. |
 | 5. Fund that address with `bitcoin-cli -signet -datadir=/data -rpcwallet=rehearsal -named sendtoaddress` and `replaceable=false`. | Every input sequence is `4294967294` or `4294967295`. |
 | 6. Wait until `confirmations` reaches the profile depth. On this signet checklist that depth is 1. On mainnet it is 6. | The raw transaction shows that depth. Rehearsal 3 waited for 6, which took 38 minutes 35 seconds. The stage funds this at least 48 hours ahead. |
-| 7. Run the pre-flight list above, including two verifier laptops. | Every line is yes. |
+| 7. Run `rgb011-check preflight --json --seal TXID:VOUT` with the seed unset, copy its generated `preflight.json` into the stage inbox, and complete the pre-flight list above with both verifier laptops. | The JSON contains the two heights, the planned chain address, funding depth, and `unspent=true`; every checklist line is yes. |
 | 8. Sign the genesis with `rgb011-check genesis --seal TXID:VOUT`. `signer_entity` is 32 zero bytes. | A signed genesis file exists. The command did not print `genesis stays unsigned`. |
 | 9. Read the EntityID the command prints. | 64 hex characters. |
-| 10. Run `python3 docs/block0-screen.py init ENTITYID "Rehearsal Name"`. | `/tmp/block0-screen/index.html` shows that id and a QR code. The browser has no other tabs. |
+| 10. Start `python3 docs/block0-screen.py watch --network signet --verifier-url VERIFIER_URL --package-url PACKAGE_URL`. | `/tmp/block0-screen/index.html` is the stage screen. The browser has no other tabs. |
 | 11. Give each verifier a USB with the genesis, the consignment, and `public.txt`. | Two laptops, two people. Ideally two Bitcoin backends. |
-| 12. Each laptop runs `rgb011-check verify` with the seed unset. | Both say CURRENT. Run the projector `verifier` command for A and for B with the height they used. |
+| 12. Each laptop runs `rgb011-check verify --json` with the seed unset and transfers its JSON by the allow-listed travel-router path or the file-inbox fallback. | Both verifier panels say CURRENT and show the source, height, and block hash they used. |
 | 13. The artist signs one `official_name` claim with `rgb011-check claim`. | The claim file names this EntityID and the predicate `official_name`. No new Bitcoin transaction. |
-| 14. One verifier checks the claim. Run `python3 docs/block0-screen.py claim "Rehearsal Name"`. | The page says "Name claim signed:" and the name. The verifier prints `name_claim=valid`. |
+| 14. Both verifiers rerun `rgb011-check verify --json` after receiving `claim.o2a`, then transfer the replacement JSON documents. | Both claim panels show the requested name and `claim_valid=true`. |
 | 15. Copy the package to the artist USB and to the backup operator. On a machine without the seed, run `rgb011-check verify` again. | The same EntityID, CURRENT, and `name_claim=valid`. Rehearsal 3 finished this restore in under 2 seconds. |
 | 16. Leave the seal unspent. | No rotation, recovery, or close follows. `gettxout` still returns the output. |
 

@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
-"""Write the local projector pages for the block-0 ceremony.
+"""Write the one local projector page for the block-0 ceremony.
 
-`init`, `verifier`, and `claim` fill the recorded rehearsal page.
 `render` and `watch` fill the stage screen from verify JSON files.
 The stage screen displays those files. It does not choose a history state.
-`pull` is the loopback fallback that writes those files into the inbox.
+`pull` retrieves allow-listed LAN JSON documents into the inbox.
 The browser loads only the local page.
 """
 
 import html
+import ipaddress
 import json
 import os
-import re
 import shutil
 import subprocess
 import sys
@@ -21,12 +20,11 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parent
-TEMPLATE = ROOT / "block0-display.html"
 STAGE_TEMPLATE = ROOT / "stage-screen" / "stage.html"
 OUT = Path("/tmp/block0-screen")
-ID_RE = re.compile(r"^[0-9a-fA-F]{64}$")
 DENY_MESSAGE = "refusing a field that matches the secret denylist"
 NETWORKS = {"regtest", "signet", "mainnet"}
+PULL_SIZE_CAP = 64 * 1024
 PANEL_PATHS = [
     ("verifier_id", ("verifier_id",)),
     ("network", ("network",)),
@@ -78,110 +76,6 @@ def require_clean(value: str) -> str:
     if secret_marked(value):
         die(DENY_MESSAGE)
     return value
-
-
-def require_id(value: str) -> str:
-    require_clean(value)
-    if any(char.isspace() for char in value):
-        die("refusing input that contains spaces")
-    if ID_RE.fullmatch(value) is None:
-        die("EntityID must be 64 hex characters")
-    return value.lower()
-
-
-def require_label(value: str) -> str:
-    require_clean(value)
-    if "\n" in value or "\r" in value:
-        die("refusing a label that spans lines")
-    return value
-
-
-def read_state(out: Path) -> dict[str, str]:
-    path = out / "state.txt"
-    if not path.exists():
-        die("run init first")
-    state: dict[str, str] = {}
-    for line in path.read_text(encoding="utf-8").splitlines():
-        key, value = line.split("=", 1)
-        state[key] = value
-    return state
-
-
-def write_page(out: Path, state: dict[str, str]) -> None:
-    for value in state.values():
-        require_clean(value)
-    out.mkdir(parents=True, exist_ok=True)
-    page = TEMPLATE.read_text(encoding="utf-8")
-    replacements = {
-        "NAME_HERE": html.escape(state["name"]),
-        "ENTITY_ID_HERE": html.escape(state["entity_id"]),
-        "VERIFIER_A_HERE": html.escape(state["verifier_a"]),
-        "VERIFIER_B_HERE": html.escape(state["verifier_b"]),
-        "CLAIM_HERE": html.escape(state["claim"]),
-    }
-    for token, value in replacements.items():
-        page = page.replace(token, value)
-    (out / "index.html").write_text(page, encoding="utf-8")
-    lines = [f"{key}={value}" for key, value in state.items()]
-    (out / "state.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
-    (out / "entity-id.txt").write_text(state["entity_id"] + "\n", encoding="utf-8")
-
-
-def run_legacy(out: Path, command: str, args: list[str]) -> None:
-    if command == "init":
-        if len(args) != 3:
-            die("usage: block0-screen.py init ENTITYID NAME")
-        if shutil.which("qrencode") is None:
-            die("qrencode is not installed")
-        entity_id = require_id(args[1])
-        name = require_label(args[2])
-        state = {
-            "name": name,
-            "entity_id": entity_id,
-            "verifier_a": "waiting",
-            "verifier_b": "waiting",
-            "claim": "Name claim: waiting",
-        }
-        write_page(out, state)
-        subprocess.run(
-            [
-                "qrencode",
-                "-o",
-                str(out / "entity-qr.png"),
-                "-t",
-                "PNG",
-                "-l",
-                "M",
-                "-s",
-                "12",
-                "--",
-                entity_id,
-            ],
-            check=True,
-        )
-        return
-    if command == "verifier":
-        if len(args) != 4:
-            die("usage: block0-screen.py verifier A|B STATE HEIGHT")
-        which = args[1].upper()
-        if which not in {"A", "B"}:
-            die("verifier must be A or B")
-        state_word = require_label(args[2])
-        height = args[3]
-        if not height.isdigit():
-            die("height must be a number")
-        state = read_state(out)
-        state[f"verifier_{which.lower()}"] = f"{state_word} at height {height}"
-        write_page(out, state)
-        return
-    if command == "claim":
-        if len(args) != 2:
-            die("usage: block0-screen.py claim NAME")
-        state = read_state(out)
-        state["claim"] = "Name claim signed: " + require_label(args[1])
-        write_page(out, state)
-        return
-    die("unknown command")
 
 
 def walk_strings(value: object, found: list[str]) -> None:
@@ -431,15 +325,56 @@ def watch_screen(
         time.sleep(1)
 
 
-def loopback_http(url: str) -> bool:
+def is_lan_ip(address: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
+    if address.is_loopback or address.is_link_local:
+        return True
+    if isinstance(address, ipaddress.IPv4Address):
+        return any(
+            address in network
+            for network in (
+                ipaddress.ip_network("10.0.0.0/8"),
+                ipaddress.ip_network("172.16.0.0/12"),
+                ipaddress.ip_network("192.168.0.0/16"),
+            )
+        )
+    return address in ipaddress.ip_network("fc00::/7")
+
+
+def allowed_lan_http(url: str, allow: set[tuple[str, int]]) -> bool:
     parsed = urlparse(url)
     if parsed.scheme != "http":
         return False
     if parsed.username is not None or parsed.password is not None:
         return False
-    if parsed.hostname not in {"127.0.0.1", "localhost"}:
+    if parsed.fragment or parsed.hostname is None:
         return False
-    return True
+    try:
+        address = ipaddress.ip_address(parsed.hostname)
+        port = parsed.port
+    except ValueError:
+        return False
+    if port is None or not is_lan_ip(address):
+        return False
+    return (address.compressed, port) in allow
+
+
+def pull_allowlist() -> set[tuple[str, int]]:
+    raw = os.environ.get("O2A_PULL_ALLOW", "")
+    raw_entries = {item.strip() for item in raw.split(",") if item.strip()}
+    if not raw_entries:
+        die("O2A_PULL_ALLOW must list verifier IP:port entries")
+    entries = set()
+    for entry in raw_entries:
+        parsed = urlparse(f"http://{entry}")
+        try:
+            address = ipaddress.ip_address(parsed.hostname or "")
+            port = parsed.port
+        except ValueError:
+            die("O2A_PULL_ALLOW accepts only explicit IP:port entries")
+        if port is None or parsed.path not in {"", "/"} or not is_lan_ip(address):
+            die("O2A_PULL_ALLOW accepts only explicit IP:port entries")
+        entries.add((address.compressed, port))
+    return entries
 
 
 class RefuseRedirect(urllib.request.HTTPRedirectHandler):
@@ -447,13 +382,34 @@ class RefuseRedirect(urllib.request.HTTPRedirectHandler):
         die("pull refuses a redirect")
 
 
-def pull_one(url: str, destination: Path) -> None:
+def pull_one(url: str, destination: Path, allow: set[tuple[str, int]]) -> None:
     require_clean(url)
-    if not loopback_http(url):
-        die("pull accepts only loopback http")
+    if not allowed_lan_http(url, allow):
+        die("pull URL is not an allow-listed HTTP IP:port")
     opener = urllib.request.build_opener(RefuseRedirect)
-    with opener.open(url, timeout=5) as response:
-        body = response.read()
+    request = urllib.request.Request(url, method="GET", headers={"Accept": "application/json"})
+    with opener.open(request, timeout=5) as response:
+        content_type = response.headers.get_content_type()
+        if content_type != "application/json":
+            die("pull requires Content-Type application/json")
+        declared = response.headers.get("Content-Length")
+        if declared is not None:
+            try:
+                declared_size = int(declared)
+            except ValueError:
+                die("pull response has an invalid Content-Length")
+            if declared_size > PULL_SIZE_CAP:
+                die("pull response exceeds the size cap")
+        body = response.read(PULL_SIZE_CAP + 1)
+    if len(body) > PULL_SIZE_CAP:
+        die("pull response exceeds the size cap")
+    try:
+        document = json.loads(body)
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        die("pull response is not JSON")
+    if not isinstance(document, dict):
+        die("pull response is not a JSON object")
+    refuse_secrets(document)
     destination.write_bytes(body)
 
 
@@ -466,6 +422,7 @@ def pull_screen(
     use_qr: bool,
 ) -> None:
     inbox.mkdir(parents=True, exist_ok=True)
+    allow = pull_allowlist()
     mapping = (
         ("O2A_VERIFIER_A_URL", inbox / "verifier-a.json"),
         ("O2A_VERIFIER_B_URL", inbox / "verifier-b.json"),
@@ -474,7 +431,7 @@ def pull_screen(
         url = os.environ.get(env_name, "").strip()
         if not url:
             die(f"{env_name} is required")
-        pull_one(url, destination)
+        pull_one(url, destination, allow)
     render_screen(out, inbox, network, verifier_url, package_url, use_qr)
 
 
@@ -488,15 +445,11 @@ def main(argv: list[str] | None = None) -> None:
         args = args[2:]
     if not args:
         die(
-            "usage: block0-screen.py init ENTITYID NAME"
-            " | verifier A|B STATE HEIGHT | claim NAME"
-            " | render --network NETWORK --verifier-url URL --package-url URL"
+            "usage: block0-screen.py render --network NETWORK --verifier-url URL --package-url URL"
             " | watch ... | pull ..."
         )
     command = args[0]
-    if command in {"init", "verifier", "claim"}:
-        run_legacy(out, command, args)
-    elif command in {"render", "watch", "pull"}:
+    if command in {"render", "watch", "pull"}:
         network, verifier_url, package_url, inbox, use_qr = parse_stage_args(args[1:])
         inbox_path = inbox if inbox is not None else out / "inbox"
         if command == "render":

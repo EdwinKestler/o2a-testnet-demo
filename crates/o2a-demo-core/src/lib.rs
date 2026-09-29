@@ -784,6 +784,7 @@ mod tests {
                 spend: None,
             }),
             o2a_ok: true,
+            valid_transition: false,
             best_height: 105,
             required_depth: 1,
         }

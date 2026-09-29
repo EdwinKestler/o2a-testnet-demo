@@ -30,6 +30,7 @@ impl NetworkKind {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Operation {
     Plan,
+    Preflight,
     Genesis,
     OfficialName,
     Lineage,
@@ -43,6 +44,7 @@ impl Operation {
     pub fn name(self) -> &'static str {
         match self {
             Operation::Plan => "plan",
+            Operation::Preflight => "preflight",
             Operation::Genesis => "genesis",
             Operation::OfficialName => "official_name",
             Operation::Lineage => "lineage",
@@ -57,7 +59,11 @@ impl Operation {
     pub fn allowed_on_mainnet(self) -> bool {
         matches!(
             self,
-            Operation::Plan | Operation::Verify | Operation::Genesis | Operation::OfficialName
+            Operation::Plan
+                | Operation::Preflight
+                | Operation::Verify
+                | Operation::Genesis
+                | Operation::OfficialName
         )
     }
 
@@ -359,6 +365,7 @@ pub fn is_read_method(method: &str) -> bool {
             | "blockchain.transaction.get"
             | "blockchain.transaction.get_merkle"
             | "blockchain.transaction.id_from_pos"
+            | "blockchain.scripthash.get_history"
             | "server.ping"
             | "server.version"
             | "server.features"
@@ -397,7 +404,7 @@ pub fn split_args(args: &[String]) -> Result<CliArgs, String> {
     for arg in args {
         if expect_seal {
             if arg.starts_with('-') || arg.is_empty() {
-                return Err("genesis --seal requires an outpoint".into());
+                return Err("--seal requires an outpoint".into());
             }
             seal = Some(arg.clone());
             expect_seal = false;
@@ -421,10 +428,18 @@ pub fn split_args(args: &[String]) -> Result<CliArgs, String> {
         }
     }
     if expect_seal {
-        return Err("genesis --seal requires an outpoint".into());
+        return Err("--seal requires an outpoint".into());
     }
-    if json && !matches!(command.as_deref(), Some("verify") | Some("signet-verify")) {
-        return Err("--json is only valid with verify".into());
+    if json
+        && !matches!(
+            command.as_deref(),
+            Some("verify") | Some("signet-verify") | Some("preflight")
+        )
+    {
+        return Err("--json is only valid with verify or preflight".into());
+    }
+    if command.as_deref() == Some("preflight") && (!json || seal.is_none()) {
+        return Err("preflight requires --json --seal <outpoint>".into());
     }
     if command.as_deref() == Some("publish-package") && dir.is_none() {
         return Err("publish-package requires a destination directory".into());
@@ -657,6 +672,7 @@ mod tests {
         assert!(plan.contains("--authorize-mainnet"), "{plan}");
         decide(&mainnet, Operation::Plan, true, Some("mainnet")).expect("authorized plan");
         decide(&mainnet, Operation::Verify, false, None).expect("verify");
+        decide(&mainnet, Operation::Preflight, false, None).expect("preflight");
         decide(&mainnet, Operation::OfficialName, true, Some("mainnet")).expect("claim");
         let claim = decide(&mainnet, Operation::OfficialName, false, None).expect_err("claim flag");
         assert!(claim.contains("--authorize-mainnet"), "{claim}");
@@ -716,6 +732,17 @@ mod tests {
         assert!(json.dir.is_none());
         let alias = split_args(&["--json".into(), "signet-verify".into()]).expect("alias");
         assert!(alias.json);
+        let preflight = split_args(&[
+            "preflight".into(),
+            "--json".into(),
+            "--seal".into(),
+            "aa:1".into(),
+        ])
+        .expect("preflight");
+        assert!(preflight.json);
+        assert_eq!(preflight.seal.as_deref(), Some("aa:1"));
+        let missing_preflight = must_err(split_args(&["preflight".into(), "--json".into()]));
+        assert!(missing_preflight.contains("--seal"), "{missing_preflight}");
         let rejected = must_err(split_args(&["plan".into(), "--json".into()]));
         assert!(
             rejected.contains("--json is only valid with verify"),

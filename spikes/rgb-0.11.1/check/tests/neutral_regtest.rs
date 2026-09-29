@@ -502,6 +502,18 @@ exec electrs --skip-default-conf-files --conf "$HOME/electrs.toml"
     );
 
     let seal = format!("{txid}:{vout}");
+    let preflight = tool_ok(&["preflight", "--json", "--seal", &seal], &env);
+    assert!(
+        preflight.contains(&format!("\"seal_address\": \"{address}\"")),
+        "{preflight}"
+    );
+    assert!(
+        preflight.contains("\"funding_confirmations\": 1"),
+        "{preflight}"
+    );
+    assert!(preflight.contains("\"unspent\": true"), "{preflight}");
+    assert!(evidence.join("preflight.json").is_file());
+
     let genesis = tool_ok(&["genesis", "--seal", &seal], &env);
     assert!(genesis.contains("entity_id="), "{genesis}");
     assert!(genesis.contains("confirmations=1"), "{genesis}");

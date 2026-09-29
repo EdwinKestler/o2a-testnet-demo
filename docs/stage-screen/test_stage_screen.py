@@ -16,7 +16,9 @@ import tempfile
 import time
 import unittest
 import zlib
+from email.message import Message
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "docs" / "block0-screen.py"
@@ -535,20 +537,22 @@ class StageScreenTest(unittest.TestCase):
             self.assertIn("verifier-a.json is a symlink", result.stderr)
             self.assertFalse((tmp / "out" / "index.html").exists())
 
-    def test_pull_refuses_public_urls_before_a_connection(self):
-        loopback = self.screen.loopback_http
-        self.assertTrue(loopback("http://127.0.0.1:9/verify.json"))
-        self.assertTrue(loopback("http://localhost/verify.json"))
-        self.assertFalse(loopback("https://127.0.0.1/verify.json"))
-        self.assertFalse(loopback("https://example.com/verify.json"))
-        self.assertFalse(loopback("http://user:secret@127.0.0.1/verify.json"))
-        self.assertFalse(loopback("http://203.0.113.5/verify.json"))
-        self.assertFalse(loopback("http://[::1]:9/verify.json"))
+    def test_pull_requires_an_explicit_ip_port_allowlist_before_a_connection(self):
+        allowed = self.screen.allowed_lan_http
+        permit = {("192.168.50.10", 8080), ("127.0.0.1", 9000)}
+        self.assertTrue(allowed("http://192.168.50.10:8080/verify.json", permit))
+        self.assertTrue(allowed("http://127.0.0.1:9000/verify.json", permit))
+        self.assertFalse(allowed("http://192.168.50.10:8081/verify.json", permit))
+        self.assertFalse(allowed("https://192.168.50.10:8080/verify.json", permit))
+        self.assertFalse(allowed("http://verifier.local:8080/verify.json", permit))
+        self.assertFalse(allowed("http://user:secret@192.168.50.10:8080/verify.json", permit))
+        self.assertFalse(allowed("http://203.0.113.5:80/verify.json", permit))
         with tempfile.TemporaryDirectory() as tmp:
             tmp = Path(tmp)
             env = os.environ.copy()
-            env["O2A_VERIFIER_A_URL"] = "https://example.com/verify.json"
-            env["O2A_VERIFIER_B_URL"] = "http://203.0.113.5/verify.json"
+            env["O2A_PULL_ALLOW"] = "192.168.50.10:8080,192.168.50.11:8080"
+            env["O2A_VERIFIER_A_URL"] = "http://203.0.113.5:80/verify.json"
+            env["O2A_VERIFIER_B_URL"] = "http://192.168.50.11:8080/verify.json"
             started = time.monotonic()
             result = subprocess.run(
                 [
@@ -571,77 +575,62 @@ class StageScreenTest(unittest.TestCase):
             )
             elapsed = time.monotonic() - started
             self.assertEqual(result.returncode, 1)
-            self.assertIn("pull accepts only loopback http", result.stderr)
-            self.assertNotIn("example.com", result.stderr)
+            self.assertIn("pull URL is not an allow-listed HTTP IP:port", result.stderr)
+            self.assertNotIn("203.0.113.5", result.stderr)
             self.assertLess(elapsed, 1.0)
             self.assertFalse((tmp / "out" / "index.html").exists())
 
-    def test_legacy_rehearsal_page_still_signs_the_claim_line(self):
-        entity = "12" * 32
-        with tempfile.TemporaryDirectory() as tmp:
-            out = Path(tmp)
-            init = subprocess.run(
-                [sys.executable, str(SCRIPT), "--out", str(out), "init", entity, "Rehearsal Name"],
-                capture_output=True,
-                text=True,
-                cwd=ROOT,
-            )
-            self.assertEqual(init.returncode, 0, init.stderr)
-            claim = subprocess.run(
-                [sys.executable, str(SCRIPT), "--out", str(out), "claim", "Rehearsal Name"],
-                capture_output=True,
-                text=True,
-                cwd=ROOT,
-            )
-            self.assertEqual(claim.returncode, 0, claim.stderr)
-            verifier = subprocess.run(
-                [sys.executable, str(SCRIPT), "--out", str(out), "verifier", "A", "CURRENT", "12"],
-                capture_output=True,
-                text=True,
-                cwd=ROOT,
-            )
-            self.assertEqual(verifier.returncode, 0, verifier.stderr)
-            page = (out / "index.html").read_text(encoding="utf-8")
-            self.assertIn(entity, page)
-            self.assertIn("Name claim signed:", page)
-            self.assertIn("Rehearsal Name", page)
-            self.assertIn("CURRENT at height 12", page)
-            self.assertIn("O2A identity", page)
-            self.assertNotIn("xprv", page.lower())
-            leaked = subprocess.run(
-                [sys.executable, str(SCRIPT), "--out", str(out), "claim", "leak xprvMARKER"],
-                capture_output=True,
-                text=True,
-                cwd=ROOT,
-            )
-            self.assertEqual(leaked.returncode, 1)
-            self.assertEqual(leaked.stderr.strip(), DENY)
-            self.assertNotIn("xprvMARKER", leaked.stderr)
-            kept = (out / "index.html").read_text(encoding="utf-8")
-            self.assertNotIn("xprvMARKER", kept)
-            self.assertIn("Name claim signed:", kept)
+    def test_pull_is_get_only_json_only_capped_and_has_no_credentials(self):
+        class Response:
+            def __init__(self, body, content_type="application/json", length=None):
+                self.body = body
+                self.headers = Message()
+                self.headers["Content-Type"] = content_type
+                if length is not None:
+                    self.headers["Content-Length"] = str(length)
 
-    def test_legacy_init_refuses_a_secret_label(self):
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_args):
+                return False
+
+            def read(self, limit):
+                return self.body[:limit]
+
+        class Opener:
+            def __init__(self, response):
+                self.response = response
+                self.request = None
+
+            def open(self, request, timeout):
+                self.request = request
+                self.timeout = timeout
+                return self.response
+
+        allow = {("192.168.50.10", 8080)}
+        url = "http://192.168.50.10:8080/verify.json"
         with tempfile.TemporaryDirectory() as tmp:
-            out = Path(tmp)
-            result = subprocess.run(
-                [
-                    sys.executable,
-                    str(SCRIPT),
-                    "--out",
-                    str(out),
-                    "init",
-                    "12" * 32,
-                    "has xprvMARKER",
-                ],
-                capture_output=True,
-                text=True,
-                cwd=ROOT,
-            )
-            self.assertEqual(result.returncode, 1)
-            self.assertEqual(result.stderr.strip(), DENY)
-            self.assertNotIn("xprvMARKER", result.stderr)
-            self.assertFalse((out / "index.html").exists())
+            destination = Path(tmp) / "verify.json"
+            opener = Opener(Response(b'{"identity_history_state":"CURRENT"}'))
+            with mock.patch.object(self.screen.urllib.request, "build_opener", return_value=opener):
+                self.screen.pull_one(url, destination, allow)
+            self.assertEqual(opener.request.get_method(), "GET")
+            self.assertNotIn("Authorization", opener.request.headers)
+            self.assertEqual(json.loads(destination.read_text()), {"identity_history_state": "CURRENT"})
+
+            bad_type = Opener(Response(b"{}", "text/plain"))
+            with mock.patch.object(self.screen.urllib.request, "build_opener", return_value=bad_type):
+                with self.assertRaises(SystemExit):
+                    self.screen.pull_one(url, destination, allow)
+
+            too_large = Opener(Response(b"{}", length=self.screen.PULL_SIZE_CAP + 1))
+            with mock.patch.object(self.screen.urllib.request, "build_opener", return_value=too_large):
+                with self.assertRaises(SystemExit):
+                    self.screen.pull_one(url, destination, allow)
+
+            with self.assertRaises(SystemExit):
+                self.screen.RefuseRedirect().redirect_request(None, None, 302, "moved", {}, url)
 
     def test_watch_renders_the_inbox_once(self):
         with tempfile.TemporaryDirectory() as tmp:
