@@ -1,0 +1,1202 @@
+$ cargo deny check advisories bans sources
+warning[duplicate]: found 2 duplicate entries for crate 'block-buffer'
+   ┌─ /media/kestl/andor/ffwd/wt-rgb011-spike/spikes/rgb-0.11.1/Cargo.lock:21:1
+   │  
+21 │ ╭ block-buffer 0.10.4 registry+https://github.com/rust-lang/crates.io-index
+22 │ │ block-buffer 0.12.1 registry+https://github.com/rust-lang/crates.io-index
+   │ ╰─────────────────────────────────────────────────────────────────────────┘ lock entries
+   │  
+   ├ block-buffer v0.10.4
+     └── digest v0.10.7
+         └── sha2 v0.10.9
+             └── baid64 v0.4.1
+                 ├── rgb-aluvm v0.11.1
+                 │   ├── rgb-consensus v0.11.1
+                 │   │   ├── rgb-invoicing v0.11.1
+                 │   │   │   └── rgb-ops v0.11.1
+                 │   │   │       ├── rgb-api v0.11.1
+                 │   │   │       │   └── rgb011-check v0.1.0
+                 │   │   │       ├── rgb-psbt-utils v0.11.1
+                 │   │   │       │   ├── rgb-api v0.11.1 (*)
+                 │   │   │       │   └── rgb011-check v0.1.0 (*)
+                 │   │   │       ├── rgb-schemas v0.11.1
+                 │   │   │       │   └── rgb011-check v0.1.0 (*)
+                 │   │   │       └── rgb011-check v0.1.0 (*)
+                 │   │   ├── rgb-ops v0.11.1 (*)
+                 │   │   └── rgb011-check v0.1.0 (*)
+                 │   ├── rgb-ops v0.11.1 (*)
+                 │   └── rgb-schemas v0.11.1 (*)
+                 ├── rgb-api v0.11.1 (*)
+                 ├── rgb-ascii-armor v1.0.4
+                 │   ├── rgb-aluvm v0.11.1 (*)
+                 │   ├── rgb-ops v0.11.1 (*)
+                 │   └── rgb-strict-types v1.0.4
+                 │       ├── rgb-aluvm v0.11.1 (*)
+                 │       ├── rgb-api v0.11.1 (*)
+                 │       ├── rgb-consensus v0.11.1 (*)
+                 │       ├── rgb-invoicing v0.11.1 (*)
+                 │       ├── rgb-ops v0.11.1 (*)
+                 │       ├── rgb-schemas v0.11.1 (*)
+                 │       └── rgb011-check v0.1.0 (*)
+                 ├── rgb-consensus v0.11.1 (*)
+                 ├── rgb-invoicing v0.11.1 (*)
+                 ├── rgb-ops v0.11.1 (*)
+                 └── rgb-strict-types v1.0.4 (*)
+   ├ block-buffer v0.12.1
+     └── digest v0.11.3
+         ├── ripemd v0.2.0
+         │   ├── rgb-aluvm v0.11.1
+         │   │   ├── rgb-consensus v0.11.1
+         │   │   │   ├── rgb-invoicing v0.11.1
+         │   │   │   │   └── rgb-ops v0.11.1
+         │   │   │   │       ├── rgb-api v0.11.1
+         │   │   │   │       │   └── rgb011-check v0.1.0
+         │   │   │   │       ├── rgb-psbt-utils v0.11.1
+         │   │   │   │       │   ├── rgb-api v0.11.1 (*)
+         │   │   │   │       │   └── rgb011-check v0.1.0 (*)
+         │   │   │   │       ├── rgb-schemas v0.11.1
+         │   │   │   │       │   └── rgb011-check v0.1.0 (*)
+         │   │   │   │       └── rgb011-check v0.1.0 (*)
+         │   │   │   ├── rgb-ops v0.11.1 (*)
+         │   │   │   └── rgb011-check v0.1.0 (*)
+         │   │   ├── rgb-ops v0.11.1 (*)
+         │   │   └── rgb-schemas v0.11.1 (*)
+         │   └── rgb-consensus v0.11.1 (*)
+         └── sha2 v0.11.0
+             ├── rgb-aluvm v0.11.1 (*)
+             ├── rgb-ascii-armor v1.0.4
+             │   ├── rgb-aluvm v0.11.1 (*)
+             │   ├── rgb-ops v0.11.1 (*)
+             │   └── rgb-strict-types v1.0.4
+             │       ├── rgb-aluvm v0.11.1 (*)
+             │       ├── rgb-api v0.11.1 (*)
+             │       ├── rgb-consensus v0.11.1 (*)
+             │       ├── rgb-invoicing v0.11.1 (*)
+             │       ├── rgb-ops v0.11.1 (*)
+             │       ├── rgb-schemas v0.11.1 (*)
+             │       └── rgb011-check v0.1.0 (*)
+             ├── rgb-consensus v0.11.1 (*)
+             └── rgb-strict-types v1.0.4 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'cpufeatures'
+   ┌─ /media/kestl/andor/ffwd/wt-rgb011-spike/spikes/rgb-0.11.1/Cargo.lock:31:1
+   │  
+31 │ ╭ cpufeatures 0.2.17 registry+https://github.com/rust-lang/crates.io-index
+32 │ │ cpufeatures 0.3.1 registry+https://github.com/rust-lang/crates.io-index
+   │ ╰───────────────────────────────────────────────────────────────────────┘ lock entries
+   │  
+   ├ cpufeatures v0.2.17
+     └── sha2 v0.10.9
+         └── baid64 v0.4.1
+             ├── rgb-aluvm v0.11.1
+             │   ├── rgb-consensus v0.11.1
+             │   │   ├── rgb-invoicing v0.11.1
+             │   │   │   └── rgb-ops v0.11.1
+             │   │   │       ├── rgb-api v0.11.1
+             │   │   │       │   └── rgb011-check v0.1.0
+             │   │   │       ├── rgb-psbt-utils v0.11.1
+             │   │   │       │   ├── rgb-api v0.11.1 (*)
+             │   │   │       │   └── rgb011-check v0.1.0 (*)
+             │   │   │       ├── rgb-schemas v0.11.1
+             │   │   │       │   └── rgb011-check v0.1.0 (*)
+             │   │   │       └── rgb011-check v0.1.0 (*)
+             │   │   ├── rgb-ops v0.11.1 (*)
+             │   │   └── rgb011-check v0.1.0 (*)
+             │   ├── rgb-ops v0.11.1 (*)
+             │   └── rgb-schemas v0.11.1 (*)
+             ├── rgb-api v0.11.1 (*)
+             ├── rgb-ascii-armor v1.0.4
+             │   ├── rgb-aluvm v0.11.1 (*)
+             │   ├── rgb-ops v0.11.1 (*)
+             │   └── rgb-strict-types v1.0.4
+             │       ├── rgb-aluvm v0.11.1 (*)
+             │       ├── rgb-api v0.11.1 (*)
+             │       ├── rgb-consensus v0.11.1 (*)
+             │       ├── rgb-invoicing v0.11.1 (*)
+             │       ├── rgb-ops v0.11.1 (*)
+             │       ├── rgb-schemas v0.11.1 (*)
+             │       └── rgb011-check v0.1.0 (*)
+             ├── rgb-consensus v0.11.1 (*)
+             ├── rgb-invoicing v0.11.1 (*)
+             ├── rgb-ops v0.11.1 (*)
+             └── rgb-strict-types v1.0.4 (*)
+   ├ cpufeatures v0.3.1
+     ├── blake3 v1.8.7
+     │   └── rgb-aluvm v0.11.1
+     │       ├── rgb-consensus v0.11.1
+     │       │   ├── rgb-invoicing v0.11.1
+     │       │   │   └── rgb-ops v0.11.1
+     │       │   │       ├── rgb-api v0.11.1
+     │       │   │       │   └── rgb011-check v0.1.0
+     │       │   │       ├── rgb-psbt-utils v0.11.1
+     │       │   │       │   ├── rgb-api v0.11.1 (*)
+     │       │   │       │   └── rgb011-check v0.1.0 (*)
+     │       │   │       ├── rgb-schemas v0.11.1
+     │       │   │       │   └── rgb011-check v0.1.0 (*)
+     │       │   │       └── rgb011-check v0.1.0 (*)
+     │       │   ├── rgb-ops v0.11.1 (*)
+     │       │   └── rgb011-check v0.1.0 (*)
+     │       ├── rgb-ops v0.11.1 (*)
+     │       └── rgb-schemas v0.11.1 (*)
+     └── sha2 v0.11.0
+         ├── rgb-aluvm v0.11.1 (*)
+         ├── rgb-ascii-armor v1.0.4
+         │   ├── rgb-aluvm v0.11.1 (*)
+         │   ├── rgb-ops v0.11.1 (*)
+         │   └── rgb-strict-types v1.0.4
+         │       ├── rgb-aluvm v0.11.1 (*)
+         │       ├── rgb-api v0.11.1 (*)
+         │       ├── rgb-consensus v0.11.1 (*)
+         │       ├── rgb-invoicing v0.11.1 (*)
+         │       ├── rgb-ops v0.11.1 (*)
+         │       ├── rgb-schemas v0.11.1 (*)
+         │       └── rgb011-check v0.1.0 (*)
+         ├── rgb-consensus v0.11.1 (*)
+         └── rgb-strict-types v1.0.4 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'crypto-common'
+   ┌─ /media/kestl/andor/ffwd/wt-rgb011-spike/spikes/rgb-0.11.1/Cargo.lock:34:1
+   │  
+34 │ ╭ crypto-common 0.1.7 registry+https://github.com/rust-lang/crates.io-index
+35 │ │ crypto-common 0.2.2 registry+https://github.com/rust-lang/crates.io-index
+   │ ╰─────────────────────────────────────────────────────────────────────────┘ lock entries
+   │  
+   ├ crypto-common v0.1.7
+     └── digest v0.10.7
+         └── sha2 v0.10.9
+             └── baid64 v0.4.1
+                 ├── rgb-aluvm v0.11.1
+                 │   ├── rgb-consensus v0.11.1
+                 │   │   ├── rgb-invoicing v0.11.1
+                 │   │   │   └── rgb-ops v0.11.1
+                 │   │   │       ├── rgb-api v0.11.1
+                 │   │   │       │   └── rgb011-check v0.1.0
+                 │   │   │       ├── rgb-psbt-utils v0.11.1
+                 │   │   │       │   ├── rgb-api v0.11.1 (*)
+                 │   │   │       │   └── rgb011-check v0.1.0 (*)
+                 │   │   │       ├── rgb-schemas v0.11.1
+                 │   │   │       │   └── rgb011-check v0.1.0 (*)
+                 │   │   │       └── rgb011-check v0.1.0 (*)
+                 │   │   ├── rgb-ops v0.11.1 (*)
+                 │   │   └── rgb011-check v0.1.0 (*)
+                 │   ├── rgb-ops v0.11.1 (*)
+                 │   └── rgb-schemas v0.11.1 (*)
+                 ├── rgb-api v0.11.1 (*)
+                 ├── rgb-ascii-armor v1.0.4
+                 │   ├── rgb-aluvm v0.11.1 (*)
+                 │   ├── rgb-ops v0.11.1 (*)
+                 │   └── rgb-strict-types v1.0.4
+                 │       ├── rgb-aluvm v0.11.1 (*)
+                 │       ├── rgb-api v0.11.1 (*)
+                 │       ├── rgb-consensus v0.11.1 (*)
+                 │       ├── rgb-invoicing v0.11.1 (*)
+                 │       ├── rgb-ops v0.11.1 (*)
+                 │       ├── rgb-schemas v0.11.1 (*)
+                 │       └── rgb011-check v0.1.0 (*)
+                 ├── rgb-consensus v0.11.1 (*)
+                 ├── rgb-invoicing v0.11.1 (*)
+                 ├── rgb-ops v0.11.1 (*)
+                 └── rgb-strict-types v1.0.4 (*)
+   ├ crypto-common v0.2.2
+     └── digest v0.11.3
+         ├── ripemd v0.2.0
+         │   ├── rgb-aluvm v0.11.1
+         │   │   ├── rgb-consensus v0.11.1
+         │   │   │   ├── rgb-invoicing v0.11.1
+         │   │   │   │   └── rgb-ops v0.11.1
+         │   │   │   │       ├── rgb-api v0.11.1
+         │   │   │   │       │   └── rgb011-check v0.1.0
+         │   │   │   │       ├── rgb-psbt-utils v0.11.1
+         │   │   │   │       │   ├── rgb-api v0.11.1 (*)
+         │   │   │   │       │   └── rgb011-check v0.1.0 (*)
+         │   │   │   │       ├── rgb-schemas v0.11.1
+         │   │   │   │       │   └── rgb011-check v0.1.0 (*)
+         │   │   │   │       └── rgb011-check v0.1.0 (*)
+         │   │   │   ├── rgb-ops v0.11.1 (*)
+         │   │   │   └── rgb011-check v0.1.0 (*)
+         │   │   ├── rgb-ops v0.11.1 (*)
+         │   │   └── rgb-schemas v0.11.1 (*)
+         │   └── rgb-consensus v0.11.1 (*)
+         └── sha2 v0.11.0
+             ├── rgb-aluvm v0.11.1 (*)
+             ├── rgb-ascii-armor v1.0.4
+             │   ├── rgb-aluvm v0.11.1 (*)
+             │   ├── rgb-ops v0.11.1 (*)
+             │   └── rgb-strict-types v1.0.4
+             │       ├── rgb-aluvm v0.11.1 (*)
+             │       ├── rgb-api v0.11.1 (*)
+             │       ├── rgb-consensus v0.11.1 (*)
+             │       ├── rgb-invoicing v0.11.1 (*)
+             │       ├── rgb-ops v0.11.1 (*)
+             │       ├── rgb-schemas v0.11.1 (*)
+             │       └── rgb011-check v0.1.0 (*)
+             ├── rgb-consensus v0.11.1 (*)
+             └── rgb-strict-types v1.0.4 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'digest'
+   ┌─ /media/kestl/andor/ffwd/wt-rgb011-spike/spikes/rgb-0.11.1/Cargo.lock:37:1
+   │  
+37 │ ╭ digest 0.10.7 registry+https://github.com/rust-lang/crates.io-index
+38 │ │ digest 0.11.3 registry+https://github.com/rust-lang/crates.io-index
+   │ ╰───────────────────────────────────────────────────────────────────┘ lock entries
+   │  
+   ├ digest v0.10.7
+     └── sha2 v0.10.9
+         └── baid64 v0.4.1
+             ├── rgb-aluvm v0.11.1
+             │   ├── rgb-consensus v0.11.1
+             │   │   ├── rgb-invoicing v0.11.1
+             │   │   │   └── rgb-ops v0.11.1
+             │   │   │       ├── rgb-api v0.11.1
+             │   │   │       │   └── rgb011-check v0.1.0
+             │   │   │       ├── rgb-psbt-utils v0.11.1
+             │   │   │       │   ├── rgb-api v0.11.1 (*)
+             │   │   │       │   └── rgb011-check v0.1.0 (*)
+             │   │   │       ├── rgb-schemas v0.11.1
+             │   │   │       │   └── rgb011-check v0.1.0 (*)
+             │   │   │       └── rgb011-check v0.1.0 (*)
+             │   │   ├── rgb-ops v0.11.1 (*)
+             │   │   └── rgb011-check v0.1.0 (*)
+             │   ├── rgb-ops v0.11.1 (*)
+             │   └── rgb-schemas v0.11.1 (*)
+             ├── rgb-api v0.11.1 (*)
+             ├── rgb-ascii-armor v1.0.4
+             │   ├── rgb-aluvm v0.11.1 (*)
+             │   ├── rgb-ops v0.11.1 (*)
+             │   └── rgb-strict-types v1.0.4
+             │       ├── rgb-aluvm v0.11.1 (*)
+             │       ├── rgb-api v0.11.1 (*)
+             │       ├── rgb-consensus v0.11.1 (*)
+             │       ├── rgb-invoicing v0.11.1 (*)
+             │       ├── rgb-ops v0.11.1 (*)
+             │       ├── rgb-schemas v0.11.1 (*)
+             │       └── rgb011-check v0.1.0 (*)
+             ├── rgb-consensus v0.11.1 (*)
+             ├── rgb-invoicing v0.11.1 (*)
+             ├── rgb-ops v0.11.1 (*)
+             └── rgb-strict-types v1.0.4 (*)
+   ├ digest v0.11.3
+     ├── ripemd v0.2.0
+     │   ├── rgb-aluvm v0.11.1
+     │   │   ├── rgb-consensus v0.11.1
+     │   │   │   ├── rgb-invoicing v0.11.1
+     │   │   │   │   └── rgb-ops v0.11.1
+     │   │   │   │       ├── rgb-api v0.11.1
+     │   │   │   │       │   └── rgb011-check v0.1.0
+     │   │   │   │       ├── rgb-psbt-utils v0.11.1
+     │   │   │   │       │   ├── rgb-api v0.11.1 (*)
+     │   │   │   │       │   └── rgb011-check v0.1.0 (*)
+     │   │   │   │       ├── rgb-schemas v0.11.1
+     │   │   │   │       │   └── rgb011-check v0.1.0 (*)
+     │   │   │   │       └── rgb011-check v0.1.0 (*)
+     │   │   │   ├── rgb-ops v0.11.1 (*)
+     │   │   │   └── rgb011-check v0.1.0 (*)
+     │   │   ├── rgb-ops v0.11.1 (*)
+     │   │   └── rgb-schemas v0.11.1 (*)
+     │   └── rgb-consensus v0.11.1 (*)
+     └── sha2 v0.11.0
+         ├── rgb-aluvm v0.11.1 (*)
+         ├── rgb-ascii-armor v1.0.4
+         │   ├── rgb-aluvm v0.11.1 (*)
+         │   ├── rgb-ops v0.11.1 (*)
+         │   └── rgb-strict-types v1.0.4
+         │       ├── rgb-aluvm v0.11.1 (*)
+         │       ├── rgb-api v0.11.1 (*)
+         │       ├── rgb-consensus v0.11.1 (*)
+         │       ├── rgb-invoicing v0.11.1 (*)
+         │       ├── rgb-ops v0.11.1 (*)
+         │       ├── rgb-schemas v0.11.1 (*)
+         │       └── rgb011-check v0.1.0 (*)
+         ├── rgb-consensus v0.11.1 (*)
+         └── rgb-strict-types v1.0.4 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'getrandom'
+   ┌─ /media/kestl/andor/ffwd/wt-rgb011-spike/spikes/rgb-0.11.1/Cargo.lock:49:1
+   │  
+49 │ ╭ getrandom 0.2.17 registry+https://github.com/rust-lang/crates.io-index
+50 │ │ getrandom 0.3.4 registry+https://github.com/rust-lang/crates.io-index
+   │ ╰─────────────────────────────────────────────────────────────────────┘ lock entries
+   │  
+   ├ getrandom v0.2.17
+     ├── rand_core v0.6.4
+     │   ├── rand v0.8.8
+     │   │   └── amplify v4.8.1
+     │   │       ├── baid64 v0.4.1
+     │   │       │   ├── rgb-aluvm v0.11.1
+     │   │       │   │   ├── rgb-consensus v0.11.1
+     │   │       │   │   │   ├── rgb-invoicing v0.11.1
+     │   │       │   │   │   │   └── rgb-ops v0.11.1
+     │   │       │   │   │   │       ├── rgb-api v0.11.1
+     │   │       │   │   │   │       │   └── rgb011-check v0.1.0
+     │   │       │   │   │   │       ├── rgb-psbt-utils v0.11.1
+     │   │       │   │   │   │       │   ├── rgb-api v0.11.1 (*)
+     │   │       │   │   │   │       │   └── rgb011-check v0.1.0 (*)
+     │   │       │   │   │   │       ├── rgb-schemas v0.11.1
+     │   │       │   │   │   │       │   └── rgb011-check v0.1.0 (*)
+     │   │       │   │   │   │       └── rgb011-check v0.1.0 (*)
+     │   │       │   │   │   ├── rgb-ops v0.11.1 (*)
+     │   │       │   │   │   └── rgb011-check v0.1.0 (*)
+     │   │       │   │   ├── rgb-ops v0.11.1 (*)
+     │   │       │   │   └── rgb-schemas v0.11.1 (*)
+     │   │       │   ├── rgb-api v0.11.1 (*)
+     │   │       │   ├── rgb-ascii-armor v1.0.4
+     │   │       │   │   ├── rgb-aluvm v0.11.1 (*)
+     │   │       │   │   ├── rgb-ops v0.11.1 (*)
+     │   │       │   │   └── rgb-strict-types v1.0.4
+     │   │       │   │       ├── rgb-aluvm v0.11.1 (*)
+     │   │       │   │       ├── rgb-api v0.11.1 (*)
+     │   │       │   │       ├── rgb-consensus v0.11.1 (*)
+     │   │       │   │       ├── rgb-invoicing v0.11.1 (*)
+     │   │       │   │       ├── rgb-ops v0.11.1 (*)
+     │   │       │   │       ├── rgb-schemas v0.11.1 (*)
+     │   │       │   │       └── rgb011-check v0.1.0 (*)
+     │   │       │   ├── rgb-consensus v0.11.1 (*)
+     │   │       │   ├── rgb-invoicing v0.11.1 (*)
+     │   │       │   ├── rgb-ops v0.11.1 (*)
+     │   │       │   └── rgb-strict-types v1.0.4 (*)
+     │   │       ├── nonasync v0.1.3
+     │   │       │   ├── rgb-api v0.11.1 (*)
+     │   │       │   └── rgb-ops v0.11.1 (*)
+     │   │       ├── rgb-aluvm v0.11.1 (*)
+     │   │       ├── rgb-api v0.11.1 (*)
+     │   │       ├── rgb-ascii-armor v1.0.4 (*)
+     │   │       ├── rgb-consensus v0.11.1 (*)
+     │   │       ├── rgb-invoicing v0.11.1 (*)
+     │   │       ├── rgb-ops v0.11.1 (*)
+     │   │       ├── rgb-psbt-utils v0.11.1 (*)
+     │   │       ├── rgb-schemas v0.11.1 (*)
+     │   │       ├── rgb-strict-encoding v1.0.4
+     │   │       │   ├── rgb-aluvm v0.11.1 (*)
+     │   │       │   ├── rgb-ascii-armor v1.0.4 (*)
+     │   │       │   ├── rgb-consensus v0.11.1 (*)
+     │   │       │   ├── rgb-invoicing v0.11.1 (*)
+     │   │       │   ├── rgb-ops v0.11.1 (*)
+     │   │       │   ├── rgb-psbt-utils v0.11.1 (*)
+     │   │       │   ├── rgb-strict-types v1.0.4 (*)
+     │   │       │   └── rgb011-check v0.1.0 (*)
+     │   │       ├── rgb-strict-types v1.0.4 (*)
+     │   │       └── rgb011-check v0.1.0 (*)
+     │   └── rand_chacha v0.3.1
+     │       └── rand v0.8.8 (*)
+     └── rgb-consensus v0.11.1 (*)
+   ├ getrandom v0.3.4
+     ├── rand_core v0.9.5
+     │   ├── rand v0.9.5
+     │   │   ├── rgb-consensus v0.11.1
+     │   │   │   ├── rgb-invoicing v0.11.1
+     │   │   │   │   └── rgb-ops v0.11.1
+     │   │   │   │       ├── rgb-api v0.11.1
+     │   │   │   │       │   └── rgb011-check v0.1.0
+     │   │   │   │       ├── rgb-psbt-utils v0.11.1
+     │   │   │   │       │   ├── rgb-api v0.11.1 (*)
+     │   │   │   │       │   └── rgb011-check v0.1.0 (*)
+     │   │   │   │       ├── rgb-schemas v0.11.1
+     │   │   │   │       │   └── rgb011-check v0.1.0 (*)
+     │   │   │   │       └── rgb011-check v0.1.0 (*)
+     │   │   │   ├── rgb-ops v0.11.1 (*)
+     │   │   │   └── rgb011-check v0.1.0 (*)
+     │   │   ├── rgb-ops v0.11.1 (*)
+     │   │   └── secp256k1 v0.33.1
+     │   │       └── rgb-consensus v0.11.1 (*)
+     │   └── rand_chacha v0.9.0
+     │       └── rand v0.9.5 (*)
+     ├── rgb-api v0.11.1 (*)
+     ├── rgb-consensus v0.11.1 (*)
+     ├── rgb-ops v0.11.1 (*)
+     └── rgb-psbt-utils v0.11.1 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'hashbrown'
+   ┌─ /media/kestl/andor/ffwd/wt-rgb011-spike/spikes/rgb-0.11.1/Cargo.lock:52:1
+   │  
+52 │ ╭ hashbrown 0.15.5 registry+https://github.com/rust-lang/crates.io-index
+53 │ │ hashbrown 0.17.1 registry+https://github.com/rust-lang/crates.io-index
+   │ ╰──────────────────────────────────────────────────────────────────────┘ lock entries
+   │  
+   ├ hashbrown v0.15.5
+     └── petgraph v0.8.3
+         └── daggy v0.9.0
+             └── rgb-consensus v0.11.1
+                 ├── rgb-invoicing v0.11.1
+                 │   └── rgb-ops v0.11.1
+                 │       ├── rgb-api v0.11.1
+                 │       │   └── rgb011-check v0.1.0
+                 │       ├── rgb-psbt-utils v0.11.1
+                 │       │   ├── rgb-api v0.11.1 (*)
+                 │       │   └── rgb011-check v0.1.0 (*)
+                 │       ├── rgb-schemas v0.11.1
+                 │       │   └── rgb011-check v0.1.0 (*)
+                 │       └── rgb011-check v0.1.0 (*)
+                 ├── rgb-ops v0.11.1 (*)
+                 └── rgb011-check v0.1.0 (*)
+   ├ hashbrown v0.17.1
+     └── indexmap v2.14.2
+         ├── petgraph v0.8.3
+         │   └── daggy v0.9.0
+         │       └── rgb-consensus v0.11.1
+         │           ├── rgb-invoicing v0.11.1
+         │           │   └── rgb-ops v0.11.1
+         │           │       ├── rgb-api v0.11.1
+         │           │       │   └── rgb011-check v0.1.0
+         │           │       ├── rgb-psbt-utils v0.11.1
+         │           │       │   ├── rgb-api v0.11.1 (*)
+         │           │       │   └── rgb011-check v0.1.0 (*)
+         │           │       ├── rgb-schemas v0.11.1
+         │           │       │   └── rgb011-check v0.1.0 (*)
+         │           │       └── rgb011-check v0.1.0 (*)
+         │           ├── rgb-ops v0.11.1 (*)
+         │           └── rgb011-check v0.1.0 (*)
+         ├── rgb-api v0.11.1 (*)
+         ├── rgb-invoicing v0.11.1 (*)
+         └── rgb-strict-types v1.0.4
+             ├── rgb-aluvm v0.11.1
+             │   ├── rgb-consensus v0.11.1 (*)
+             │   ├── rgb-ops v0.11.1 (*)
+             │   └── rgb-schemas v0.11.1 (*)
+             ├── rgb-api v0.11.1 (*)
+             ├── rgb-consensus v0.11.1 (*)
+             ├── rgb-invoicing v0.11.1 (*)
+             ├── rgb-ops v0.11.1 (*)
+             ├── rgb-schemas v0.11.1 (*)
+             └── rgb011-check v0.1.0 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'rand'
+   ┌─ /media/kestl/andor/ffwd/wt-rgb011-spike/spikes/rgb-0.11.1/Cargo.lock:79:1
+   │  
+79 │ ╭ rand 0.8.8 registry+https://github.com/rust-lang/crates.io-index
+80 │ │ rand 0.9.5 registry+https://github.com/rust-lang/crates.io-index
+   │ ╰────────────────────────────────────────────────────────────────┘ lock entries
+   │  
+   ├ rand v0.8.8
+     └── amplify v4.8.1
+         ├── baid64 v0.4.1
+         │   ├── rgb-aluvm v0.11.1
+         │   │   ├── rgb-consensus v0.11.1
+         │   │   │   ├── rgb-invoicing v0.11.1
+         │   │   │   │   └── rgb-ops v0.11.1
+         │   │   │   │       ├── rgb-api v0.11.1
+         │   │   │   │       │   └── rgb011-check v0.1.0
+         │   │   │   │       ├── rgb-psbt-utils v0.11.1
+         │   │   │   │       │   ├── rgb-api v0.11.1 (*)
+         │   │   │   │       │   └── rgb011-check v0.1.0 (*)
+         │   │   │   │       ├── rgb-schemas v0.11.1
+         │   │   │   │       │   └── rgb011-check v0.1.0 (*)
+         │   │   │   │       └── rgb011-check v0.1.0 (*)
+         │   │   │   ├── rgb-ops v0.11.1 (*)
+         │   │   │   └── rgb011-check v0.1.0 (*)
+         │   │   ├── rgb-ops v0.11.1 (*)
+         │   │   └── rgb-schemas v0.11.1 (*)
+         │   ├── rgb-api v0.11.1 (*)
+         │   ├── rgb-ascii-armor v1.0.4
+         │   │   ├── rgb-aluvm v0.11.1 (*)
+         │   │   ├── rgb-ops v0.11.1 (*)
+         │   │   └── rgb-strict-types v1.0.4
+         │   │       ├── rgb-aluvm v0.11.1 (*)
+         │   │       ├── rgb-api v0.11.1 (*)
+         │   │       ├── rgb-consensus v0.11.1 (*)
+         │   │       ├── rgb-invoicing v0.11.1 (*)
+         │   │       ├── rgb-ops v0.11.1 (*)
+         │   │       ├── rgb-schemas v0.11.1 (*)
+         │   │       └── rgb011-check v0.1.0 (*)
+         │   ├── rgb-consensus v0.11.1 (*)
+         │   ├── rgb-invoicing v0.11.1 (*)
+         │   ├── rgb-ops v0.11.1 (*)
+         │   └── rgb-strict-types v1.0.4 (*)
+         ├── nonasync v0.1.3
+         │   ├── rgb-api v0.11.1 (*)
+         │   └── rgb-ops v0.11.1 (*)
+         ├── rgb-aluvm v0.11.1 (*)
+         ├── rgb-api v0.11.1 (*)
+         ├── rgb-ascii-armor v1.0.4 (*)
+         ├── rgb-consensus v0.11.1 (*)
+         ├── rgb-invoicing v0.11.1 (*)
+         ├── rgb-ops v0.11.1 (*)
+         ├── rgb-psbt-utils v0.11.1 (*)
+         ├── rgb-schemas v0.11.1 (*)
+         ├── rgb-strict-encoding v1.0.4
+         │   ├── rgb-aluvm v0.11.1 (*)
+         │   ├── rgb-ascii-armor v1.0.4 (*)
+         │   ├── rgb-consensus v0.11.1 (*)
+         │   ├── rgb-invoicing v0.11.1 (*)
+         │   ├── rgb-ops v0.11.1 (*)
+         │   ├── rgb-psbt-utils v0.11.1 (*)
+         │   ├── rgb-strict-types v1.0.4 (*)
+         │   └── rgb011-check v0.1.0 (*)
+         ├── rgb-strict-types v1.0.4 (*)
+         └── rgb011-check v0.1.0 (*)
+   ├ rand v0.9.5
+     ├── rgb-consensus v0.11.1
+     │   ├── rgb-invoicing v0.11.1
+     │   │   └── rgb-ops v0.11.1
+     │   │       ├── rgb-api v0.11.1
+     │   │       │   └── rgb011-check v0.1.0
+     │   │       ├── rgb-psbt-utils v0.11.1
+     │   │       │   ├── rgb-api v0.11.1 (*)
+     │   │       │   └── rgb011-check v0.1.0 (*)
+     │   │       ├── rgb-schemas v0.11.1
+     │   │       │   └── rgb011-check v0.1.0 (*)
+     │   │       └── rgb011-check v0.1.0 (*)
+     │   ├── rgb-ops v0.11.1 (*)
+     │   └── rgb011-check v0.1.0 (*)
+     ├── rgb-ops v0.11.1 (*)
+     └── secp256k1 v0.33.1
+         └── rgb-consensus v0.11.1 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'rand_chacha'
+   ┌─ /media/kestl/andor/ffwd/wt-rgb011-spike/spikes/rgb-0.11.1/Cargo.lock:81:1
+   │  
+81 │ ╭ rand_chacha 0.3.1 registry+https://github.com/rust-lang/crates.io-index
+82 │ │ rand_chacha 0.9.0 registry+https://github.com/rust-lang/crates.io-index
+   │ ╰───────────────────────────────────────────────────────────────────────┘ lock entries
+   │  
+   ├ rand_chacha v0.3.1
+     └── rand v0.8.8
+         └── amplify v4.8.1
+             ├── baid64 v0.4.1
+             │   ├── rgb-aluvm v0.11.1
+             │   │   ├── rgb-consensus v0.11.1
+             │   │   │   ├── rgb-invoicing v0.11.1
+             │   │   │   │   └── rgb-ops v0.11.1
+             │   │   │   │       ├── rgb-api v0.11.1
+             │   │   │   │       │   └── rgb011-check v0.1.0
+             │   │   │   │       ├── rgb-psbt-utils v0.11.1
+             │   │   │   │       │   ├── rgb-api v0.11.1 (*)
+             │   │   │   │       │   └── rgb011-check v0.1.0 (*)
+             │   │   │   │       ├── rgb-schemas v0.11.1
+             │   │   │   │       │   └── rgb011-check v0.1.0 (*)
+             │   │   │   │       └── rgb011-check v0.1.0 (*)
+             │   │   │   ├── rgb-ops v0.11.1 (*)
+             │   │   │   └── rgb011-check v0.1.0 (*)
+             │   │   ├── rgb-ops v0.11.1 (*)
+             │   │   └── rgb-schemas v0.11.1 (*)
+             │   ├── rgb-api v0.11.1 (*)
+             │   ├── rgb-ascii-armor v1.0.4
+             │   │   ├── rgb-aluvm v0.11.1 (*)
+             │   │   ├── rgb-ops v0.11.1 (*)
+             │   │   └── rgb-strict-types v1.0.4
+             │   │       ├── rgb-aluvm v0.11.1 (*)
+             │   │       ├── rgb-api v0.11.1 (*)
+             │   │       ├── rgb-consensus v0.11.1 (*)
+             │   │       ├── rgb-invoicing v0.11.1 (*)
+             │   │       ├── rgb-ops v0.11.1 (*)
+             │   │       ├── rgb-schemas v0.11.1 (*)
+             │   │       └── rgb011-check v0.1.0 (*)
+             │   ├── rgb-consensus v0.11.1 (*)
+             │   ├── rgb-invoicing v0.11.1 (*)
+             │   ├── rgb-ops v0.11.1 (*)
+             │   └── rgb-strict-types v1.0.4 (*)
+             ├── nonasync v0.1.3
+             │   ├── rgb-api v0.11.1 (*)
+             │   └── rgb-ops v0.11.1 (*)
+             ├── rgb-aluvm v0.11.1 (*)
+             ├── rgb-api v0.11.1 (*)
+             ├── rgb-ascii-armor v1.0.4 (*)
+             ├── rgb-consensus v0.11.1 (*)
+             ├── rgb-invoicing v0.11.1 (*)
+             ├── rgb-ops v0.11.1 (*)
+             ├── rgb-psbt-utils v0.11.1 (*)
+             ├── rgb-schemas v0.11.1 (*)
+             ├── rgb-strict-encoding v1.0.4
+             │   ├── rgb-aluvm v0.11.1 (*)
+             │   ├── rgb-ascii-armor v1.0.4 (*)
+             │   ├── rgb-consensus v0.11.1 (*)
+             │   ├── rgb-invoicing v0.11.1 (*)
+             │   ├── rgb-ops v0.11.1 (*)
+             │   ├── rgb-psbt-utils v0.11.1 (*)
+             │   ├── rgb-strict-types v1.0.4 (*)
+             │   └── rgb011-check v0.1.0 (*)
+             ├── rgb-strict-types v1.0.4 (*)
+             └── rgb011-check v0.1.0 (*)
+   ├ rand_chacha v0.9.0
+     └── rand v0.9.5
+         ├── rgb-consensus v0.11.1
+         │   ├── rgb-invoicing v0.11.1
+         │   │   └── rgb-ops v0.11.1
+         │   │       ├── rgb-api v0.11.1
+         │   │       │   └── rgb011-check v0.1.0
+         │   │       ├── rgb-psbt-utils v0.11.1
+         │   │       │   ├── rgb-api v0.11.1 (*)
+         │   │       │   └── rgb011-check v0.1.0 (*)
+         │   │       ├── rgb-schemas v0.11.1
+         │   │       │   └── rgb011-check v0.1.0 (*)
+         │   │       └── rgb011-check v0.1.0 (*)
+         │   ├── rgb-ops v0.11.1 (*)
+         │   └── rgb011-check v0.1.0 (*)
+         ├── rgb-ops v0.11.1 (*)
+         └── secp256k1 v0.33.1
+             └── rgb-consensus v0.11.1 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'rand_core'
+   ┌─ /media/kestl/andor/ffwd/wt-rgb011-spike/spikes/rgb-0.11.1/Cargo.lock:83:1
+   │  
+83 │ ╭ rand_core 0.6.4 registry+https://github.com/rust-lang/crates.io-index
+84 │ │ rand_core 0.9.5 registry+https://github.com/rust-lang/crates.io-index
+   │ ╰─────────────────────────────────────────────────────────────────────┘ lock entries
+   │  
+   ├ rand_core v0.6.4
+     ├── rand v0.8.8
+     │   └── amplify v4.8.1
+     │       ├── baid64 v0.4.1
+     │       │   ├── rgb-aluvm v0.11.1
+     │       │   │   ├── rgb-consensus v0.11.1
+     │       │   │   │   ├── rgb-invoicing v0.11.1
+     │       │   │   │   │   └── rgb-ops v0.11.1
+     │       │   │   │   │       ├── rgb-api v0.11.1
+     │       │   │   │   │       │   └── rgb011-check v0.1.0
+     │       │   │   │   │       ├── rgb-psbt-utils v0.11.1
+     │       │   │   │   │       │   ├── rgb-api v0.11.1 (*)
+     │       │   │   │   │       │   └── rgb011-check v0.1.0 (*)
+     │       │   │   │   │       ├── rgb-schemas v0.11.1
+     │       │   │   │   │       │   └── rgb011-check v0.1.0 (*)
+     │       │   │   │   │       └── rgb011-check v0.1.0 (*)
+     │       │   │   │   ├── rgb-ops v0.11.1 (*)
+     │       │   │   │   └── rgb011-check v0.1.0 (*)
+     │       │   │   ├── rgb-ops v0.11.1 (*)
+     │       │   │   └── rgb-schemas v0.11.1 (*)
+     │       │   ├── rgb-api v0.11.1 (*)
+     │       │   ├── rgb-ascii-armor v1.0.4
+     │       │   │   ├── rgb-aluvm v0.11.1 (*)
+     │       │   │   ├── rgb-ops v0.11.1 (*)
+     │       │   │   └── rgb-strict-types v1.0.4
+     │       │   │       ├── rgb-aluvm v0.11.1 (*)
+     │       │   │       ├── rgb-api v0.11.1 (*)
+     │       │   │       ├── rgb-consensus v0.11.1 (*)
+     │       │   │       ├── rgb-invoicing v0.11.1 (*)
+     │       │   │       ├── rgb-ops v0.11.1 (*)
+     │       │   │       ├── rgb-schemas v0.11.1 (*)
+     │       │   │       └── rgb011-check v0.1.0 (*)
+     │       │   ├── rgb-consensus v0.11.1 (*)
+     │       │   ├── rgb-invoicing v0.11.1 (*)
+     │       │   ├── rgb-ops v0.11.1 (*)
+     │       │   └── rgb-strict-types v1.0.4 (*)
+     │       ├── nonasync v0.1.3
+     │       │   ├── rgb-api v0.11.1 (*)
+     │       │   └── rgb-ops v0.11.1 (*)
+     │       ├── rgb-aluvm v0.11.1 (*)
+     │       ├── rgb-api v0.11.1 (*)
+     │       ├── rgb-ascii-armor v1.0.4 (*)
+     │       ├── rgb-consensus v0.11.1 (*)
+     │       ├── rgb-invoicing v0.11.1 (*)
+     │       ├── rgb-ops v0.11.1 (*)
+     │       ├── rgb-psbt-utils v0.11.1 (*)
+     │       ├── rgb-schemas v0.11.1 (*)
+     │       ├── rgb-strict-encoding v1.0.4
+     │       │   ├── rgb-aluvm v0.11.1 (*)
+     │       │   ├── rgb-ascii-armor v1.0.4 (*)
+     │       │   ├── rgb-consensus v0.11.1 (*)
+     │       │   ├── rgb-invoicing v0.11.1 (*)
+     │       │   ├── rgb-ops v0.11.1 (*)
+     │       │   ├── rgb-psbt-utils v0.11.1 (*)
+     │       │   ├── rgb-strict-types v1.0.4 (*)
+     │       │   └── rgb011-check v0.1.0 (*)
+     │       ├── rgb-strict-types v1.0.4 (*)
+     │       └── rgb011-check v0.1.0 (*)
+     └── rand_chacha v0.3.1
+         └── rand v0.8.8 (*)
+   ├ rand_core v0.9.5
+     ├── rand v0.9.5
+     │   ├── rgb-consensus v0.11.1
+     │   │   ├── rgb-invoicing v0.11.1
+     │   │   │   └── rgb-ops v0.11.1
+     │   │   │       ├── rgb-api v0.11.1
+     │   │   │       │   └── rgb011-check v0.1.0
+     │   │   │       ├── rgb-psbt-utils v0.11.1
+     │   │   │       │   ├── rgb-api v0.11.1 (*)
+     │   │   │       │   └── rgb011-check v0.1.0 (*)
+     │   │   │       ├── rgb-schemas v0.11.1
+     │   │   │       │   └── rgb011-check v0.1.0 (*)
+     │   │   │       └── rgb011-check v0.1.0 (*)
+     │   │   ├── rgb-ops v0.11.1 (*)
+     │   │   └── rgb011-check v0.1.0 (*)
+     │   ├── rgb-ops v0.11.1 (*)
+     │   └── secp256k1 v0.33.1
+     │       └── rgb-consensus v0.11.1 (*)
+     └── rand_chacha v0.9.0
+         └── rand v0.9.5 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'secp256k1'
+    ┌─ /media/kestl/andor/ffwd/wt-rgb011-spike/spikes/rgb-0.11.1/Cargo.lock:102:1
+    │  
+102 │ ╭ secp256k1 0.29.1 registry+https://github.com/rust-lang/crates.io-index
+103 │ │ secp256k1 0.33.1 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰──────────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ secp256k1 v0.29.1
+      ├── bitcoin v0.32.102
+      │   ├── rgb-consensus v0.11.1
+      │   │   ├── rgb-invoicing v0.11.1
+      │   │   │   └── rgb-ops v0.11.1
+      │   │   │       ├── rgb-api v0.11.1
+      │   │   │       │   └── rgb011-check v0.1.0
+      │   │   │       ├── rgb-psbt-utils v0.11.1
+      │   │   │       │   ├── rgb-api v0.11.1 (*)
+      │   │   │       │   └── rgb011-check v0.1.0 (*)
+      │   │   │       ├── rgb-schemas v0.11.1
+      │   │   │       │   └── rgb011-check v0.1.0 (*)
+      │   │   │       └── rgb011-check v0.1.0 (*)
+      │   │   ├── rgb-ops v0.11.1 (*)
+      │   │   └── rgb011-check v0.1.0 (*)
+      │   └── rgb-strict-encoding v1.0.4
+      │       ├── rgb-aluvm v0.11.1
+      │       │   ├── rgb-consensus v0.11.1 (*)
+      │       │   ├── rgb-ops v0.11.1 (*)
+      │       │   └── rgb-schemas v0.11.1 (*)
+      │       ├── rgb-ascii-armor v1.0.4
+      │       │   ├── rgb-aluvm v0.11.1 (*)
+      │       │   ├── rgb-ops v0.11.1 (*)
+      │       │   └── rgb-strict-types v1.0.4
+      │       │       ├── rgb-aluvm v0.11.1 (*)
+      │       │       ├── rgb-api v0.11.1 (*)
+      │       │       ├── rgb-consensus v0.11.1 (*)
+      │       │       ├── rgb-invoicing v0.11.1 (*)
+      │       │       ├── rgb-ops v0.11.1 (*)
+      │       │       ├── rgb-schemas v0.11.1 (*)
+      │       │       └── rgb011-check v0.1.0 (*)
+      │       ├── rgb-consensus v0.11.1 (*)
+      │       ├── rgb-invoicing v0.11.1 (*)
+      │       ├── rgb-ops v0.11.1 (*)
+      │       ├── rgb-psbt-utils v0.11.1 (*)
+      │       ├── rgb-strict-types v1.0.4 (*)
+      │       └── rgb011-check v0.1.0 (*)
+      └── o2a-demo-core v0.1.0
+          └── rgb011-check v0.1.0 (*)
+    ├ secp256k1 v0.33.1
+      └── rgb-consensus v0.11.1
+          ├── rgb-invoicing v0.11.1
+          │   └── rgb-ops v0.11.1
+          │       ├── rgb-api v0.11.1
+          │       │   └── rgb011-check v0.1.0
+          │       ├── rgb-psbt-utils v0.11.1
+          │       │   ├── rgb-api v0.11.1 (*)
+          │       │   └── rgb011-check v0.1.0 (*)
+          │       ├── rgb-schemas v0.11.1
+          │       │   └── rgb011-check v0.1.0 (*)
+          │       └── rgb011-check v0.1.0 (*)
+          ├── rgb-ops v0.11.1 (*)
+          └── rgb011-check v0.1.0 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'secp256k1-sys'
+    ┌─ /media/kestl/andor/ffwd/wt-rgb011-spike/spikes/rgb-0.11.1/Cargo.lock:104:1
+    │  
+104 │ ╭ secp256k1-sys 0.10.1 registry+https://github.com/rust-lang/crates.io-index
+105 │ │ secp256k1-sys 0.14.1 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰──────────────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ secp256k1-sys v0.10.1
+      └── secp256k1 v0.29.1
+          ├── bitcoin v0.32.102
+          │   ├── rgb-consensus v0.11.1
+          │   │   ├── rgb-invoicing v0.11.1
+          │   │   │   └── rgb-ops v0.11.1
+          │   │   │       ├── rgb-api v0.11.1
+          │   │   │       │   └── rgb011-check v0.1.0
+          │   │   │       ├── rgb-psbt-utils v0.11.1
+          │   │   │       │   ├── rgb-api v0.11.1 (*)
+          │   │   │       │   └── rgb011-check v0.1.0 (*)
+          │   │   │       ├── rgb-schemas v0.11.1
+          │   │   │       │   └── rgb011-check v0.1.0 (*)
+          │   │   │       └── rgb011-check v0.1.0 (*)
+          │   │   ├── rgb-ops v0.11.1 (*)
+          │   │   └── rgb011-check v0.1.0 (*)
+          │   └── rgb-strict-encoding v1.0.4
+          │       ├── rgb-aluvm v0.11.1
+          │       │   ├── rgb-consensus v0.11.1 (*)
+          │       │   ├── rgb-ops v0.11.1 (*)
+          │       │   └── rgb-schemas v0.11.1 (*)
+          │       ├── rgb-ascii-armor v1.0.4
+          │       │   ├── rgb-aluvm v0.11.1 (*)
+          │       │   ├── rgb-ops v0.11.1 (*)
+          │       │   └── rgb-strict-types v1.0.4
+          │       │       ├── rgb-aluvm v0.11.1 (*)
+          │       │       ├── rgb-api v0.11.1 (*)
+          │       │       ├── rgb-consensus v0.11.1 (*)
+          │       │       ├── rgb-invoicing v0.11.1 (*)
+          │       │       ├── rgb-ops v0.11.1 (*)
+          │       │       ├── rgb-schemas v0.11.1 (*)
+          │       │       └── rgb011-check v0.1.0 (*)
+          │       ├── rgb-consensus v0.11.1 (*)
+          │       ├── rgb-invoicing v0.11.1 (*)
+          │       ├── rgb-ops v0.11.1 (*)
+          │       ├── rgb-psbt-utils v0.11.1 (*)
+          │       ├── rgb-strict-types v1.0.4 (*)
+          │       └── rgb011-check v0.1.0 (*)
+          └── o2a-demo-core v0.1.0
+              └── rgb011-check v0.1.0 (*)
+    ├ secp256k1-sys v0.14.1
+      └── secp256k1 v0.33.1
+          └── rgb-consensus v0.11.1
+              ├── rgb-invoicing v0.11.1
+              │   └── rgb-ops v0.11.1
+              │       ├── rgb-api v0.11.1
+              │       │   └── rgb011-check v0.1.0
+              │       ├── rgb-psbt-utils v0.11.1
+              │       │   ├── rgb-api v0.11.1 (*)
+              │       │   └── rgb011-check v0.1.0 (*)
+              │       ├── rgb-schemas v0.11.1
+              │       │   └── rgb011-check v0.1.0 (*)
+              │       └── rgb011-check v0.1.0 (*)
+              ├── rgb-ops v0.11.1 (*)
+              └── rgb011-check v0.1.0 (*)
+
+warning[duplicate]: found 2 duplicate entries for crate 'sha2'
+    ┌─ /media/kestl/andor/ffwd/wt-rgb011-spike/spikes/rgb-0.11.1/Cargo.lock:110:1
+    │  
+110 │ ╭ sha2 0.10.9 registry+https://github.com/rust-lang/crates.io-index
+111 │ │ sha2 0.11.0 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰─────────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ sha2 v0.10.9
+      └── baid64 v0.4.1
+          ├── rgb-aluvm v0.11.1
+          │   ├── rgb-consensus v0.11.1
+          │   │   ├── rgb-invoicing v0.11.1
+          │   │   │   └── rgb-ops v0.11.1
+          │   │   │       ├── rgb-api v0.11.1
+          │   │   │       │   └── rgb011-check v0.1.0
+          │   │   │       ├── rgb-psbt-utils v0.11.1
+          │   │   │       │   ├── rgb-api v0.11.1 (*)
+          │   │   │       │   └── rgb011-check v0.1.0 (*)
+          │   │   │       ├── rgb-schemas v0.11.1
+          │   │   │       │   └── rgb011-check v0.1.0 (*)
+          │   │   │       └── rgb011-check v0.1.0 (*)
+          │   │   ├── rgb-ops v0.11.1 (*)
+          │   │   └── rgb011-check v0.1.0 (*)
+          │   ├── rgb-ops v0.11.1 (*)
+          │   └── rgb-schemas v0.11.1 (*)
+          ├── rgb-api v0.11.1 (*)
+          ├── rgb-ascii-armor v1.0.4
+          │   ├── rgb-aluvm v0.11.1 (*)
+          │   ├── rgb-ops v0.11.1 (*)
+          │   └── rgb-strict-types v1.0.4
+          │       ├── rgb-aluvm v0.11.1 (*)
+          │       ├── rgb-api v0.11.1 (*)
+          │       ├── rgb-consensus v0.11.1 (*)
+          │       ├── rgb-invoicing v0.11.1 (*)
+          │       ├── rgb-ops v0.11.1 (*)
+          │       ├── rgb-schemas v0.11.1 (*)
+          │       └── rgb011-check v0.1.0 (*)
+          ├── rgb-consensus v0.11.1 (*)
+          ├── rgb-invoicing v0.11.1 (*)
+          ├── rgb-ops v0.11.1 (*)
+          └── rgb-strict-types v1.0.4 (*)
+    ├ sha2 v0.11.0
+      ├── rgb-aluvm v0.11.1
+      │   ├── rgb-consensus v0.11.1
+      │   │   ├── rgb-invoicing v0.11.1
+      │   │   │   └── rgb-ops v0.11.1
+      │   │   │       ├── rgb-api v0.11.1
+      │   │   │       │   └── rgb011-check v0.1.0
+      │   │   │       ├── rgb-psbt-utils v0.11.1
+      │   │   │       │   ├── rgb-api v0.11.1 (*)
+      │   │   │       │   └── rgb011-check v0.1.0 (*)
+      │   │   │       ├── rgb-schemas v0.11.1
+      │   │   │       │   └── rgb011-check v0.1.0 (*)
+      │   │   │       └── rgb011-check v0.1.0 (*)
+      │   │   ├── rgb-ops v0.11.1 (*)
+      │   │   └── rgb011-check v0.1.0 (*)
+      │   ├── rgb-ops v0.11.1 (*)
+      │   └── rgb-schemas v0.11.1 (*)
+      ├── rgb-ascii-armor v1.0.4
+      │   ├── rgb-aluvm v0.11.1 (*)
+      │   ├── rgb-ops v0.11.1 (*)
+      │   └── rgb-strict-types v1.0.4
+      │       ├── rgb-aluvm v0.11.1 (*)
+      │       ├── rgb-api v0.11.1 (*)
+      │       ├── rgb-consensus v0.11.1 (*)
+      │       ├── rgb-invoicing v0.11.1 (*)
+      │       ├── rgb-ops v0.11.1 (*)
+      │       ├── rgb-schemas v0.11.1 (*)
+      │       └── rgb011-check v0.1.0 (*)
+      ├── rgb-consensus v0.11.1 (*)
+      └── rgb-strict-types v1.0.4 (*)
+
+warning[duplicate]: found 3 duplicate entries for crate 'syn'
+    ┌─ /media/kestl/andor/ffwd/wt-rgb011-spike/spikes/rgb-0.11.1/Cargo.lock:114:1
+    │  
+114 │ ╭ syn 1.0.109 registry+https://github.com/rust-lang/crates.io-index
+115 │ │ syn 2.0.119 registry+https://github.com/rust-lang/crates.io-index
+116 │ │ syn 3.0.6 registry+https://github.com/rust-lang/crates.io-index
+    │ ╰───────────────────────────────────────────────────────────────┘ lock entries
+    │  
+    ├ syn v1.0.109
+      ├── amplify_derive v4.0.1
+      │   └── amplify v4.8.1
+      │       ├── baid64 v0.4.1
+      │       │   ├── rgb-aluvm v0.11.1
+      │       │   │   ├── rgb-consensus v0.11.1
+      │       │   │   │   ├── rgb-invoicing v0.11.1
+      │       │   │   │   │   └── rgb-ops v0.11.1
+      │       │   │   │   │       ├── rgb-api v0.11.1
+      │       │   │   │   │       │   └── rgb011-check v0.1.0
+      │       │   │   │   │       ├── rgb-psbt-utils v0.11.1
+      │       │   │   │   │       │   ├── rgb-api v0.11.1 (*)
+      │       │   │   │   │       │   └── rgb011-check v0.1.0 (*)
+      │       │   │   │   │       ├── rgb-schemas v0.11.1
+      │       │   │   │   │       │   └── rgb011-check v0.1.0 (*)
+      │       │   │   │   │       └── rgb011-check v0.1.0 (*)
+      │       │   │   │   ├── rgb-ops v0.11.1 (*)
+      │       │   │   │   └── rgb011-check v0.1.0 (*)
+      │       │   │   ├── rgb-ops v0.11.1 (*)
+      │       │   │   └── rgb-schemas v0.11.1 (*)
+      │       │   ├── rgb-api v0.11.1 (*)
+      │       │   ├── rgb-ascii-armor v1.0.4
+      │       │   │   ├── rgb-aluvm v0.11.1 (*)
+      │       │   │   ├── rgb-ops v0.11.1 (*)
+      │       │   │   └── rgb-strict-types v1.0.4
+      │       │   │       ├── rgb-aluvm v0.11.1 (*)
+      │       │   │       ├── rgb-api v0.11.1 (*)
+      │       │   │       ├── rgb-consensus v0.11.1 (*)
+      │       │   │       ├── rgb-invoicing v0.11.1 (*)
+      │       │   │       ├── rgb-ops v0.11.1 (*)
+      │       │   │       ├── rgb-schemas v0.11.1 (*)
+      │       │   │       └── rgb011-check v0.1.0 (*)
+      │       │   ├── rgb-consensus v0.11.1 (*)
+      │       │   ├── rgb-invoicing v0.11.1 (*)
+      │       │   ├── rgb-ops v0.11.1 (*)
+      │       │   └── rgb-strict-types v1.0.4 (*)
+      │       ├── nonasync v0.1.3
+      │       │   ├── rgb-api v0.11.1 (*)
+      │       │   └── rgb-ops v0.11.1 (*)
+      │       ├── rgb-aluvm v0.11.1 (*)
+      │       ├── rgb-api v0.11.1 (*)
+      │       ├── rgb-ascii-armor v1.0.4 (*)
+      │       ├── rgb-consensus v0.11.1 (*)
+      │       ├── rgb-invoicing v0.11.1 (*)
+      │       ├── rgb-ops v0.11.1 (*)
+      │       ├── rgb-psbt-utils v0.11.1 (*)
+      │       ├── rgb-schemas v0.11.1 (*)
+      │       ├── rgb-strict-encoding v1.0.4
+      │       │   ├── rgb-aluvm v0.11.1 (*)
+      │       │   ├── rgb-ascii-armor v1.0.4 (*)
+      │       │   ├── rgb-consensus v0.11.1 (*)
+      │       │   ├── rgb-invoicing v0.11.1 (*)
+      │       │   ├── rgb-ops v0.11.1 (*)
+      │       │   ├── rgb-psbt-utils v0.11.1 (*)
+      │       │   ├── rgb-strict-types v1.0.4 (*)
+      │       │   └── rgb011-check v0.1.0 (*)
+      │       ├── rgb-strict-types v1.0.4 (*)
+      │       └── rgb011-check v0.1.0 (*)
+      ├── amplify_syn v2.0.1
+      │   ├── amplify v4.8.1 (*)
+      │   ├── amplify_derive v4.0.1 (*)
+      │   └── rgb-strict-encoding-derive v1.0.4
+      │       └── rgb-strict-encoding v1.0.4 (*)
+      └── rgb-strict-encoding-derive v1.0.4 (*)
+    ├ syn v2.0.119
+      ├── thiserror-impl v1.0.69
+      │   └── thiserror v1.0.69
+      │       └── base85 v2.0.0
+      │           ├── rgb-ascii-armor v1.0.4
+      │           │   ├── rgb-aluvm v0.11.1
+      │           │   │   ├── rgb-consensus v0.11.1
+      │           │   │   │   ├── rgb-invoicing v0.11.1
+      │           │   │   │   │   └── rgb-ops v0.11.1
+      │           │   │   │   │       ├── rgb-api v0.11.1
+      │           │   │   │   │       │   └── rgb011-check v0.1.0
+      │           │   │   │   │       ├── rgb-psbt-utils v0.11.1
+      │           │   │   │   │       │   ├── rgb-api v0.11.1 (*)
+      │           │   │   │   │       │   └── rgb011-check v0.1.0 (*)
+      │           │   │   │   │       ├── rgb-schemas v0.11.1
+      │           │   │   │   │       │   └── rgb011-check v0.1.0 (*)
+      │           │   │   │   │       └── rgb011-check v0.1.0 (*)
+      │           │   │   │   ├── rgb-ops v0.11.1 (*)
+      │           │   │   │   └── rgb011-check v0.1.0 (*)
+      │           │   │   ├── rgb-ops v0.11.1 (*)
+      │           │   │   └── rgb-schemas v0.11.1 (*)
+      │           │   ├── rgb-ops v0.11.1 (*)
+      │           │   └── rgb-strict-types v1.0.4
+      │           │       ├── rgb-aluvm v0.11.1 (*)
+      │           │       ├── rgb-api v0.11.1 (*)
+      │           │       ├── rgb-consensus v0.11.1 (*)
+      │           │       ├── rgb-invoicing v0.11.1 (*)
+      │           │       ├── rgb-ops v0.11.1 (*)
+      │           │       ├── rgb-schemas v0.11.1 (*)
+      │           │       └── rgb011-check v0.1.0 (*)
+      │           └── rgb-consensus v0.11.1 (*)
+      ├── windows-implement v0.60.2
+      │   └── windows-core v0.62.2
+      │       └── iana-time-zone v0.1.65
+      │           └── chrono v0.4.45
+      │               ├── rgb-api v0.11.1 (*)
+      │               ├── rgb-consensus v0.11.1 (*)
+      │               └── rgb-ops v0.11.1 (*)
+      ├── windows-interface v0.59.3
+      │   └── windows-core v0.62.2 (*)
+      └── zerocopy-derive v0.8.59
+          └── zerocopy v0.8.59
+              ├── half v2.7.1
+              │   └── rgb-aluvm v0.11.1 (*)
+              └── ppv-lite86 v0.2.21
+                  ├── rand_chacha v0.3.1
+                  │   └── rand v0.8.8
+                  │       └── amplify v4.8.1
+                  │           ├── baid64 v0.4.1
+                  │           │   ├── rgb-aluvm v0.11.1 (*)
+                  │           │   ├── rgb-api v0.11.1 (*)
+                  │           │   ├── rgb-ascii-armor v1.0.4 (*)
+                  │           │   ├── rgb-consensus v0.11.1 (*)
+                  │           │   ├── rgb-invoicing v0.11.1 (*)
+                  │           │   ├── rgb-ops v0.11.1 (*)
+                  │           │   └── rgb-strict-types v1.0.4 (*)
+                  │           ├── nonasync v0.1.3
+                  │           │   ├── rgb-api v0.11.1 (*)
+                  │           │   └── rgb-ops v0.11.1 (*)
+                  │           ├── rgb-aluvm v0.11.1 (*)
+                  │           ├── rgb-api v0.11.1 (*)
+                  │           ├── rgb-ascii-armor v1.0.4 (*)
+                  │           ├── rgb-consensus v0.11.1 (*)
+                  │           ├── rgb-invoicing v0.11.1 (*)
+                  │           ├── rgb-ops v0.11.1 (*)
+                  │           ├── rgb-psbt-utils v0.11.1 (*)
+                  │           ├── rgb-schemas v0.11.1 (*)
+                  │           ├── rgb-strict-encoding v1.0.4
+                  │           │   ├── rgb-aluvm v0.11.1 (*)
+                  │           │   ├── rgb-ascii-armor v1.0.4 (*)
+                  │           │   ├── rgb-consensus v0.11.1 (*)
+                  │           │   ├── rgb-invoicing v0.11.1 (*)
+                  │           │   ├── rgb-ops v0.11.1 (*)
+                  │           │   ├── rgb-psbt-utils v0.11.1 (*)
+                  │           │   ├── rgb-strict-types v1.0.4 (*)
+                  │           │   └── rgb011-check v0.1.0 (*)
+                  │           ├── rgb-strict-types v1.0.4 (*)
+                  │           └── rgb011-check v0.1.0 (*)
+                  └── rand_chacha v0.9.0
+                      └── rand v0.9.5
+                          ├── rgb-consensus v0.11.1 (*)
+                          ├── rgb-ops v0.11.1 (*)
+                          └── secp256k1 v0.33.1
+                              └── rgb-consensus v0.11.1 (*)
+    ├ syn v3.0.6
+      ├── ref-cast-impl v1.0.27
+      │   └── ref-cast v1.0.27
+      │       └── fluent-uri v0.3.2
+      │           └── rgb-invoicing v0.11.1
+      │               └── rgb-ops v0.11.1
+      │                   ├── rgb-api v0.11.1
+      │                   │   └── rgb011-check v0.1.0
+      │                   ├── rgb-psbt-utils v0.11.1
+      │                   │   ├── rgb-api v0.11.1 (*)
+      │                   │   └── rgb011-check v0.1.0 (*)
+      │                   ├── rgb-schemas v0.11.1
+      │                   │   └── rgb011-check v0.1.0 (*)
+      │                   └── rgb011-check v0.1.0 (*)
+      ├── serde_derive v1.0.229
+      │   ├── petgraph v0.8.3
+      │   │   └── daggy v0.9.0
+      │   │       └── rgb-consensus v0.11.1
+      │   │           ├── rgb-invoicing v0.11.1 (*)
+      │   │           ├── rgb-ops v0.11.1 (*)
+      │   │           └── rgb011-check v0.1.0 (*)
+      │   └── serde v1.0.229
+      │       ├── bitcoin v0.32.102
+      │       │   ├── rgb-consensus v0.11.1 (*)
+      │       │   └── rgb-strict-encoding v1.0.4
+      │       │       ├── rgb-aluvm v0.11.1
+      │       │       │   ├── rgb-consensus v0.11.1 (*)
+      │       │       │   ├── rgb-ops v0.11.1 (*)
+      │       │       │   └── rgb-schemas v0.11.1 (*)
+      │       │       ├── rgb-ascii-armor v1.0.4
+      │       │       │   ├── rgb-aluvm v0.11.1 (*)
+      │       │       │   ├── rgb-ops v0.11.1 (*)
+      │       │       │   └── rgb-strict-types v1.0.4
+      │       │       │       ├── rgb-aluvm v0.11.1 (*)
+      │       │       │       ├── rgb-api v0.11.1 (*)
+      │       │       │       ├── rgb-consensus v0.11.1 (*)
+      │       │       │       ├── rgb-invoicing v0.11.1 (*)
+      │       │       │       ├── rgb-ops v0.11.1 (*)
+      │       │       │       ├── rgb-schemas v0.11.1 (*)
+      │       │       │       └── rgb011-check v0.1.0 (*)
+      │       │       ├── rgb-consensus v0.11.1 (*)
+      │       │       ├── rgb-invoicing v0.11.1 (*)
+      │       │       ├── rgb-ops v0.11.1 (*)
+      │       │       ├── rgb-psbt-utils v0.11.1 (*)
+      │       │       ├── rgb-strict-types v1.0.4 (*)
+      │       │       └── rgb011-check v0.1.0 (*)
+      │       ├── bitcoin-units v0.1.101
+      │       │   └── bitcoin v0.32.102 (*)
+      │       ├── bitcoin_hashes v0.14.101
+      │       │   ├── base58ck v0.1.101
+      │       │   │   └── bitcoin v0.32.102 (*)
+      │       │   ├── bitcoin v0.32.102 (*)
+      │       │   ├── o2a-demo-core v0.1.0
+      │       │   │   └── rgb011-check v0.1.0 (*)
+      │       │   └── secp256k1 v0.29.1
+      │       │       ├── bitcoin v0.32.102 (*)
+      │       │       └── o2a-demo-core v0.1.0 (*)
+      │       ├── daggy v0.9.0 (*)
+      │       ├── petgraph v0.8.3 (*)
+      │       ├── rgb-psbt-utils v0.11.1 (*)
+      │       ├── secp256k1 v0.29.1 (*)
+      │       └── serde_json v1.0.140
+      │           └── rgb011-check v0.1.0 (*)
+      └── wasm-bindgen-macro-support v0.2.129
+          └── wasm-bindgen-macro v0.2.129
+              └── wasm-bindgen v0.2.129
+                  ├── amplify v4.8.1
+                  │   ├── baid64 v0.4.1
+                  │   │   ├── rgb-aluvm v0.11.1 (*)
+                  │   │   ├── rgb-api v0.11.1 (*)
+                  │   │   ├── rgb-ascii-armor v1.0.4 (*)
+                  │   │   ├── rgb-consensus v0.11.1 (*)
+                  │   │   ├── rgb-invoicing v0.11.1 (*)
+                  │   │   ├── rgb-ops v0.11.1 (*)
+                  │   │   └── rgb-strict-types v1.0.4 (*)
+                  │   ├── nonasync v0.1.3
+                  │   │   ├── rgb-api v0.11.1 (*)
+                  │   │   └── rgb-ops v0.11.1 (*)
+                  │   ├── rgb-aluvm v0.11.1 (*)
+                  │   ├── rgb-api v0.11.1 (*)
+                  │   ├── rgb-ascii-armor v1.0.4 (*)
+                  │   ├── rgb-consensus v0.11.1 (*)
+                  │   ├── rgb-invoicing v0.11.1 (*)
+                  │   ├── rgb-ops v0.11.1 (*)
+                  │   ├── rgb-psbt-utils v0.11.1 (*)
+                  │   ├── rgb-schemas v0.11.1 (*)
+                  │   ├── rgb-strict-encoding v1.0.4 (*)
+                  │   ├── rgb-strict-types v1.0.4 (*)
+                  │   └── rgb011-check v0.1.0 (*)
+                  ├── amplify_apfloat v0.3.1
+                  │   └── amplify v4.8.1 (*)
+                  ├── amplify_num v0.5.4
+                  │   ├── amplify v4.8.1 (*)
+                  │   └── amplify_apfloat v0.3.1 (*)
+                  ├── chrono v0.4.45
+                  │   ├── rgb-api v0.11.1 (*)
+                  │   ├── rgb-consensus v0.11.1 (*)
+                  │   └── rgb-ops v0.11.1 (*)
+                  ├── getrandom v0.2.17
+                  │   ├── rand_core v0.6.4
+                  │   │   ├── rand v0.8.8
+                  │   │   │   └── amplify v4.8.1 (*)
+                  │   │   └── rand_chacha v0.3.1
+                  │   │       └── rand v0.8.8 (*)
+                  │   └── rgb-consensus v0.11.1 (*)
+                  ├── getrandom v0.3.4
+                  │   ├── rand_core v0.9.5
+                  │   │   ├── rand v0.9.5
+                  │   │   │   ├── rgb-consensus v0.11.1 (*)
+                  │   │   │   ├── rgb-ops v0.11.1 (*)
+                  │   │   │   └── secp256k1 v0.33.1
+                  │   │   │       └── rgb-consensus v0.11.1 (*)
+                  │   │   └── rand_chacha v0.9.0
+                  │   │       └── rand v0.9.5 (*)
+                  │   ├── rgb-api v0.11.1 (*)
+                  │   ├── rgb-consensus v0.11.1 (*)
+                  │   ├── rgb-ops v0.11.1 (*)
+                  │   └── rgb-psbt-utils v0.11.1 (*)
+                  ├── iana-time-zone v0.1.65
+                  │   └── chrono v0.4.45 (*)
+                  ├── js-sys v0.3.106
+                  │   ├── chrono v0.4.45 (*)
+                  │   ├── getrandom v0.2.17 (*)
+                  │   ├── getrandom v0.3.4 (*)
+                  │   └── iana-time-zone v0.1.65 (*)
+                  ├── rgb-aluvm v0.11.1 (*)
+                  ├── rgb-api v0.11.1 (*)
+                  ├── rgb-consensus v0.11.1 (*)
+                  ├── rgb-ops v0.11.1 (*)
+                  ├── rgb-psbt-utils v0.11.1 (*)
+                  ├── rgb-strict-encoding v1.0.4 (*)
+                  └── rgb-strict-types v1.0.4 (*)
+
+advisories ok, bans ok, sources ok
+EXIT:0

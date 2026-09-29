@@ -1,0 +1,11 @@
+# sha256 of the published .crate files in the local cargo cache.
+# Each value matches the checksum field in spikes/rgb-0.11.1/Cargo.lock.
+rgb-consensus 0.11.1 cecb9e63175ae5f75b53724c8fbdea261d5903086a121fe722fbd8af3b3b1af3
+rgb-ops 0.11.1 60f23b8116d672ea7e455de1cb340cea243ff40b319c4b3c3622efe88f46ecff
+rgb-schemas 0.11.1 3d46b2d581f785bb8f69760df64d2d0bbdcc78839817560ff4e73aed5f9e1cb6
+rgb-api 0.11.1 aad6e1bf00a974bd19e3e9102fe0c185ac8eda9ef550378c1a3585245c2e0006
+rgb-psbt-utils 0.11.1 b1c22ce8b1f6e125c5125a16f136c93450ceb0830e9048a43dad336c1b588120
+rgb-aluvm 0.11.1 4b371aad57bb172879ef661d1cc102dadca47ff703def8d916b31ca772180960
+rgb-strict-encoding 1.0.4 784229a9cf3ed198e59cbd44bc5a3c772619e5f2a864eea3ec13524ec4eb1616
+rgb-strict-types 1.0.4 7cb1f717f2235eedfb147cfd5a47ccdb6660168e38f1acf2afcb199d19104e2f
+bitcoin 0.32.102 bb0ce8bd5baaa0d303a19915a6d93afed161f528654e42da2a7a97d05c59499a

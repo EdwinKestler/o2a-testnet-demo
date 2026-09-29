@@ -1,4 +1,5 @@
 /target/
+/spikes/rgb-0.11.1/target/
 /.env
 /dev/.env
 /.cargo/

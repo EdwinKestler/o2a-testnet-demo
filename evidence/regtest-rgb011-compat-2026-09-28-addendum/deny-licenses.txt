@@ -1,0 +1,69 @@
+$ cargo deny check licenses
+error[rejected]: failed to satisfy license requirements
+   ┌─ /home/kestl/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/hex_lit-0.1.1/Cargo.toml:22:12
+   │
+22 │ license = "MITNFA"
+   │            ━━━━━━
+   │            │
+   │            rejected: license is not explicitly allowed
+   │
+   ├ MITNFA - MIT +no-false-attribs license:
+   ├   - No additional metadata available for license
+   ├ hex_lit v0.1.1
+     └── bitcoin v0.32.102
+         ├── rgb-consensus v0.11.1
+         │   ├── rgb-invoicing v0.11.1
+         │   │   └── rgb-ops v0.11.1
+         │   │       ├── rgb-api v0.11.1
+         │   │       │   └── rgb011-check v0.1.0
+         │   │       ├── rgb-psbt-utils v0.11.1
+         │   │       │   ├── rgb-api v0.11.1 (*)
+         │   │       │   └── rgb011-check v0.1.0 (*)
+         │   │       ├── rgb-schemas v0.11.1
+         │   │       │   └── rgb011-check v0.1.0 (*)
+         │   │       └── rgb011-check v0.1.0 (*)
+         │   ├── rgb-ops v0.11.1 (*)
+         │   └── rgb011-check v0.1.0 (*)
+         └── rgb-strict-encoding v1.0.4
+             ├── rgb-aluvm v0.11.1
+             │   ├── rgb-consensus v0.11.1 (*)
+             │   ├── rgb-ops v0.11.1 (*)
+             │   └── rgb-schemas v0.11.1 (*)
+             ├── rgb-ascii-armor v1.0.4
+             │   ├── rgb-aluvm v0.11.1 (*)
+             │   ├── rgb-ops v0.11.1 (*)
+             │   └── rgb-strict-types v1.0.4
+             │       ├── rgb-aluvm v0.11.1 (*)
+             │       ├── rgb-api v0.11.1 (*)
+             │       ├── rgb-consensus v0.11.1 (*)
+             │       ├── rgb-invoicing v0.11.1 (*)
+             │       ├── rgb-ops v0.11.1 (*)
+             │       ├── rgb-schemas v0.11.1 (*)
+             │       └── rgb011-check v0.1.0 (*)
+             ├── rgb-consensus v0.11.1 (*)
+             ├── rgb-invoicing v0.11.1 (*)
+             ├── rgb-ops v0.11.1 (*)
+             ├── rgb-psbt-utils v0.11.1 (*)
+             ├── rgb-strict-types v1.0.4 (*)
+             └── rgb011-check v0.1.0 (*)
+
+warning[license-not-encountered]: license was not encountered
+   ┌─ /media/kestl/andor/ffwd/wt-rgb011-spike/spikes/rgb-0.11.1/deny.toml:12:6
+   │
+12 │     "BSD-3-Clause",
+   │      ━━━━━━━━━━━━ unmatched license allowance
+
+warning[license-not-encountered]: license was not encountered
+   ┌─ /media/kestl/andor/ffwd/wt-rgb011-spike/spikes/rgb-0.11.1/deny.toml:14:6
+   │
+14 │     "CDLA-Permissive-2.0",
+   │      ━━━━━━━━━━━━━━━━━━━ unmatched license allowance
+
+warning[license-not-encountered]: license was not encountered
+   ┌─ /media/kestl/andor/ffwd/wt-rgb011-spike/spikes/rgb-0.11.1/deny.toml:15:6
+   │
+15 │     "ISC",
+   │      ━━━ unmatched license allowance
+
+licenses FAILED
+EXIT:4

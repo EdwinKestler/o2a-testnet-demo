@@ -1,0 +1,15 @@
+=== audit ===
+    Fetching advisory database from `https://github.com/RustSec/advisory-db.git`
+      Loaded 1273 security advisories (from /home/kestl/.cargo/advisory-db)
+    Updating crates.io index
+    Scanning Cargo.lock for vulnerabilities (139 crate dependencies)
+AUDIT_EXIT:0
+=== deny ===
+error[deprecated]: this key has been removed, see https://github.com/EmbarkStudios/cargo-deny/pull/611 for migration information
+  ┌─ /media/kestl/andor/ffwd/wt-rgb011-spike/spikes/rgb-0.11.1/deny.toml:6:1
+  │
+6 │ vulnerability = "deny"
+  │ ━━━━━━━━━━━━━
+
+2026-09-29 00:52:32 [ERROR] failed to validate configuration file /media/kestl/andor/ffwd/wt-rgb011-spike/spikes/rgb-0.11.1/deny.toml
+DENY_EXIT:1
