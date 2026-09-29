@@ -2,7 +2,7 @@
 
 **Versión:** plan actual, con ADR-0008, ADR-0009, ADR-0010 y el ensayo 3
 **Audiencia de este documento:** equipo comercial
-**Estado del proyecto:** demostración. No es un lanzamiento. No es producto. Mainnet está fuera de alcance.
+**Estado del proyecto:** demostración. No es un lanzamiento. No es producto. La red del evento requiere autorización explícita del maintainer (pendiente). Signet es la red de ensayo.
 
 La red del evento en vivo espera una decisión: `[red del evento: autorización explícita del maintainer]`. Signet es la red del ensayo. Este texto no fija la red del evento.
 
@@ -31,7 +31,10 @@ En el escenario entra esto:
 
 El sello se financia al menos 48 horas antes. En el ensayo 3, las 6 confirmaciones tardaron 38 minutos y 35 segundos. Por eso la espera ocurre antes de que entre el público. Con el sello ya profundo, la firma, las dos comprobaciones, el nombre y la restauración cupieron en menos de 2 segundos de reloj de programa.
 
-Lo que el público también debe oír, en voz alta, antes de crear la identidad: es de prueba y se descarta.
+Lo que el público también debe oír, en voz alta, antes de crear la identidad, depende de la red que el maintainer autorice:
+
+- Si el evento es en signet: "Esta identidad es de prueba y se descarta."
+- Si el evento es en mainnet (solo con autorización): "Esta identidad es permanente y pertenece al artista. Su respaldo queda en dos lugares, uno en manos del artista."
 
 ---
 
@@ -46,7 +49,8 @@ Lo que el público también debe oír, en voz alta, antes de crear la identidad:
 | Raíz | La llave que firma la génesis. Después no opera la identidad. |
 | Controlador | La llave que firma el nombre oficial. |
 | Recuperación | 2 de 3, después de una demora. No se ejecuta en el escenario. |
-| Signet | La red del ensayo. Las monedas de prueba no tienen valor. |
+| Signet | La red del ensayo. Si el evento es en signet, las monedas no tienen valor. |
+| Red del evento | Pendiente. Si el evento es en mainnet, solo con autorización explícita del maintainer. |
 | RGB | El carrier de las transiciones futuras, cuando el programa sea final. Hoy el escenario usa la génesis. |
 
 ---
@@ -69,7 +73,10 @@ D7 queda como ninguno hasta que alguien lo cambie. Sigue siendo una decisión ab
 
 La red del evento es la decisión de la primera línea de este documento. Signet queda como red de ensayo.
 
-Regla que no se negocia: antes de crear cualquier identidad se le dice al participante que es de prueba y se va a descartar. Esto se dice en voz alta.
+Regla que no se negocia: antes de crear la identidad se dice en voz alta la frase de la red decidida.
+
+- Si el evento es en signet: "Esta identidad es de prueba y se descarta."
+- Si el evento es en mainnet (solo con autorización): "Esta identidad es permanente y pertenece al artista. Su respaldo queda en dos lugares, uno en manos del artista."
 
 ---
 
@@ -135,7 +142,7 @@ El sello ya está financiado y tiene 6 confirmaciones antes de que se abra la pu
 | Acto 1 | El dispositivo falla antes de firmar | Se detiene. No se inventa otra identidad en el escenario. | "No inventamos una segunda identidad aquí." |
 | Acto 1 | El dispositivo falla después de firmar | Se muestra el EntityID solo si el archivo firmado ya salió del dispositivo. | "Mostramos el identificador del archivo firmado, o esperamos." |
 | Acto 2 | Los dos verificadores no coinciden | Se dejan las dos líneas en pantalla. | "Las dos comprobaciones no coinciden. No lo llamamos final." |
-| Acto 2 | Cae la red de la sala | La firma ya está en el archivo. Los verificadores comprueban cuando ven un backend de signet. | "La firma está en el archivo. La comprobación pública sigue cuando vemos la cadena." |
+| Acto 2 | Cae la red de la sala | La firma ya está en el archivo. Si el evento es en signet, los verificadores comprueban cuando ven un backend de signet. Si el evento es en mainnet (solo con autorización), comprueban cuando ven un backend de mainnet. | "La firma está en el archivo. La comprobación pública sigue cuando vemos la cadena." |
 | Acto 3 | Falla la restauración | Se conservan las dos copias y se le dice al artista antes de que se vaya. | "Conservamos las dos copias." |
 
 ---
@@ -149,11 +156,15 @@ El sello ya está financiado y tiene 6 confirmaciones antes de que se abra la pu
 - **Una sola declaración comprobable.** El público se lleva el EntityID y el nombre firmado. Un segundo actor no forma parte del plan fijo.
 - **Portabilidad.** El paquete se comprueba en otra máquina. Esa comprobación no pide permiso a un servidor nuestro.
 
+Lo que se dice de la identidad depende de la red:
+
+- Si el evento es en signet: no es la identidad definitiva del artista. "Esta identidad es de prueba y se descarta."
+- Si el evento es en mainnet (solo con autorización): "Esta identidad es permanente y pertenece al artista. Su respaldo queda en dos lugares, uno en manos del artista."
+
 Lo que el equipo comercial no promete con este guion:
 
 - Una fecha de producción.
 - Integración con la venta de boletos.
-- Que la identidad de la demo sea la identidad definitiva del artista.
 - Una rotación en vivo, una atestación en vivo, o una red de evento ya elegida.
 
 ---
@@ -163,7 +174,7 @@ Lo que el equipo comercial no promete con este guion:
 | Pregunta | Respuesta corta |
 | --- | --- |
 | ¿Esto es cripto o tokens? | No hay token. Bitcoin fija el sello del EntityID y el orden de esa salida. |
-| ¿Cuánto cuesta cada firma? | El nombre oficial no cuesta una transacción de Bitcoin. Es un objeto firmado. El sello se paga antes, con al menos 48 horas y 6 confirmaciones. En el ensayo las monedas son de signet y no tienen valor. |
+| ¿Cuánto cuesta cada firma? | El nombre oficial no cuesta una transacción de Bitcoin. Es un objeto firmado. El sello se paga antes, con al menos 48 horas y 6 confirmaciones. Si el evento es en signet, las monedas no tienen valor. Si el evento es en mainnet (solo con autorización), el sello es un pago de Bitcoin ya confirmado. |
 | ¿Por qué RGB? | RGB es el carrier de las transiciones, cuando el programa sea final. Hoy el escenario firma la génesis y un claim. El claim no paga una transacción. El sello de Bitcoin es el ancla del EntityID. |
 | ¿Y si el artista pierde la llave? | La recuperación es 2 de 3, con demora. La oferta por defecto es 1008 bloques. Hacen falta dos de las tres llaves de recuperación. Cualquiera de esas dos puede actuar solo después de la demora. La recuperación no se hace en el escenario. |
 | ¿Por qué no una base de datos nuestra? | Porque entonces hay que confiar en nosotros. Las dos laptops leen el mismo paquete. |
@@ -178,9 +189,9 @@ Lo que el equipo comercial no promete con este guion:
 - [ ] Ninguna entrada de esa transacción señala reemplazo.
 - [ ] Hay dos laptops de verificación. Lo ideal es que usen backends de Bitcoin distintos.
 - [ ] Hay dos copias de respaldo: una para el artista y una para el operador de respaldo.
-- [ ] El participante oyó que la identidad es de prueba y se descarta.
+- [ ] El participante oyó la frase que corresponde a la red decidida.
 - [ ] La semilla no está en la laptop del operador ni en las laptops de los verificadores.
-- [ ] La red del ensayo es signet. La red del evento sigue abierta en la decisión de la primera sección.
+- [ ] La red del ensayo es signet. Si el evento es en signet, se usa esa red. Si el evento es en mainnet, hace falta la autorización explícita del maintainer. Esa autorización sigue pendiente.
 
 ---
 

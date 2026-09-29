@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Public material for the disposable O2A demonstration. Signet is the rehearsal network.">
+  <meta name="description" content="Public material for the O2A demonstration. Signet is the rehearsal network. The event network is still pending.">
   <title>O2A — demonstration on Bitcoin signet</title>
   <link rel="stylesheet" href="../assets/style.css">
 </head>
@@ -14,16 +14,16 @@
       <span class="brand">O2A / DEMO</span>
       <span class="language"><a href="../" lang="es">ES</a><span aria-current="page">EN</span></span>
     </nav>
-    <p class="eyebrow">Disposable demonstration · rehearsal network</p>
+    <p class="eyebrow">Demonstration · rehearsal network</p>
     <h1>O2A — demonstration on Bitcoin signet</h1>
     <p class="lede">The first O2A EntityID is minted live. Its seal is already funded and has 6 confirmations. On stage the artist signs the genesis, the EntityID appears immediately, two verifiers report CURRENT, the artist signs the official name, and the package is restored from backup.</p>
     <p class="section-intro">Signet is the rehearsal network. The network of a public event remains a maintainer decision.</p>
     <div class="claim-grid" aria-label="What we are not claiming">
-      <div class="claim"><strong>It is not in production.</strong> This demonstration is not a release, and mainnet is out of scope.</div>
-      <div class="claim"><strong>It creates no persistent identity.</strong> Today's identities are tests and will be discarded.</div>
+      <div class="claim"><strong>It is not in production.</strong> This demonstration is not a release. The event network needs the maintainer's explicit authorization and is still pending. Signet is the rehearsal network.</div>
+      <div class="claim"><strong>Rehearsal identities (signet) are tests and are discarded.</strong></div>
       <div class="claim"><strong>It does not replace ticketing.</strong> It makes no claim to replace today's ticket-sales systems.</div>
     </div>
-    <p class="warning">Every identity created by this demonstration is disposable. Before creation, every participant is given this warning and must explicitly acknowledge it.</p>
+    <p class="warning">Before a rehearsal identity is created, the participant hears that it is a test and will be discarded. At an event, they hear the sentence that matches the network the maintainer authorizes.</p>
   </header>
 
   <main id="content">
@@ -144,7 +144,7 @@ spikes/rgb-0.11.1/target/debug/rgb011-check signet-verify</code></pre>
       <h2 id="questions">Questions</h2>
       <div class="questions">
         <article class="question"><h3>Is this crypto or tokens?</h3><p>There is no O2A token. Bitcoin anchors the EntityID seal and the order of that output.</p></article>
-        <article class="question"><h3>What does each signature cost?</h3><p>The official name is a signed object and costs no Bitcoin transaction. The seal is funded ahead of the show. Signet coins have no value. Mainnet is out of scope.</p></article>
+        <article class="question"><h3>What does each signature cost?</h3><p>The official name is a signed object and costs no Bitcoin transaction. The seal is funded ahead of the show. If the event is on signet, the coins have no value. If the event is on mainnet, that happens only with the maintainer's explicit authorization.</p></article>
         <article class="question"><h3>Why RGB?</h3><p>RGB carries later transitions once the program is final. The stage claim pays no Bitcoin transaction. The Bitcoin seal is the EntityID's anchor.</p></article>
         <article class="question"><h3>What if the artist loses their key?</h3><p>Recovery is 2 of 3, with a delay. The default offer is 1008 blocks. Any two of the three recovery keys can act after that delay. Recovery is not performed on stage.</p></article>
         <article class="question"><h3>Why not use our database?</h3><p>The two laptops read the same package without querying an O2A service.</p></article>
