@@ -25,13 +25,28 @@ disposable lineage evidence. The operator runbook is
 [docs/block0-runbook.md](docs/block0-runbook.md). The commercial script is
 [docs/guion-demo.md](docs/guion-demo.md).
 
-Regtest is the development and evidence network. Signet is the rehearsal
-network. The network for a later public event is a maintainer decision.
-This repository does not perform a mainnet mint. Mainnet is out of scope.
+Regtest is the development network. Signet is the rehearsal network.
+Signet identities are disposable. The mainnet block-0 identity is permanent.
+
+`O2A_NETWORK` selects one profile: `regtest` (the default), `signet`, or
+`mainnet`. That profile supplies the network byte, coin type, address
+prefix, RGB chain, backend endpoints, and confirmation depth. The stage
+commands are `plan`, `genesis --seal TXID:VOUT`, `claim`, and `verify`.
+The same names run on every profile. On mainnet, `plan`, `genesis`, and
+`claim` need `--authorize-mainnet` and the typed word `mainnet` before
+any key is derived. `verify` does not ask for the session lock and leaves
+the seed unset. A mainnet `plan` requires a seed file. It does not print
+an address from the published unsafe seed. On regtest or signet, that
+preview runs only when `O2A_DEMO_UNSAFE_PREVIEW=1`, and the command
+prints its banner. Transitions are refused. When mainnet endpoints are
+configured, transport is read-only. This repository refuses every
+mainnet broadcast, including from an authorized session. The operator's
+wallet funds the seal. No mainnet identity network is running.
 
 Read [DEMO-GATE.md](DEMO-GATE.md) before running or changing the demo.
-Every identity created here is disposable and permanently unsuitable for
-mainnet or production use.
+Regtest and signet identities created here are disposable. The offline
+mainnet dry run is a test vector inside the harness. It is not the
+block-0 identity, and it does not call mainnet `plan`.
 
 ## Isolated development environment
 
