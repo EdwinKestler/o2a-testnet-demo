@@ -2,7 +2,7 @@
 
 This is the operator runbook for the first O2A EntityID minted live with an artist.
 
-The rehearsal network is the public Bitcoin signet. A rehearsal identity is disposable. The network for a later public event waits for the maintainer's explicit authorization. This document does not mint on mainnet. It contains no mainnet key, address, or transaction.
+The rehearsal network is the public Bitcoin signet. A rehearsal identity is disposable. The block-0 profile is Bitcoin mainnet, and that identity is permanent. `plan`, `genesis --seal TXID:VOUT`, `claim`, and `verify` are the same commands on both networks. The active profile selects the network byte, the coin type, the address prefix, and the confirmation depth. This rehearsal checklist uses the signet profile. It contains no mainnet key, address, or transaction. No mainnet identity network is running.
 
 The show follows ADR-0008 for the EntityID, ADR-0009 for the state id and the `official_name` claim, and ADR-0010 for rgb-protocol 0.11.1 with Opret. The adapter is [rgb-0.11.1-adapter.md](rgb-0.11.1-adapter.md).
 
@@ -26,7 +26,7 @@ Every O2A command in this runbook is the 0.11.1 binary built by rehearsal 3:
 cargo build --manifest-path spikes/rgb-0.11.1/Cargo.toml --locked --bin rgb011-check
 ```
 
-The binary is `spikes/rgb-0.11.1/target/debug/rgb011-check`. The commands used here are `plan`, `signet-genesis`, `signet-claim`, and `signet-verify`.
+The binary is `spikes/rgb-0.11.1/target/debug/rgb011-check`. The commands are `plan`, `genesis --seal TXID:VOUT`, `claim`, and `verify`. `signet-genesis` and `signet-claim` still run. Each alias sets no network and prints a deprecation note. `signet-verify` is the same kind of alias for `verify`.
 
 The signet node command used by rehearsal 3 is Bitcoin Core inside container `signet-infra-bitcoind-1`. The base compose file leaves the wallet disabled. The rehearsal wallet comes from `dev/signet/compose.wallet.yaml` on project `signet-infra`. Set the context on the command. Do not leave the user's Docker context switched. The `desktop-linux` context does not see this container.
 
@@ -36,7 +36,7 @@ DOCKER_CONTEXT=default docker exec signet-infra-bitcoind-1 bitcoin-cli -signet -
 
 Core is published on `127.0.0.1:38332`. Electrum for this stack is `127.0.0.1:60601`. Copy the cookie from the container path `/data/signet/.cookie` to a file outside the repository, and point `BITCOIN_COOKIE` at that copy. Do not print the cookie. Do not commit it. Do not edit `dev/bitcoin.conf` or `dev/compose.yaml`.
 
-`o2a-demo-core` defaults the recovery delay to 10 blocks and the entity index to 0. The ceremony exports `O2A_DEMO_DELAY`, `O2A_DEMO_THRESHOLD`, and `O2A_DEMO_ENTITY` for both `plan` and `signet-genesis`. The seed file stays outside the repository. This rehearsal stays on signet. A mainnet session needs `O2A_NETWORK=mainnet`, `--authorize-mainnet`, and the typed word `mainnet`. That session may build genesis and the one `official_name` claim. It refuses transitions and every mainnet broadcast. Signet identities are disposable. The mainnet block-0 identity is permanent.
+`o2a-demo-core` defaults the recovery delay to 10 blocks and the entity index to 0. The ceremony exports `O2A_DEMO_DELAY`, `O2A_DEMO_THRESHOLD`, and `O2A_DEMO_ENTITY` for both `plan` and `genesis`. The seed file stays outside the repository. Set `O2A_NETWORK=signet` for a rehearsal and `O2A_NETWORK=mainnet` for block 0. On mainnet, `genesis` and `claim` also need `--authorize-mainnet` and the typed word `mainnet`. `plan` and `verify` do not ask for that word. `verify` leaves the seed unset. The session may sign genesis and the one `official_name` claim. It refuses transitions. When the operator configures mainnet endpoints, transport is read-only. The binary refuses every mainnet broadcast, including from an authorized session. The operator's wallet funds the seal on every network. Signet identities are disposable. The mainnet block-0 identity is permanent.
 
 The projector stays on the operator laptop:
 
@@ -146,14 +146,16 @@ The projector, the verifier laptops, and any photo of the room stay on the publi
 `rgb011-check plan` prints the address, the descriptor, the delay, the threshold, and the public keys. Set the same environment that genesis will use. The binary is `spikes/rgb-0.11.1/target/debug/rgb011-check`.
 
 ```text
+O2A_NETWORK=signet \
 O2A_DEMO_SEED_FILE=PATH_OUTSIDE_THE_REPO \
-O2A_DEMO_NETWORK=signet \
 O2A_DEMO_DELAY=1008 \
 O2A_DEMO_THRESHOLD=2 \
 O2A_DEMO_ENTITY=NEW_INDEX \
 RGB_CHAIN=signet \
 spikes/rgb-0.11.1/target/debug/rgb011-check plan
 ```
+
+For mainnet, set `O2A_NETWORK=mainnet` and `RGB_CHAIN=mainnet`. The command stays `plan`. `plan` prints `address`, `policy`, and `script_pubkey`. The policy line is the descriptor the operator pays.
 
 Then read that address back from Bitcoin Core. The two strings match before anyone sends money.
 
@@ -172,7 +174,7 @@ Send the seal coins in a transaction that cannot be replaced.
 
 The EntityID commits to the seal outpoint. A replace-by-fee transaction spends the same inputs and creates a new transaction id. The outpoint the artist is about to sign would no longer exist, and the EntityID on the page would not match the coins. Child-pays-for-parent adds a fee without changing that outpoint. Use that if the fee needs help later.
 
-Rehearsal 3 paid 10,000 sats from wallet `rehearsal` with `replaceable=false`. A later show uses the wallet the maintainer assigns, and a new address. The command form is the one rehearsal 3 ran:
+Rehearsal 3 paid 10,000 sats from wallet `rehearsal` with `replaceable=false`. A later show uses the wallet the operator controls, and a new address. On signet that wallet is `rehearsal`. On mainnet it is the operator's own wallet. `rgb011-check` does not build or broadcast the funding transaction. The command form rehearsal 3 ran is:
 
 ```text
 DOCKER_CONTEXT=default docker exec signet-infra-bitcoind-1 \
@@ -182,7 +184,7 @@ DOCKER_CONTEXT=default docker exec signet-infra-bitcoind-1 \
 
 `replaceable=false` asks Core not to signal replacement. Named arguments keep that flag on the replacement setting. Not signaling replacement is operator discipline. Since Bitcoin Core 28, a node may accept a replacement even when the original transaction did not signal it. The protection for the EntityID is to wait for 6 confirmations before the artist signs the genesis, and to never fee-bump that funding transaction. If the fee needs help before those 6 confirmations, use child-pays-for-parent, which keeps the same outpoint.
 
-If the funding transaction is built with `createrawtransaction`, the replaceable argument defaults to true. `fundrawtransaction` with `"replaceable": false` does not rewrite a sequence that is already on an input. Set the input sequence to `4294967294`, pass locktime `0`, and pass `false` as the fourth `createrawtransaction` argument. `rgb011-check` does that in `fund_output` when it funds a regtest output that must keep its txid.
+If the funding transaction is built with `createrawtransaction`, the replaceable argument defaults to true. `fundrawtransaction` with `"replaceable": false` does not rewrite a sequence that is already on an input. Set the input sequence to `4294967294`, pass locktime `0`, and pass `false` as the fourth `createrawtransaction` argument. The recorded regtest lineage helper `fund_output` does that for its own outputs. The stage command `genesis` does not fund a seal.
 
 Then check the transaction:
 
@@ -193,31 +195,37 @@ DOCKER_CONTEXT=default docker exec signet-infra-bitcoind-1 \
 
 Every input `sequence` is `4294967294` or `4294967295`. A smaller sequence is a replacement signal. If you see one, stop, leave the transaction unspent, and fund a new seal output that does not signal replacement. Do not run `bumpfee` on the seal transaction.
 
-`rgb011-check signet-genesis` repeats this check. When a sequence is smaller it prints `funding sequences […] are replaceable; genesis stays unsigned` and does not sign.
+`rgb011-check genesis --seal TXID:VOUT` repeats this check. When a sequence is smaller it prints `funding sequences […] are replaceable; genesis stays unsigned` and does not sign.
 
 Record `txid`, output index, amount, and the block hash once it confirms. Rehearsal 3 recorded sequence `4294967294`, output index 0, and anchor block 324124, hash `00000011ebb467178dfac1055a719a0013e14bf01b9697c86b2d3ad74001addd`.
 
 ### Wait for depth
 
-`rgb011-check signet-verify` uses depth 2, the `DEPTH` constant in `spikes/rgb-0.11.1/check/src/lineage.rs`. `signet-genesis` still refuses to sign before 6 confirmations. The stage clock uses 6. The live-event network is still a maintainer decision, and the stage still waits for 6.
+`genesis` signs when `confirmations` reaches the profile depth. Signet and regtest use 1. Mainnet uses 6. `verify` uses that same depth. The recorded regtest lineage evaluator keeps depth 2 in `spikes/rgb-0.11.1/check/src/lineage.rs`, and that constant stays on the lineage command. Since Bitcoin Core 28, a node may replace a transaction that did not signal replacement, so the operator may wait longer before running `genesis`. The tool's gate is the profile depth. Rehearsal 3 waited for 6 confirmations. That wait is a record of that rehearsal.
 
 ```text
 DOCKER_CONTEXT=default docker exec signet-infra-bitcoind-1 \
   bitcoin-cli -signet -datadir=/data getrawtransaction TXID 1
 ```
 
-Read `confirmations`. Continue when the number is at least 6. Below 6, `rgb011-check signet-genesis` prints `depth N; genesis stays unsigned until 6 confirmations`.
+Read `confirmations`. Continue when the number has reached the profile depth: 1 on signet, 6 on mainnet. Below that depth, `rgb011-check genesis --seal TXID:VOUT` prints `depth N; genesis stays unsigned until D confirmations`.
 
 Signet blocks are uneven. Rehearsal 3 went from the first zero-confirmation reading at 21:32:31 to 6 confirmations at 22:11:06, which is 38 minutes 35 seconds. Plan on at least that long, and start the wait inside the T-48h window so the show is not the thing that waits. The seal is funded at least 48 hours ahead.
 
-A `signet-verify` run can print CURRENT once the seal has 2 confirmations. The stage clock still waits for 6, and `signet-genesis` will not sign before that. The operator does not put the EntityID on the projector as final before 6.
+`verify` reports CURRENT once the seal has reached the profile depth and the read-only checks agree. The operator puts the EntityID on the projector as final after `genesis` has signed and both verifiers report CURRENT.
 
 ### Pre-flight, by T-2h
 
 Each line is a yes before the audience comes in.
 
 - The O2A signet node and its electrs agree on a height, and that height is the public signet tip or the operator can explain the gap. Rehearsal 3 saw the local tip, electrs, and blockstream.info all at 324129 when genesis was signed.
-- The seal transaction has at least 6 confirmations.
+- The verifier's read-only mainnet access works against our own node. Read one known transaction and stop. The genesis coinbase is that known transaction. This read does not broadcast.
+
+```text
+bitcoin-cli -datadir=OUR_MAINNET_DATADIR getrawtransaction 4a5e1e4baab89f3a32518a88c31bc87f618f76673e2cc77ab2127b7afdeda33b 1
+```
+
+- The seal transaction has reached the profile depth. On signet that is 1 confirmation. On mainnet that is 6.
 - No seal input signals replacement. Every sequence is `4294967294` or `4294967295`.
 - Core `deriveaddresses` matches the seal address in the public plan.
 - `O2A_DEMO_DELAY` matches the delay that was funded. A mismatch is a different address.
@@ -236,20 +244,20 @@ The funding wait is already finished. In rehearsal 3 the signing script reached 
 
 | Clock | Who | Action |
 | --- | --- | --- |
-| 0:00 | Artist | On the offline device, confirm the outpoint and the public policy. Sign the genesis with `rgb011-check signet-genesis`. |
+| 0:00 | Artist | On the offline device, confirm the outpoint and the public policy. Sign the genesis with `rgb011-check genesis --seal TXID:VOUT`. On mainnet, add `--authorize-mainnet` and type `mainnet`. |
 | 0:45 | Operator | Read the EntityID from the signed genesis. It is the tagged hash of the payload, with `signer_entity` all zeros. |
 | 1:00 | Operator | Build the projector page with `docs/block0-screen.py`. |
-| 1:30 | Verifier A | On laptop A, run `rgb011-check signet-verify` with the seed unset. Say the state aloud. |
+| 1:30 | Verifier A | On laptop A, run `rgb011-check verify` with the seed unset. Say the state aloud. |
 | 2:30 | Verifier B | On laptop B, run the same check. Ideally this laptop uses a different Bitcoin backend. |
-| 3:15 | Artist | Sign the `official_name` claim with `rgb011-check signet-claim`. |
+| 3:15 | Artist | Sign the `official_name` claim with `rgb011-check claim`. On mainnet, add `--authorize-mainnet` and type `mainnet`. |
 | 4:00 | Verifier A | Show the claim on laptop A. The operator copies that public line to the projector. |
 | 4:30 | Operator | Stop. Take no more signatures. |
 
 Genesis, with the seed file set and the evidence directory outside any published site:
 
 ```text
+O2A_NETWORK=signet \
 O2A_DEMO_SEED_FILE=PATH_OUTSIDE_THE_REPO \
-O2A_DEMO_NETWORK=signet \
 O2A_DEMO_DELAY=1008 \
 O2A_DEMO_THRESHOLD=2 \
 O2A_DEMO_ENTITY=NEW_INDEX \
@@ -258,32 +266,39 @@ BITCOIN_RPC=http://127.0.0.1:38332 \
 BITCOIN_COOKIE=PATH_TO_COPIED_COOKIE \
 BITCOIN_WALLET=rehearsal \
 ELECTRUM=127.0.0.1:60601 \
-SEAL_OUTPOINT=TXID:VOUT \
 RGB011_EVIDENCE=EVIDENCE_DIR \
-spikes/rgb-0.11.1/target/debug/rgb011-check signet-genesis
+spikes/rgb-0.11.1/target/debug/rgb011-check genesis --seal TXID:VOUT
 ```
+
+For mainnet, set `O2A_NETWORK=mainnet` and `RGB_CHAIN=mainnet`, point `BITCOIN_RPC` and `ELECTRUM` at our own read-only node, and run `genesis --seal TXID:VOUT --authorize-mainnet`. The operator types `mainnet` after the banner. The command name stays `genesis`.
 
 The claim uses the same evidence directory. It writes `claim.o2a`. It spends no Bitcoin output.
 
 ```text
+O2A_NETWORK=signet \
 O2A_DEMO_SEED_FILE=PATH_OUTSIDE_THE_REPO \
-O2A_DEMO_NETWORK=signet \
 O2A_REHEARSAL_NAME="Rehearsal Name" \
+RGB_CHAIN=signet \
 RGB011_EVIDENCE=EVIDENCE_DIR \
-spikes/rgb-0.11.1/target/debug/rgb011-check signet-claim
+spikes/rgb-0.11.1/target/debug/rgb011-check claim
 ```
 
-Each verifier gets a directory with `genesis.o2a`, `genesis.strict`, `public.txt`, and, after the claim, `claim.o2a`. The seed variables stay unset:
+On mainnet the claim command is `claim --authorize-mainnet`, and the operator types `mainnet`.
+
+Each verifier gets a directory with `genesis.o2a`, `genesis.strict`, `public.txt`, and, after the claim, `claim.o2a`. The seed variables stay unset. `verify` does not ask for the session lock.
 
 ```text
 env -u O2A_DEMO_SEED_FILE -u O2A_DEMO_ENTITY \
+O2A_NETWORK=signet \
 RGB_CHAIN=signet \
 BITCOIN_RPC=http://127.0.0.1:38332 \
 BITCOIN_COOKIE=PATH_TO_COPIED_COOKIE \
 ELECTRUM=127.0.0.1:60601 \
 RGB011_EVIDENCE=VERIFIER_DIR \
-spikes/rgb-0.11.1/target/debug/rgb011-check signet-verify
+spikes/rgb-0.11.1/target/debug/rgb011-check verify
 ```
+
+For a mainnet verifier, set `O2A_NETWORK=mainnet` and `RGB_CHAIN=mainnet`, and point the RPC and Electrum values at the same read-only node that passed the known-transaction pre-flight. The command stays `verify`.
 
 Projector commands, on the operator laptop. The name is the public display name for that rehearsal. Rehearsal 3 used `Rehearsal Name`. Do not put a person's legal name on this page unless the artist has asked for that spelling in the public plan.
 
@@ -341,10 +356,10 @@ The package is:
 
 Copy 1 stays with the artist, on a USB stick they take home. Copy 2 stays with the backup operator, in a place agreed before the show.
 
-On a machine that does not have the artist seed, run the same `rgb011-check signet-verify` command as the verifiers, with `O2A_DEMO_SEED_FILE` and `O2A_DEMO_ENTITY` unset:
+On a machine that does not have the artist seed, run the same `rgb011-check verify` command as the verifiers, with `O2A_DEMO_SEED_FILE` and `O2A_DEMO_ENTITY` unset:
 
 1. Copy the package into an empty folder.
-2. Run `spikes/rgb-0.11.1/target/debug/rgb011-check signet-verify` against the signet node.
+2. Run `spikes/rgb-0.11.1/target/debug/rgb011-check verify` against the profile's node.
 3. The EntityID matches the projector.
 4. The state is CURRENT.
 5. The name claim prints `name_claim=valid`.
@@ -362,11 +377,11 @@ Do not spend the seal. Do not rotate the controller. Those wait until the RGB pr
 | Artist device fails after signing | Read the EntityID from the signed file if it is on the USB. If the file never left the broken device, stop and recover that file before showing an id. | "We show the id from the signed file, or we wait." |
 | Fee is too low and the seal has no confirmation | Add a child-pays-for-parent from the show wallet. Do not replace the seal transaction. The stage waits. | "The payment is the same one. We are waiting for it to confirm." |
 | Someone starts a replacement transaction | Treat that outpoint as unused. Fund a new output that does not signal replacement. The unsigned plan is discarded. | "That payment was replaced, so it is not this identity. We will use a new one." |
-| `signet-genesis` prints `funding sequences` and `genesis stays unsigned` | Leave that output unspent. Fund a new seal whose inputs are `4294967294` or `4294967295`. | "That payment can still be replaced. We will use a new one." |
+| `genesis` prints `funding sequences` and `genesis stays unsigned` | Leave that output unspent. Fund a new seal whose inputs are `4294967294` or `4294967295`. | "That payment can still be replaced. We will use a new one." |
 | Operator shows the wrong window | Switch to the `file://` page. If the seed was visible, the artist treats that seed as public and starts a new seed ceremony later. Do not continue with a seed that was on the projector. | "That screen was wrong. We stop." |
 | A camera is pointed at the artist device | Turn that screen away. The projector may stay on the public page. | "The wall is the public screen." |
 | Verifiers disagree | Leave both results on the page. Do not hide the one that is not CURRENT. | "The two checks do not match yet. We will not call this final." |
-| The seal was funded but has fewer than 6 confirmations at door time | Keep the audience plan. Sign only if the artist and the operator agree to show the id as waiting. The page does not say CURRENT. | "The identity is signed. We still wait for confirmations before we call it final." |
+| The seal has fewer confirmations than the profile depth at door time | Keep the audience plan. Sign only if the artist and the operator agree to show the id as waiting. The page does not say CURRENT. | "The identity is signed. We still wait for confirmations before we call it final." |
 
 ## Rehearsal 3
 
@@ -398,20 +413,20 @@ Run these steps in this order, on signet, with a disposable identity. Each step 
 | Step | Done when |
 | --- | --- |
 | 1. Confirm the O2A signet node is running and electrs is at the same height. Use `bitcoin-cli -signet -datadir=/data` inside `signet-infra-bitcoind-1`, with `DOCKER_CONTEXT=default`. | Heights match, or the gap is written down. |
-| 2. Create a new entity index. Run `rgb011-check plan` with `O2A_DEMO_NETWORK=signet`, `O2A_DEMO_DELAY=1008`, `O2A_DEMO_THRESHOLD=2`, and `O2A_DEMO_ENTITY` set. | The public plan lists x-only keys and the entity index. The seed is on the artist device only. |
+| 2. Create a new entity index. Run `rgb011-check plan` with `O2A_NETWORK=signet`, `O2A_DEMO_DELAY=1008`, `O2A_DEMO_THRESHOLD=2`, and `O2A_DEMO_ENTITY` set. | The public plan lists x-only keys and the entity index. The seed is on the artist device only. |
 | 3. Choose the recovery set with the artist. Default offer: 2 of 3, the artist's two shares in different physical places, staff hold zero, delay 1008 blocks unless the artist changes it. | The public plan has threshold, delay, and recovery key ids. The same delay is in the environment. |
 | 4. Match the plan address with Core `getdescriptorinfo` and `deriveaddresses`. | The two address strings are identical. |
 | 5. Fund that address with `bitcoin-cli -signet -datadir=/data -rpcwallet=rehearsal -named sendtoaddress` and `replaceable=false`. | Every input sequence is `4294967294` or `4294967295`. |
-| 6. Wait until `confirmations` is at least 6. | The raw transaction shows 6 or more. Rehearsal 3 needed 38 minutes 35 seconds. The stage funds this at least 48 hours ahead. |
+| 6. Wait until `confirmations` reaches the profile depth. On this signet checklist that depth is 1. On mainnet it is 6. | The raw transaction shows that depth. Rehearsal 3 waited for 6, which took 38 minutes 35 seconds. The stage funds this at least 48 hours ahead. |
 | 7. Run the pre-flight list above, including two verifier laptops. | Every line is yes. |
-| 8. Sign the genesis with `rgb011-check signet-genesis`. `signer_entity` is 32 zero bytes. | A signed genesis file exists. The command did not print `genesis stays unsigned`. |
+| 8. Sign the genesis with `rgb011-check genesis --seal TXID:VOUT`. `signer_entity` is 32 zero bytes. | A signed genesis file exists. The command did not print `genesis stays unsigned`. |
 | 9. Read the EntityID the command prints. | 64 hex characters. |
 | 10. Run `python3 docs/block0-screen.py init ENTITYID "Rehearsal Name"`. | `/tmp/block0-screen/index.html` shows that id and a QR code. The browser has no other tabs. |
 | 11. Give each verifier a USB with the genesis, the consignment, and `public.txt`. | Two laptops, two people. Ideally two Bitcoin backends. |
-| 12. Each laptop runs `rgb011-check signet-verify` with the seed unset. | Both say CURRENT. Run the projector `verifier` command for A and for B with the height they used. |
-| 13. The artist signs one `official_name` claim with `rgb011-check signet-claim`. | The claim file names this EntityID and the predicate `official_name`. No new Bitcoin transaction. |
+| 12. Each laptop runs `rgb011-check verify` with the seed unset. | Both say CURRENT. Run the projector `verifier` command for A and for B with the height they used. |
+| 13. The artist signs one `official_name` claim with `rgb011-check claim`. | The claim file names this EntityID and the predicate `official_name`. No new Bitcoin transaction. |
 | 14. One verifier checks the claim. Run `python3 docs/block0-screen.py claim "Rehearsal Name"`. | The page says "Name claim signed:" and the name. The verifier prints `name_claim=valid`. |
-| 15. Copy the package to the artist USB and to the backup operator. On a machine without the seed, run `rgb011-check signet-verify` again. | The same EntityID, CURRENT, and `name_claim=valid`. Rehearsal 3 finished this restore in under 2 seconds. |
+| 15. Copy the package to the artist USB and to the backup operator. On a machine without the seed, run `rgb011-check verify` again. | The same EntityID, CURRENT, and `name_claim=valid`. Rehearsal 3 finished this restore in under 2 seconds. |
 | 16. Leave the seal unspent. | No rotation, recovery, or close follows. `gettxout` still returns the output. |
 
 Rehearsal 3 completed step 1 on 2026-09-28. At signing, the local tip, electrs, and blockstream.info were all at height 324129. A later rehearsal starts at step 1 again.

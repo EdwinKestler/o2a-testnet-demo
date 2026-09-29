@@ -74,9 +74,8 @@ impl Node {
     }
 
     pub fn call(&self, wallet: bool, method: &str, params: Value) -> Result<Value, String> {
-        if self.refuse_broadcast && crate::profile::is_broadcast_method(method) {
-            return Err("mainnet broadcast is refused".into());
-        }
+        // The allowlist is decided here, before raw() opens a socket.
+        crate::profile::mainnet_method_gate(self.refuse_broadcast, method)?;
         let response = self.raw(wallet, method, params)?;
         if let Some(err) = response.get("error").filter(|value| !value.is_null()) {
             return Err(err.to_string());
@@ -190,7 +189,8 @@ impl ElectrumResolver {
         })
     }
 
-    fn call(&mut self, method: &str, params: Value) -> Result<Value, String> {
+    pub(crate) fn call(&mut self, method: &str, params: Value) -> Result<Value, String> {
+        crate::profile::mainnet_method_gate(self.rpc.refuse_broadcast, method)?;
         let id = self.next_id;
         self.next_id += 1;
         let mut stream =

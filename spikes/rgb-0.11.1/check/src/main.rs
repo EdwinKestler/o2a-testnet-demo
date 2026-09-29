@@ -37,19 +37,34 @@ const NEXT_SATS: u64 = 100_000;
 
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
-    let (command, authorize) = match profile::split_args(&args) {
+    let parsed = match profile::split_args(&args) {
         Ok(parsed) => parsed,
         Err(err) => {
             eprintln!("setup failed: {err}");
             std::process::exit(1);
         }
     };
-    let result = match command.as_deref() {
+    let authorize = parsed.authorize;
+    let result = match parsed.command.as_deref() {
         Some("lineage") => lineage::run(authorize),
         Some("plan") => lineage::plan(authorize),
-        Some("signet-genesis") => lineage::signet_genesis(authorize),
-        Some("signet-claim") => lineage::signet_claim(authorize),
-        Some("signet-verify") => lineage::signet_verify(authorize),
+        Some("genesis") => lineage::genesis(authorize, parsed.seal.as_deref()),
+        Some("claim") => lineage::claim(authorize),
+        Some("verify") => lineage::stage_verify(authorize),
+        Some("signet-genesis") => {
+            eprintln!(
+                "note: signet-genesis is deprecated; use genesis --seal <outpoint>. This alias sets no network."
+            );
+            lineage::genesis(authorize, parsed.seal.as_deref())
+        }
+        Some("signet-claim") => {
+            eprintln!("note: signet-claim is deprecated; use claim. This alias sets no network.");
+            lineage::claim(authorize)
+        }
+        Some("signet-verify") => {
+            eprintln!("note: signet-verify is deprecated; use verify. This alias sets no network.");
+            lineage::stage_verify(authorize)
+        }
         _ => run(authorize),
     };
     if let Err(err) = result {

@@ -1,10 +1,9 @@
 //! One network profile. Every other module reads this value and does not
 //! keep a second network table.
 //!
-//! `genesis_sign_depth` stays 6 on every network. Bitcoin Core 28 can replace
-//! a transaction that did not signal replacement, so `signet-genesis` keeps
-//! the confirmation wait it already had. `required_depth` is the profile
-//! depth from the network table.
+//! Genesis signs at `required_depth`: regtest 1, signet 1, mainnet 6.
+//! Mainnet transport is an explicit read allowlist. Broadcast methods stay
+//! refused.
 
 use std::io::{self, Write};
 
@@ -54,12 +53,17 @@ impl Operation {
         }
     }
 
-    /// Local preview, genesis, and the one official-name claim.
+    /// Plan, verify, genesis, and the one official-name claim.
     pub fn allowed_on_mainnet(self) -> bool {
         matches!(
             self,
-            Operation::Plan | Operation::Genesis | Operation::OfficialName
+            Operation::Plan | Operation::Verify | Operation::Genesis | Operation::OfficialName
         )
+    }
+
+    /// Genesis and the official_name claim use keys. Plan and verify do not.
+    pub fn needs_session_lock(self) -> bool {
+        matches!(self, Operation::Genesis | Operation::OfficialName)
     }
 }
 
@@ -76,7 +80,6 @@ pub struct NetworkProfile {
     pub wallet: String,
     pub cookie_path: Option<String>,
     pub required_depth: u32,
-    pub genesis_sign_depth: u32,
     pub create_miner_wallet: bool,
     pub offline: bool,
     pub identity: &'static str,
@@ -153,7 +156,6 @@ pub fn from_kind(kind: NetworkKind) -> NetworkProfile {
         wallet: wallet.to_string(),
         cookie_path: cookie,
         required_depth,
-        genesis_sign_depth: 6,
         create_miner_wallet: create_miner,
         offline: mainnet,
         identity: if mainnet { "permanent" } else { "disposable" },
@@ -223,8 +225,8 @@ pub fn load() -> Result<NetworkProfile, String> {
         if nonempty("BITCOIN_WALLET").is_none() {
             profile.wallet.clear();
         }
-        profile.offline = true;
         profile.create_miner_wallet = false;
+        profile.offline = profile.rpc_url.is_none() || profile.electrum.is_none();
     }
     Ok(profile)
 }
@@ -235,30 +237,6 @@ pub fn require_regtest_command(profile: &NetworkProfile) -> Result<(), String> {
     }
     if profile.rgb_conflict {
         return Err("RGB_CHAIN must be regtest".into());
-    }
-    Ok(())
-}
-
-pub fn require_signet_genesis(profile: &NetworkProfile) -> Result<(), String> {
-    if !profile.signet_requested || profile.kind != NetworkKind::Signet {
-        return Err("O2A_DEMO_NETWORK must be signet".into());
-    }
-    if !profile.rgb_explicit_signet {
-        return Err("RGB_CHAIN must be signet".into());
-    }
-    Ok(())
-}
-
-pub fn require_signet_claim(profile: &NetworkProfile) -> Result<(), String> {
-    if !profile.signet_requested || profile.kind != NetworkKind::Signet {
-        return Err("O2A_DEMO_NETWORK must be signet".into());
-    }
-    Ok(())
-}
-
-pub fn require_signet_verify(profile: &NetworkProfile) -> Result<(), String> {
-    if profile.rgb_conflict || !profile.rgb_explicit_signet || profile.kind != NetworkKind::Signet {
-        return Err("RGB_CHAIN must be signet".into());
     }
     Ok(())
 }
@@ -274,7 +252,7 @@ pub fn session_banner(profile: &NetworkProfile, operation: Operation) -> String 
         profile.identity,
         operation.name(),
     );
-    if profile.kind == NetworkKind::Mainnet && operation.allowed_on_mainnet() {
+    if profile.kind == NetworkKind::Mainnet && operation.needs_session_lock() {
         text.push_str(&format!(
             "type mainnet to confirm this {} session\n",
             operation.name()
@@ -294,9 +272,12 @@ pub fn decide(
     }
     if !operation.allowed_on_mainnet() {
         return Err(format!(
-            "mainnet scope refuses {}; only the local plan, genesis, and the official_name claim are allowed",
+            "mainnet scope refuses {}; only plan, verify, genesis, and the official_name claim are allowed",
             operation.name()
         ));
+    }
+    if !operation.needs_session_lock() {
+        return Ok(());
     }
     if !authorize {
         return Err("mainnet requires --authorize-mainnet for this session".into());
@@ -316,7 +297,7 @@ pub fn begin_cli(
     eprint!("{banner}");
     let _ = io::stderr().flush();
     let typed =
-        if profile.kind == NetworkKind::Mainnet && operation.allowed_on_mainnet() && authorize {
+        if profile.kind == NetworkKind::Mainnet && operation.needs_session_lock() && authorize {
             let mut line = String::new();
             io::stdin()
                 .read_line(&mut line)
@@ -329,9 +310,6 @@ pub fn begin_cli(
 }
 
 pub fn allow_transport(profile: &NetworkProfile) -> Result<(), String> {
-    if profile.offline || profile.kind == NetworkKind::Mainnet {
-        return Err("network transport is disabled".into());
-    }
     if profile.rpc_url.is_none() || profile.electrum.is_none() {
         return Err("backend endpoints are not configured".into());
     }
@@ -348,23 +326,94 @@ pub fn refuse_broadcast(profile: &NetworkProfile) -> Result<(), String> {
 pub fn is_broadcast_method(method: &str) -> bool {
     matches!(
         method,
-        "sendrawtransaction" | "sendtoaddress" | "sendmany" | "submitpackage" | "submitblock"
+        "sendrawtransaction"
+            | "sendtoaddress"
+            | "sendmany"
+            | "submitpackage"
+            | "submitblock"
+            | "blockchain.transaction.broadcast"
+    ) || method.starts_with("send")
+}
+
+/// Headers, raw transactions, merkle proofs, unspent queries, chain info, and electrum reads.
+pub fn is_read_method(method: &str) -> bool {
+    matches!(
+        method,
+        "getblockchaininfo"
+            | "getblockcount"
+            | "getblockhash"
+            | "getblockheader"
+            | "getblock"
+            | "getrawtransaction"
+            | "gettxout"
+            | "gettxoutproof"
+            | "verifytxoutproof"
+            | "scantxoutset"
+            | "listunspent"
+            | "blockchain.headers.subscribe"
+            | "blockchain.block.header"
+            | "blockchain.block.headers"
+            | "blockchain.transaction.get"
+            | "blockchain.transaction.get_merkle"
+            | "blockchain.transaction.id_from_pos"
+            | "server.ping"
+            | "server.version"
+            | "server.features"
     )
 }
 
-pub fn split_args(args: &[String]) -> Result<(Option<String>, bool), String> {
+/// Runs before any socket. On mainnet, broadcast is refused and every other method must be on the read list.
+pub fn mainnet_method_gate(mainnet: bool, method: &str) -> Result<(), String> {
+    if !mainnet {
+        return Ok(());
+    }
+    if is_broadcast_method(method) {
+        return Err("mainnet broadcast is refused".into());
+    }
+    if !is_read_method(method) {
+        return Err(format!("mainnet transport is read-only; refused {method}"));
+    }
+    Ok(())
+}
+
+pub struct CliArgs {
+    pub command: Option<String>,
+    pub authorize: bool,
+    pub seal: Option<String>,
+}
+
+pub fn split_args(args: &[String]) -> Result<CliArgs, String> {
     let mut authorize = false;
     let mut command = None;
+    let mut seal = None;
+    let mut expect_seal = false;
     for arg in args {
+        if expect_seal {
+            if arg.starts_with('-') || arg.is_empty() {
+                return Err("genesis --seal requires an outpoint".into());
+            }
+            seal = Some(arg.clone());
+            expect_seal = false;
+            continue;
+        }
         if arg == "--authorize-mainnet" {
             authorize = true;
+        } else if arg == "--seal" {
+            expect_seal = true;
         } else if command.is_none() && !arg.starts_with('-') {
             command = Some(arg.clone());
         } else {
             return Err(format!("unknown argument {arg}"));
         }
     }
-    Ok((command, authorize))
+    if expect_seal {
+        return Err("genesis --seal requires an outpoint".into());
+    }
+    Ok(CliArgs {
+        command,
+        authorize,
+        seal,
+    })
 }
 
 fn nonempty(key: &str) -> Option<String> {
@@ -436,6 +485,13 @@ mod tests {
         }
     }
 
+    fn must_err<T>(result: Result<T, String>) -> String {
+        match result {
+            Err(err) => err,
+            Ok(_) => panic!("expected an error"),
+        }
+    }
+
     #[test]
     fn profile_table_matches_the_three_networks() {
         let regtest = from_kind(NetworkKind::Regtest);
@@ -470,7 +526,7 @@ mod tests {
         assert!(mainnet.electrum.is_none());
         assert!(mainnet.offline);
         assert_eq!(mainnet.identity, "permanent");
-        assert_eq!(mainnet.genesis_sign_depth, 6);
+        assert_eq!(mainnet.required_depth, 6);
     }
 
     #[test]
@@ -519,8 +575,9 @@ mod tests {
         let signet = load().expect("signet");
         assert_eq!(signet.network_byte, 3);
         assert_eq!(signet.coin_type, 1);
-        require_signet_genesis(&signet).expect("genesis");
-        require_signet_claim(&signet).expect("claim");
+        assert_eq!(signet.required_depth, 1);
+        decide(&signet, Operation::Genesis, false, None).expect("genesis follows the profile");
+        decide(&signet, Operation::OfficialName, false, None).expect("claim follows the profile");
 
         drop(_lock);
         let _lock = lock_env(&[
@@ -535,9 +592,7 @@ mod tests {
         let verify = load().expect("verify profile");
         assert_eq!(verify.kind, NetworkKind::Signet);
         assert_eq!(verify.network_byte, 3);
-        require_signet_verify(&verify).expect("verify");
-        assert!(require_signet_genesis(&verify).is_err());
-        assert!(require_signet_claim(&verify).is_err());
+        decide(&verify, Operation::Verify, false, None).expect("verify follows the profile");
     }
 
     #[test]
@@ -595,6 +650,11 @@ mod tests {
         assert!(mainnet.contains("identity=permanent"));
         assert!(mainnet.contains("confirmation_depth=6"));
         assert!(mainnet.contains("type mainnet to confirm this genesis session"));
+        let plan = session_banner(&from_kind(NetworkKind::Mainnet), Operation::Plan);
+        let stage_verify = session_banner(&from_kind(NetworkKind::Mainnet), Operation::Verify);
+        assert!(plan.contains("operation=plan"));
+        assert!(!plan.contains("type mainnet"));
+        assert!(!stage_verify.contains("type mainnet"));
         assert_ne!(regtest, signet);
         assert_ne!(signet, mainnet);
     }
@@ -607,8 +667,18 @@ mod tests {
         let wrong = decide(&mainnet, Operation::Genesis, true, Some("regtest")).expect_err("word");
         assert!(wrong.contains("confirmation"), "{wrong}");
         decide(&mainnet, Operation::Genesis, true, Some("mainnet\n")).expect("genesis");
-        decide(&mainnet, Operation::Plan, true, Some("mainnet")).expect("plan");
+        decide(&mainnet, Operation::Plan, false, None).expect("plan");
+        decide(&mainnet, Operation::Verify, false, None).expect("verify");
         decide(&mainnet, Operation::OfficialName, true, Some("mainnet")).expect("claim");
+        let claim = decide(&mainnet, Operation::OfficialName, false, None).expect_err("claim flag");
+        assert!(claim.contains("--authorize-mainnet"), "{claim}");
+        begin_cli(&mainnet, Operation::Plan, true).expect("plan does not read stdin");
+        begin_cli(&mainnet, Operation::Verify, true).expect("verify does not read stdin");
+        let genesis = begin_cli(&mainnet, Operation::Genesis, false).expect_err("genesis");
+        assert!(genesis.contains("--authorize-mainnet"), "{genesis}");
+        let transition_cli =
+            begin_cli(&mainnet, Operation::Transition, true).expect_err("transition stdin");
+        assert!(transition_cli.contains("scope"), "{transition_cli}");
         let transition =
             decide(&mainnet, Operation::Transition, true, Some("mainnet")).expect_err("transition");
         assert!(transition.contains("scope"), "{transition}");
@@ -637,7 +707,25 @@ mod tests {
     }
 
     #[test]
-    fn mainnet_transport_stays_closed_when_an_endpoint_is_set() {
+    fn genesis_accepts_a_seal_outpoint() {
+        let parsed = split_args(&[
+            "--authorize-mainnet".into(),
+            "genesis".into(),
+            "--seal".into(),
+            "aa:1".into(),
+        ])
+        .expect("parse");
+        assert_eq!(parsed.command.as_deref(), Some("genesis"));
+        assert!(parsed.authorize);
+        assert_eq!(parsed.seal.as_deref(), Some("aa:1"));
+        let missing = must_err(split_args(&["genesis".into(), "--seal".into()]));
+        assert!(missing.contains("outpoint"), "{missing}");
+        let unknown = must_err(split_args(&["plan".into(), "extra".into()]));
+        assert!(unknown.contains("unknown argument"), "{unknown}");
+    }
+
+    #[test]
+    fn mainnet_read_only_transport_refuses_broadcast_without_a_socket() {
         let _lock = lock_env(&[
             ("O2A_NETWORK", Some("mainnet")),
             ("O2A_DEMO_NETWORK", None),
@@ -646,56 +734,141 @@ mod tests {
             ("ELECTRUM", Some("127.0.0.1:1")),
             ("BITCOIN_WALLET", None),
             ("BITCOIN_COOKIE", None),
+            ("BITCOIN_RPC_USER", Some("reader")),
+            ("BITCOIN_RPC_PASSWORD", Some("reader-pass")),
         ]);
         let profile = load().expect("mainnet");
-        assert_eq!(profile.rpc_url.as_deref(), Some("http://127.0.0.1:1"));
-        let err = match crate::chain::Node::connect_profile(&profile, false) {
-            Err(err) => err,
-            Ok(_) => panic!("network transport opened"),
+        assert!(!profile.offline);
+        assert!(!profile.create_miner_wallet);
+        allow_transport(&profile).expect("configured read endpoints");
+        mainnet_method_gate(true, "getrawtransaction").expect("raw transaction");
+        mainnet_method_gate(true, "getblockheader").expect("header");
+        mainnet_method_gate(true, "gettxoutproof").expect("merkle proof");
+        mainnet_method_gate(true, "gettxout").expect("unspent");
+        mainnet_method_gate(true, "listunspent").expect("listunspent");
+        mainnet_method_gate(true, "getblockchaininfo").expect("chain info");
+        mainnet_method_gate(true, "blockchain.transaction.get").expect("electrum read");
+        mainnet_method_gate(true, "blockchain.headers.subscribe").expect("electrum headers");
+        let broadcast = mainnet_method_gate(true, "sendrawtransaction").expect_err("broadcast");
+        assert_eq!(broadcast, "mainnet broadcast is refused");
+        let electrum_broadcast =
+            mainnet_method_gate(true, "blockchain.transaction.broadcast").expect_err("electrum");
+        assert_eq!(electrum_broadcast, "mainnet broadcast is refused");
+        let closed = mainnet_method_gate(true, "generatetoaddress").expect_err("mine");
+        assert!(closed.contains("read-only"), "{closed}");
+        let fund = mainnet_method_gate(true, "fundrawtransaction").expect_err("fund");
+        assert!(fund.contains("read-only"), "{fund}");
+        let scope =
+            decide(&profile, Operation::Broadcast, true, Some("mainnet")).expect_err("scope");
+        assert!(scope.contains("scope"), "{scope}");
+        let node = match crate::chain::Node::connect_profile(&profile, false) {
+            Ok(node) => node,
+            Err(err) => panic!("read endpoints were refused before a socket: {err}"),
         };
-        assert_eq!(err, "network transport is disabled");
-        assert!(!err.contains("rpc connect"));
+        let sent = node
+            .call(false, "sendrawtransaction", serde_json::json!(["00"]))
+            .expect_err("broadcast");
+        assert_eq!(sent, "mainnet broadcast is refused");
+        assert!(!sent.contains("rpc connect"), "{sent}");
+        let mined = node
+            .call(false, "generatetoaddress", serde_json::json!([1, "bc1q"]))
+            .expect_err("mine");
+        assert!(mined.contains("read-only"), "{mined}");
+        assert!(!mined.contains("rpc connect"), "{mined}");
+        let mut resolver = crate::chain::ElectrumResolver::open().expect("resolver");
+        let relay = resolver
+            .call("blockchain.transaction.broadcast", serde_json::json!([]))
+            .expect_err("electrum broadcast");
+        assert_eq!(relay, "mainnet broadcast is refused");
+        assert!(!relay.contains("electrum:"), "{relay}");
+
+        drop(_lock);
+        let _missing = lock_env(&[
+            ("O2A_NETWORK", Some("mainnet")),
+            ("O2A_DEMO_NETWORK", None),
+            ("RGB_CHAIN", None),
+            ("BITCOIN_RPC", None),
+            ("ELECTRUM", None),
+            ("BITCOIN_WALLET", None),
+            ("BITCOIN_COOKIE", None),
+            ("BITCOIN_RPC_USER", None),
+            ("BITCOIN_RPC_PASSWORD", None),
+        ]);
+        let bare = load().expect("bare mainnet");
+        assert!(bare.offline);
+        let err = allow_transport(&bare).expect_err("no endpoints");
+        assert_eq!(err, "backend endpoints are not configured");
+        let closed_node = match crate::chain::Node::connect_profile(&bare, false) {
+            Err(err) => err,
+            Ok(_) => panic!("unconfigured mainnet opened"),
+        };
+        assert_eq!(closed_node, "backend endpoints are not configured");
+        assert!(!closed_node.contains("rpc connect"));
     }
 
     #[test]
-    fn offline_mainnet_dry_run_uses_mainnet_parameters_and_core() {
+    fn offline_mainnet_dry_run_signs_against_canned_funding() {
         let _lock = lock_env(&[
             ("O2A_DEMO_SEED_FILE", None),
             ("O2A_DEMO_ENTITY", None),
             ("O2A_DEMO_DELAY", None),
             ("O2A_DEMO_THRESHOLD", None),
             ("O2A_DEMO_NETWORK", None),
-            ("O2A_NETWORK", None),
+            ("O2A_NETWORK", Some("mainnet")),
             ("RGB_CHAIN", None),
+            ("BITCOIN_RPC", None),
+            ("ELECTRUM", None),
+            ("BITCOIN_WALLET", None),
+            ("BITCOIN_COOKIE", None),
+            ("BITCOIN_RPC_USER", None),
+            ("BITCOIN_RPC_PASSWORD", None),
         ]);
-        let profile = from_kind(NetworkKind::Mainnet);
+        let profile = load().expect("mainnet");
+        assert!(profile.offline);
+        assert_eq!(profile.network_byte, 0);
+        assert_eq!(profile.coin_type, 0);
+        assert_eq!(profile.required_depth, 6);
         let banner = session_banner(&profile, Operation::Plan);
         assert!(banner.contains("active_network=mainnet"));
         assert!(banner.contains("operation=plan"));
-        decide(&profile, Operation::Plan, false, None).expect_err("unauthorized plan");
-        decide(&profile, Operation::Plan, true, Some("mainnet")).expect("plan");
-        decide(&profile, Operation::Genesis, true, Some("mainnet")).expect("genesis");
+        assert!(!banner.contains("type mainnet"));
+        decide(&profile, Operation::Plan, false, None).expect("plan");
+        decide(&profile, Operation::Verify, false, None).expect("verify");
+        decide(&profile, Operation::Genesis, true, Some("mainnet")).expect("authorized genesis");
         decide(&profile, Operation::OfficialName, true, Some("mainnet")).expect("claim");
-        decide(&profile, Operation::Transition, true, Some("mainnet")).expect_err("transition");
+        let transition =
+            decide(&profile, Operation::Transition, true, Some("mainnet")).expect_err("transition");
+        assert!(transition.contains("scope"), "{transition}");
+        crate::lineage::plan(false).expect("plan command");
 
         let keys = keys_for(profile.coin_type);
         let regtest_keys = keys_for(from_kind(NetworkKind::Regtest).coin_type);
         assert_ne!(keys.root.xonly, regtest_keys.root.xonly);
-        let state = genesis_state_from(&keys, [0u8; 36]);
-        let seal = seal_for_state(&state).expect("seal");
+        let planned = genesis_state_from(&keys, [0u8; 36]);
+        let seal = seal_for_state(&planned).expect("seal");
         let address = Address::from_script(
-            ScriptBuf::from_bytes(seal.script_pubkey).as_script(),
+            ScriptBuf::from_bytes(seal.script_pubkey.clone()).as_script(),
             profile.bitcoin,
         )
         .expect("address")
         .to_string();
         assert!(address.starts_with("bc1p"), "{address}");
-        let descriptor = crate::lineage::core_descriptor(&state);
-        let signed = genesis_for(profile.network_byte, keys.root, &state);
-        assert_eq!(signed.payload.get(2), Some(&profile.network_byte));
-        verify(&signed).expect("genesis verifies");
-        let entity = entity_id(&signed.payload);
-        let sid = state_id(&entity, &encode_resulting_state(&state));
+        let policy = crate::lineage::core_descriptor(&planned);
+        assert!(policy.starts_with("tr("), "{policy}");
+
+        let (outpoint, view) = crate::lineage::canned_funding(
+            &seal.script_pubkey,
+            4_294_967_294,
+            6,
+            true,
+            b"canned-mainnet-proof",
+            true,
+        );
+        let draft = crate::lineage::draft_genesis(&profile, &outpoint, &view).expect("genesis");
+        assert_eq!(draft.signed.payload.get(2), Some(&0u8));
+        verify(&draft.signed).expect("genesis verifies");
+        assert_eq!(draft.signed.payload.get(5..37), Some(&[0u8; 32][..]));
+        let entity = entity_id(&draft.signed.payload);
         let regtest = from_kind(NetworkKind::Regtest);
         let regtest_signed = genesis_for(
             regtest.network_byte,
@@ -703,6 +876,7 @@ mod tests {
             &genesis_state_from(&regtest_keys, [0u8; 36]),
         );
         assert_ne!(entity, entity_id(&regtest_signed.payload));
+        let sid = state_id(&entity, &encode_resulting_state(&draft.state));
         let name = "Unsafe Mainnet Vector Artist";
         let claim = official_name_claim(
             profile.network_byte,
@@ -713,130 +887,82 @@ mod tests {
             official_name_nonce(&entity, name),
         )
         .expect("claim");
-        assert_eq!(claim.payload.get(2), Some(&profile.network_byte));
+        assert_eq!(claim.payload.get(2), Some(&0u8));
         verify(&claim).expect("claim verifies");
+
+        let shallow = crate::lineage::canned_funding(
+            &seal.script_pubkey,
+            4_294_967_294,
+            5,
+            true,
+            b"canned-mainnet-proof",
+            true,
+        );
+        let err = must_err(crate::lineage::draft_genesis(
+            &profile, &shallow.0, &shallow.1,
+        ));
+        assert!(err.contains("stays unsigned"), "{err}");
+        let replaceable = crate::lineage::canned_funding(
+            &seal.script_pubkey,
+            4_294_967_293,
+            6,
+            true,
+            b"canned-mainnet-proof",
+            true,
+        );
+        let err = must_err(crate::lineage::draft_genesis(
+            &profile,
+            &replaceable.0,
+            &replaceable.1,
+        ));
+        assert!(err.contains("replaceable"), "{err}");
+        let spent = crate::lineage::canned_funding(
+            &seal.script_pubkey,
+            4_294_967_295,
+            6,
+            false,
+            b"canned-mainnet-proof",
+            true,
+        );
+        let err = must_err(crate::lineage::draft_genesis(&profile, &spent.0, &spent.1));
+        assert!(err.contains("spent"), "{err}");
+        let wrong = crate::lineage::canned_funding(
+            &[0x51],
+            4_294_967_294,
+            6,
+            true,
+            b"canned-mainnet-proof",
+            true,
+        );
+        let err = must_err(crate::lineage::draft_genesis(&profile, &wrong.0, &wrong.1));
+        assert!(err.contains("planned seal policy"), "{err}");
+        let unproved =
+            crate::lineage::canned_funding(&seal.script_pubkey, 4_294_967_294, 6, true, b"", true);
+        let err = must_err(crate::lineage::draft_genesis(
+            &profile,
+            &unproved.0,
+            &unproved.1,
+        ));
+        assert!(err.contains("merkle"), "{err}");
+        let bad_header = crate::lineage::canned_funding(
+            &seal.script_pubkey,
+            4_294_967_294,
+            6,
+            true,
+            b"canned-mainnet-proof",
+            false,
+        );
+        let err = must_err(crate::lineage::draft_genesis(
+            &profile,
+            &bad_header.0,
+            &bad_header.1,
+        ));
+        assert!(err.contains("block header"), "{err}");
+
+        let refused = crate::lineage::genesis(false, Some(outpoint.as_str())).expect_err("lock");
+        assert!(refused.contains("--authorize-mainnet"), "{refused}");
+        assert!(!refused.contains("rpc connect"), "{refused}");
         let broadcast = refuse_broadcast(&profile).expect_err("broadcast");
         assert_eq!(broadcast, "mainnet broadcast is refused");
-        let transport = match crate::chain::Node::connect_profile(&profile, false) {
-            Err(err) => err,
-            Ok(_) => panic!("network transport opened"),
-        };
-        assert_eq!(transport, "network transport is disabled");
-        drop(_lock);
-
-        let core = core_derive_address(&descriptor).expect("core");
-        assert_eq!(core, address, "core {core} local {address}");
-    }
-
-    fn core_derive_address(descriptor: &str) -> Result<String, String> {
-        let dir = std::env::temp_dir().join(format!(
-            "o2a-mainnet-dry-{}-{}",
-            std::process::id(),
-            std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .map_err(|err| err.to_string())?
-                .as_nanos()
-        ));
-        std::fs::create_dir_all(&dir).map_err(|err| err.to_string())?;
-        let _cleanup = Dir(dir.clone());
-        std::fs::write(
-            dir.join("bitcoin.conf"),
-            "\
-chain=main
-server=1
-listen=0
-dnsseed=0
-connect=0
-maxconnections=0
-disablewallet=1
-discover=0
-natpmp=0
-printtoconsole=1
-rpcbind=127.0.0.1
-rpcallowip=127.0.0.1
-",
-        )
-        .map_err(|err| err.to_string())?;
-        let script = r#"
-set -e
-bitcoind -datadir=/data -conf=/data/bitcoin.conf >/data/bitcoind.log 2>&1 &
-trap 'bitcoin-cli -datadir=/data stop >/dev/null 2>&1 || true' EXIT
-for i in $(seq 1 80); do
-  if [ -f /data/.cookie ]; then
-    break
-  fi
-  sleep 0.25
-done
-test -f /data/.cookie
-INFO=$(bitcoin-cli -datadir=/data getblockchaininfo)
-printf '%s' "$INFO" | grep -q '"chain": "main"'
-printf '%s' "$INFO" | grep -q '"blocks": 0,'
-DESC=$(bitcoin-cli -datadir=/data getdescriptorinfo "$O2A_DESCRIPTOR")
-CHECK=$(printf '%s' "$DESC" | sed -n 's/.*"descriptor": "\([^"]*\)".*/\1/p')
-test -n "$CHECK"
-RAW=$(bitcoin-cli -datadir=/data deriveaddresses "$CHECK")
-ADDR=$(printf '%s' "$RAW" | sed -n 's/.*"\(bc1[^"]*\)".*/\1/p')
-test -n "$ADDR"
-printf 'address=%s\n' "$ADDR"
-"#;
-        let output = std::process::Command::new("docker")
-            .env("DOCKER_CONTEXT", "default")
-            .env("O2A_DESCRIPTOR", descriptor)
-            .args([
-                "run",
-                "--rm",
-                "--network",
-                "none",
-                "-e",
-                "O2A_DESCRIPTOR",
-                "-v",
-                &format!("{}:/data", dir.display()),
-                "--entrypoint",
-                "sh",
-                "bitcoin/bitcoin:31.1",
-                "-c",
-                script,
-            ])
-            .output()
-            .map_err(|err| err.to_string())?;
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        if !output.status.success() {
-            return Err(format!(
-                "core derive failed: {}\n{stdout}\n{stderr}",
-                output.status
-            ));
-        }
-        stdout
-            .lines()
-            .find_map(|line| line.strip_prefix("address="))
-            .map(str::to_string)
-            .ok_or_else(|| format!("core address missing\n{stdout}\n{stderr}"))
-    }
-
-    struct Dir(std::path::PathBuf);
-
-    impl Drop for Dir {
-        fn drop(&mut self) {
-            // Core's image writes the datadir as root. Wipe it inside that
-            // image, with no network, before removing the host directory.
-            let _ = std::process::Command::new("docker")
-                .env("DOCKER_CONTEXT", "default")
-                .args([
-                    "run",
-                    "--rm",
-                    "--network",
-                    "none",
-                    "-v",
-                    &format!("{}:/data", self.0.display()),
-                    "--entrypoint",
-                    "sh",
-                    "bitcoin/bitcoin:31.1",
-                    "-c",
-                    "rm -rf /data/* /data/.[!.]* /data/..?*",
-                ])
-                .status();
-            let _ = std::fs::remove_dir_all(&self.0);
-        }
     }
 }

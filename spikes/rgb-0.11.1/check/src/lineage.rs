@@ -1,4 +1,7 @@
-//! Maintained RGB 0.11.1 regtest lineage and the signet rehearsal commands.
+//! Maintained RGB 0.11.1 regtest lineage and the stage commands.
+//!
+//! `plan`, `genesis`, `claim`, and `verify` follow the active profile.
+//! The operator's wallet funds the seal. This module does not broadcast that payment.
 //!
 //! Spend scripts come from decoded signed objects. This module does not import
 //! the archived 0.12 adapter.
@@ -16,9 +19,17 @@ use o2a_demo_core::{
     CurrentSealView, DemoKey, DemoKeys, InclusionProof, LineageEvidence, ResultingState,
     SealBinding, SealFact, SignedObject, NUMS_X,
 };
+#[cfg(test)]
+use rgbstd::bitcoin::absolute::LockTime;
 use rgbstd::bitcoin::consensus::encode::deserialize;
+#[cfg(test)]
+use rgbstd::bitcoin::consensus::encode::serialize;
 use rgbstd::bitcoin::hashes::Hash;
+#[cfg(test)]
+use rgbstd::bitcoin::transaction::Version;
 use rgbstd::bitcoin::{Address, Amount, OutPoint, ScriptBuf, Transaction, Txid};
+#[cfg(test)]
+use rgbstd::bitcoin::{Sequence, TxIn, TxOut, Witness};
 use rgbstd::containers::ConsignmentExt;
 use rgbstd::contract::AllocatedState;
 use rgbstd::persistence::Stock;
@@ -54,7 +65,7 @@ pub fn plan(authorize: bool) -> Result<(), String> {
     let state = genesis_state_from(&keys, [0u8; 36]);
     let seal = seal_for_state(&state).map_err(|err| err.to_string())?;
     let address = Address::from_script(
-        ScriptBuf::from_bytes(seal.script_pubkey).as_script(),
+        ScriptBuf::from_bytes(seal.script_pubkey.clone()).as_script(),
         active.bitcoin,
     )
     .map_err(|err| err.to_string())?;
@@ -62,8 +73,11 @@ pub fn plan(authorize: bool) -> Result<(), String> {
     println!("network={}", active.network_byte);
     println!("delay_blocks={}", state.recovery.delay_blocks);
     println!("threshold={}", state.recovery.threshold);
+    let policy = core_descriptor(&state);
     println!("address={address}");
-    println!("descriptor={}", core_descriptor(&state));
+    println!("policy={policy}");
+    println!("descriptor={policy}");
+    println!("script_pubkey={}", hex::encode(&seal.script_pubkey));
     println!("root_xonly={}", hex::encode(keys.root.xonly));
     println!(
         "controller_0_xonly={}",
@@ -984,8 +998,20 @@ fn o2a_report(
     o2a_ok: bool,
     rgb: &'static str,
 ) -> Result<String, String> {
-    let first = o2a_once(node, identity, current, spend, o2a_ok, rgb)?;
-    let second = o2a_once(node, identity, current, spend, o2a_ok, rgb)?;
+    o2a_report_with(node, identity, current, spend, o2a_ok, rgb, DEPTH)
+}
+
+fn o2a_report_with(
+    node: &super::chain::Node,
+    identity: &Identity,
+    current: OutPoint,
+    spend: Option<Txid>,
+    o2a_ok: bool,
+    rgb: &'static str,
+    depth: u32,
+) -> Result<String, String> {
+    let first = o2a_once(node, identity, current, spend, o2a_ok, rgb, depth)?;
+    let second = o2a_once(node, identity, current, spend, o2a_ok, rgb, depth)?;
     if first != second {
         return Err(format!("o2a validators differ\n{first}\n{second}"));
     }
@@ -999,6 +1025,7 @@ fn o2a_once(
     spend: Option<Txid>,
     o2a_ok: bool,
     rgb: &'static str,
+    depth: u32,
 ) -> Result<String, String> {
     let canonical = super::canonical_outpoint(current.txid, current.vout);
     let payloads = [identity.genesis.payload.as_slice()];
@@ -1045,7 +1072,7 @@ fn o2a_once(
         }),
         o2a_ok,
         best_height: best,
-        required_depth: DEPTH,
+        required_depth: depth,
     };
     let report = evaluate_lineage(&evidence, rgb);
     Ok(format!(
@@ -1493,44 +1520,115 @@ fn require_seed() -> Result<(), String> {
     Ok(())
 }
 
-pub fn signet_genesis(authorize: bool) -> Result<(), String> {
-    let active = crate::profile::load()?;
-    crate::profile::begin_cli(&active, crate::profile::Operation::Genesis, authorize)?;
-    crate::profile::require_signet_genesis(&active)?;
-    require_seed()?;
-    let outpoint_text = std::env::var("SEAL_OUTPOINT").map_err(|_| "SEAL_OUTPOINT is required")?;
-    let dir =
-        PathBuf::from(std::env::var("RGB011_EVIDENCE").map_err(|_| "RGB011_EVIDENCE is required")?);
-    let mut log = super::Log::open(dir)?;
-    let node = super::chain::Node::connect_wallet(false)?;
-    let outpoint = parse_outpoint(&outpoint_text)?;
-    let tx = node.call(
-        false,
-        "getrawtransaction",
-        json!([outpoint.txid.to_string(), true]),
-    )?;
-    let confirmations = tx.get("confirmations").and_then(Value::as_u64).unwrap_or(0);
-    if confirmations < u64::from(active.genesis_sign_depth) {
+pub(crate) struct FundingObservation {
+    pub output_exists: bool,
+    pub output_script: Vec<u8>,
+    pub sequences: Vec<u32>,
+    pub confirmations: u64,
+    pub unspent: bool,
+    pub inclusion: InclusionProof,
+    pub txout_proof: Vec<u8>,
+}
+
+pub(crate) trait ReadBackend {
+    fn observe_funding(&self, txid: &str, vout: u32) -> Result<FundingObservation, String>;
+}
+
+impl ReadBackend for super::chain::Node {
+    fn observe_funding(&self, txid: &str, vout: u32) -> Result<FundingObservation, String> {
+        let tx = self.call(false, "getrawtransaction", json!([txid, true]))?;
+        let confirmations = tx.get("confirmations").and_then(Value::as_u64).unwrap_or(0);
+        let sequences = tx
+            .get("vin")
+            .and_then(Value::as_array)
+            .ok_or("vin")?
+            .iter()
+            .map(|input| input.get("sequence").and_then(Value::as_u64).unwrap_or(0) as u32)
+            .collect::<Vec<_>>();
+        let outputs = tx.get("vout").and_then(Value::as_array);
+        let script_hex = outputs
+            .and_then(|items| items.get(vout as usize))
+            .and_then(|output| output.get("scriptPubKey"))
+            .and_then(|script| script.get("hex"))
+            .and_then(Value::as_str);
+        let (output_exists, output_script) = match script_hex {
+            Some(hex_script) => (
+                true,
+                hex::decode(hex_script).map_err(|err| err.to_string())?,
+            ),
+            None => (false, Vec::new()),
+        };
+        let proof_hex = self
+            .call(false, "gettxoutproof", json!([[txid]]))?
+            .as_str()
+            .unwrap_or("")
+            .to_string();
+        let txout_proof = hex::decode(proof_hex.trim()).unwrap_or_default();
+        let inclusion = inclusion(self, txid)?;
+        let utxo = self.call(false, "gettxout", json!([txid, vout, false]))?;
+        Ok(FundingObservation {
+            output_exists,
+            output_script,
+            sequences,
+            confirmations,
+            unspent: !utxo.is_null(),
+            inclusion,
+            txout_proof,
+        })
+    }
+}
+
+pub(crate) struct GenesisDraft {
+    pub signed: SignedObject,
+    pub state: ResultingState,
+    pub confirmations: u64,
+}
+
+/// Chain checks use the read backend. The signature is produced only after they pass.
+pub(crate) fn draft_genesis(
+    active: &crate::profile::NetworkProfile,
+    outpoint_text: &str,
+    view: &dyn ReadBackend,
+) -> Result<GenesisDraft, String> {
+    let outpoint = parse_outpoint(outpoint_text)?;
+    let observed = view.observe_funding(&outpoint.txid.to_string(), outpoint.vout)?;
+    if !observed.output_exists {
+        return Err("funding output does not exist; genesis stays unsigned".into());
+    }
+    if !inclusion_matches(&observed.inclusion) {
+        return Err(
+            "funding merkle proof does not match the block header; genesis stays unsigned".into(),
+        );
+    }
+    if observed.txout_proof.is_empty() {
+        return Err(
+            "funding transaction has no merkle inclusion proof; genesis stays unsigned".into(),
+        );
+    }
+    if !observed.unspent {
+        return Err("funding output is spent; genesis stays unsigned".into());
+    }
+    if !sequences_final(&observed.sequences) {
         return Err(format!(
-            "depth {confirmations}; genesis stays unsigned until {} confirmations",
-            active.genesis_sign_depth
+            "funding sequences {:?} are replaceable; genesis stays unsigned",
+            observed.sequences
         ));
     }
-    let sequences = tx
-        .get("vin")
-        .and_then(Value::as_array)
-        .ok_or("vin")?
-        .iter()
-        .map(|input| input.get("sequence").and_then(Value::as_u64).unwrap_or(0) as u32)
-        .collect::<Vec<_>>();
-    if !sequences_final(&sequences) {
+    if observed.confirmations < u64::from(active.required_depth) {
         return Err(format!(
-            "funding sequences {sequences:?} are replaceable; genesis stays unsigned"
+            "depth {}; genesis stays unsigned until {} confirmations",
+            observed.confirmations, active.required_depth
         ));
     }
     let canonical = super::canonical_outpoint(outpoint.txid, outpoint.vout);
     let keys = keys_for(active.coin_type);
     let state = genesis_state_from(&keys, canonical);
+    let planned = seal_for_state(&state).map_err(|err| err.to_string())?;
+    if observed.output_script != planned.script_pubkey {
+        return Err(
+            "output script does not match the planned seal policy; genesis stays unsigned".into(),
+        );
+    }
     let signed = genesis_for(active.network_byte, keys.root, &state);
     verify(&signed).map_err(|err| err.to_string())?;
     if signed.payload.get(5..37) != Some(&[0u8; 32]) {
@@ -1538,16 +1636,135 @@ pub fn signet_genesis(authorize: bool) -> Result<(), String> {
     }
     let decoded =
         state_named_by_signed(&[&signed.payload], &canonical).map_err(|err| err.to_string())?;
-    let seal = seal_for_state(&decoded).map_err(|err| err.to_string())?;
-    let observed = output_script(&node, &outpoint.txid.to_string(), outpoint.vout)?;
-    if observed != seal.script_pubkey {
-        return Err("signet output script does not match the decoded genesis".into());
+    let again = seal_for_state(&decoded).map_err(|err| err.to_string())?;
+    if again.script_pubkey != planned.script_pubkey {
+        return Err("signed genesis policy does not match the planned script".into());
     }
+    Ok(GenesisDraft {
+        signed,
+        state,
+        confirmations: observed.confirmations,
+    })
+}
+
+#[cfg(test)]
+pub(crate) struct CannedFunding {
+    pub raw_tx: Vec<u8>,
+    pub confirmations: u64,
+    pub unspent: bool,
+    pub header: [u8; 80],
+    pub height: u32,
+    pub txout_proof: Vec<u8>,
+}
+
+#[cfg(test)]
+impl ReadBackend for CannedFunding {
+    fn observe_funding(&self, txid: &str, vout: u32) -> Result<FundingObservation, String> {
+        let tx: Transaction =
+            deserialize(&self.raw_tx).map_err(|err| format!("canned transaction: {err}"))?;
+        let parsed = tx.compute_txid();
+        if parsed.to_string() != txid {
+            return Err(format!("canned txid {parsed} does not match {txid}"));
+        }
+        let sequences = tx
+            .input
+            .iter()
+            .map(|input| input.sequence.to_consensus_u32())
+            .collect::<Vec<_>>();
+        let Some(output) = tx.output.get(vout as usize) else {
+            return Ok(FundingObservation {
+                output_exists: false,
+                output_script: Vec::new(),
+                sequences,
+                confirmations: self.confirmations,
+                unspent: self.unspent,
+                inclusion: InclusionProof {
+                    txid: parsed.to_byte_array(),
+                    index: 0,
+                    siblings: Vec::new(),
+                    header: self.header,
+                    height: self.height,
+                },
+                txout_proof: self.txout_proof.clone(),
+            });
+        };
+        Ok(FundingObservation {
+            output_exists: true,
+            output_script: output.script_pubkey.as_bytes().to_vec(),
+            sequences,
+            confirmations: self.confirmations,
+            unspent: self.unspent,
+            inclusion: InclusionProof {
+                txid: parsed.to_byte_array(),
+                index: 0,
+                siblings: Vec::new(),
+                header: self.header,
+                height: self.height,
+            },
+            txout_proof: self.txout_proof.clone(),
+        })
+    }
+}
+
+#[cfg(test)]
+pub(crate) fn canned_funding(
+    script: &[u8],
+    sequence: u32,
+    confirmations: u64,
+    unspent: bool,
+    proof: &[u8],
+    matching_header: bool,
+) -> (String, CannedFunding) {
+    let tx = Transaction {
+        version: Version::TWO,
+        lock_time: LockTime::ZERO,
+        input: vec![TxIn {
+            previous_output: OutPoint::null(),
+            script_sig: ScriptBuf::new(),
+            sequence: Sequence::from_consensus(sequence),
+            witness: Witness::default(),
+        }],
+        output: vec![TxOut {
+            value: Amount::from_sat(10_000),
+            script_pubkey: ScriptBuf::from_bytes(script.to_vec()),
+        }],
+    };
+    let txid = tx.compute_txid();
+    let mut header = [0u8; 80];
+    if matching_header {
+        header[36..68].copy_from_slice(&txid.to_byte_array());
+    }
+    let view = CannedFunding {
+        raw_tx: serialize(&tx),
+        confirmations,
+        unspent,
+        header,
+        height: 100,
+        txout_proof: proof.to_vec(),
+    };
+    (format!("{txid}:0"), view)
+}
+
+pub fn genesis(authorize: bool, seal: Option<&str>) -> Result<(), String> {
+    let active = crate::profile::load()?;
+    crate::profile::begin_cli(&active, crate::profile::Operation::Genesis, authorize)?;
+    require_seed()?;
+    let outpoint_text = seal
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .ok_or("genesis --seal <outpoint> is required")?
+        .to_string();
+    let dir =
+        PathBuf::from(std::env::var("RGB011_EVIDENCE").map_err(|_| "RGB011_EVIDENCE is required")?);
+    let mut log = super::Log::open(dir)?;
+    let node = super::chain::Node::connect_wallet(false)?;
+    let draft = draft_genesis(&active, &outpoint_text, &node)?;
+    let outpoint = parse_outpoint(&outpoint_text)?;
     let prepared = super::schema::identity_schema();
     let issued = super::schema::issue_on(
         &prepared,
         super::chain::chain_net()?,
-        signed.digest,
+        draft.signed.digest,
         outpoint,
         BLINDING,
         super::schema::TS_ISSUE,
@@ -1556,17 +1773,18 @@ pub fn signet_genesis(authorize: bool) -> Result<(), String> {
     let report = super::dual_validate::<false>(&bytes, &prepared.types)?;
     if !report.starts_with("Consignment is valid") {
         return Err(format!(
-            "signet genesis did not validate: {}",
+            "genesis did not validate: {}",
             super::one_line(&report)
         ));
     }
-    write_object(&log, "genesis.o2a", &signed)?;
+    write_object(&log, "genesis.o2a", &draft.signed)?;
     log.write("genesis.strict", &bytes)?;
-    let entity = entity_id(&signed.payload);
+    let entity = entity_id(&draft.signed.payload);
     let public = format!(
-        "entity_id={}\nstate_id={}\nseal={outpoint_text}\nconfirmations={confirmations}\nnetwork={}\n",
+        "entity_id={}\nstate_id={}\nseal={outpoint_text}\nconfirmations={}\nnetwork={}\n",
         hex::encode(entity),
-        hex::encode(state_id(&entity, &encode_resulting_state(&state))),
+        hex::encode(state_id(&entity, &encode_resulting_state(&draft.state))),
+        draft.confirmations,
         active.kind.label()
     );
     log.write("public.txt", public.as_bytes())?;
@@ -1574,14 +1792,13 @@ pub fn signet_genesis(authorize: bool) -> Result<(), String> {
     log.line("seal_unspent true");
     log.line("no transition was signed");
     println!("entity_id={}", hex::encode(entity));
-    println!("confirmations={confirmations}");
+    println!("confirmations={}", draft.confirmations);
     Ok(())
 }
 
-pub fn signet_claim(authorize: bool) -> Result<(), String> {
+pub fn claim(authorize: bool) -> Result<(), String> {
     let active = crate::profile::load()?;
     crate::profile::begin_cli(&active, crate::profile::Operation::OfficialName, authorize)?;
-    crate::profile::require_signet_claim(&active)?;
     require_seed()?;
     let dir =
         PathBuf::from(std::env::var("RGB011_EVIDENCE").map_err(|_| "RGB011_EVIDENCE is required")?);
@@ -1606,9 +1823,8 @@ pub fn signet_claim(authorize: bool) -> Result<(), String> {
     Ok(())
 }
 
-pub fn signet_verify(authorize: bool) -> Result<(), String> {
+pub fn stage_verify(authorize: bool) -> Result<(), String> {
     let active = crate::profile::load()?;
-    crate::profile::require_signet_verify(&active)?;
     crate::profile::begin_cli(&active, crate::profile::Operation::Verify, authorize)?;
     let dir =
         PathBuf::from(std::env::var("RGB011_EVIDENCE").map_err(|_| "RGB011_EVIDENCE is required")?);
@@ -1648,13 +1864,14 @@ pub fn signet_verify(authorize: bool) -> Result<(), String> {
         bytes,
         rgb_ok: report.starts_with("Consignment is valid"),
     };
-    let o2a = o2a_report(
+    let o2a = o2a_report_with(
         &node,
         &identity,
         outpoint,
         None,
         true,
         "Consignment is valid",
+        active.required_depth,
     )?;
     println!("entity_id={}", hex::encode(entity));
     println!("{}", super::one_line(&report));
@@ -1686,7 +1903,7 @@ pub fn signet_verify(authorize: bool) -> Result<(), String> {
         println!("name_claim=valid");
     }
     if !o2a.contains("identity_history_state=CURRENT") || !identity.rgb_ok {
-        return Err("signet verifier did not report CURRENT".into());
+        return Err("verifier did not report CURRENT".into());
     }
     Ok(())
 }

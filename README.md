@@ -30,11 +30,15 @@ Signet identities are disposable. The mainnet block-0 identity is permanent.
 
 `O2A_NETWORK` selects one profile: `regtest` (the default), `signet`, or
 `mainnet`. That profile supplies the network byte, coin type, address
-prefix, RGB chain, backend endpoints, and confirmation depth. A mainnet
-session also needs `--authorize-mainnet` and the typed word `mainnet`.
-On mainnet the session may build genesis and the one `official_name`
-claim. Transitions are refused. This repository refuses every mainnet
-broadcast. No mainnet identity network is running.
+prefix, RGB chain, backend endpoints, and confirmation depth. The stage
+commands are `plan`, `genesis --seal TXID:VOUT`, `claim`, and `verify`.
+The same names run on every profile. `plan` and `verify` do not ask for
+the session lock. On mainnet, `genesis` and `claim` also need
+`--authorize-mainnet` and the typed word `mainnet`, because those
+commands use keys. Transitions are refused. When mainnet endpoints are
+configured, transport is read-only. This repository refuses every
+mainnet broadcast, including from an authorized session. The operator's
+wallet funds the seal. No mainnet identity network is running.
 
 Read [DEMO-GATE.md](DEMO-GATE.md) before running or changing the demo.
 Regtest and signet identities created here are disposable. The offline
