@@ -1,0 +1,35 @@
+[graph]
+exclude-dev = true
+
+[advisories]
+# cargo-deny 0.16+ denies vulnerability, unsound, and notice advisories by default.
+yanked = "deny"
+
+[licenses]
+allow = [
+    "Apache-2.0",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "CC0-1.0",
+    "CDLA-Permissive-2.0",
+    "ISC",
+    "MIT",
+    "MIT-0",
+    "Unicode-3.0",
+    # Zlib is on the 2026-09-24 allow list. MITNFA stays absent on purpose.
+    "Zlib",
+]
+confidence-threshold = 0.8
+exceptions = [
+    { crate = "base85@2.0.0", allow = ["MPL-2.0-no-copyleft-exception"] },
+]
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []

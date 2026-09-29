@@ -1,0 +1,69 @@
+H0 101
+network regtest
+rgb-api link ContractIssueResolver is present; RgbWallet and rgb-lib are not called
+schema_id rgb:sch:oqE1HKzG_NrzhV2M0tn~mkfJfic5ztF6iUr8s8YbdDE#ivan-robin-exotic
+nia_schema_id rgb:sch:RWhwUfTMpuP2Zfx1~j4nswCANGeJrYOqDcKelaMV4zU#remote-digital-pegasus
+validators_none true
+fee_xonly bd332ada89ebee10f3f8d9675674e585377390ee6a54d32f704d82e727aa4319
+root_xonly 3144d4d7d965fc55af45c4d0852458dae125dc5d601a702bb55a6640ffeea2c6
+o2a_script_ignores_outpoint true
+F 108
+funding_split one output per transaction; Core rejects a duplicated address
+vout A bc4f9ef97f730bab952329ff694f47ce0060f2e8b299711013ffddc339b79fd1 0
+vout C 472bdcb06477f19be995ef64813494c6a941ac97ff09dab15ca73a30d521dabf 0
+vout D 58e2f6454e6874c50f242d2b7169402b94bff6d9c930654c5941fa35d23a30b5 0
+vout R ebc849dc9a9f55c3071b1bb4527cb747353d21d5fa0cd86c13ca20e3cf12fb85 0
+vout fee4 038408b09bba57c200a2d3f897a996aecf3e9dc8db15d7a8b6feba272bd0b5be 0
+vout fee5 46c14adbc29d375ffbd1a1693f86722468ea69305dc7fd96fec783069dc200c4 0
+vout fee7 a885e7bb470f4815c49a0e53ff4845e29006f43f258f5c5feda941596c73a4de 0
+A entity 2820fdbb0a22c370c5e7c3b47b48be2cbb9e32dba0f5eb7be636dee704bed0ff digest cffe41dd6305f0461b5363faeae33ea0cb8c7dfef5d0680a74e24f7b15e94c57 state 28a62c653206506675ee047549249a6e435677f3042157539162c0ad507d22d5 outpoint bc4f9ef97f730bab952329ff694f47ce0060f2e8b299711013ffddc339b79fd1:0
+A report Consignment is valid | tx_ord_map: | 
+A assignments seal ExplicitSeal { txid: bc4f9ef97f730bab952329ff694f47ce0060f2e8b299711013ffddc339b79fd1, vout: Vout(0) } opout 5569fef97b19a551802e4a7fc74f4fa7bb6c3e5b34c006ce7bc59457ca1d6d7d/4101/0 state Void
+CASE C1
+expected: schema with declarative identity, 32-byte digest, rotate/recover/revoke, validator None, genesis validates
+observed: schema rgb:sch:oqE1HKzG_NrzhV2M0tn~mkfJfic5ztF6iUr8s8YbdDE#ivan-robin-exotic nia rgb:sch:RWhwUfTMpuP2Zfx1~j4nswCANGeJrYOqDcKelaMV4zU#remote-digital-pegasus validators_none true contract rgb:VWn__XsZ-pVGALkp-~x09Pp7-tsPls0w-AbOe8WU-V8odbX0 digest cffe41dd6305f0461b5363faeae33ea0cb8c7dfef5d0680a74e24f7b15e94c57 report Consignment is valid | tx_ord_map: | 
+result: PASS
+CASE C2
+expected: identity right on the external O2A seal outpoint validates; script match is outside RGB
+observed: outpoint bc4f9ef97f730bab952329ff694f47ce0060f2e8b299711013ffddc339b79fd1:0 o2a_script_match true rgb_seal_has_no_script_field true assignments seal ExplicitSeal { txid: bc4f9ef97f730bab952329ff694f47ce0060f2e8b299711013ffddc339b79fd1, vout: Vout(0) } opout 5569fef97b19a551802e4a7fc74f4fa7bb6c3e5b34c006ce7bc59457ca1d6d7d/4101/0 state Void report Consignment is valid | tx_ord_map: | 
+result: PASS
+R entity f8c1a00d8e6fe69db6feb5e4ac17633bd0b5f8acbecab4eb63bcafa967ac3a64 digest 80c55a896f9d8274102d45b941779409a3ad689bdc60dbd5315eb87798113e11 state 50ebfa03f98172daae43960e118de09189e319fdd20a0810afc6f4e177dde487 outpoint ebc849dc9a9f55c3071b1bb4527cb747353d21d5fa0cd86c13ca20e3cf12fb85:0
+R report Consignment is valid | tx_ord_map: | 
+R assignments seal ExplicitSeal { txid: ebc849dc9a9f55c3071b1bb4527cb747353d21d5fa0cd86c13ca20e3cf12fb85, vout: Vout(0) } opout 5fecec3eb825afda770c71477e8d72cbafe170465588925539050eacd2859edf/4101/0 state Void
+C entity 857503c1f89060572a3df9ad2cce485b0a006d674d15c2ee4d9256e24a054a86 digest 13a4c20417ff482255b046f3d0339a9562c792d07735df32449f72ee53438919 state 4a630ac93e10cea8ec61acf691a725101bd944dc6724db7d8019179f0f0effbd outpoint 472bdcb06477f19be995ef64813494c6a941ac97ff09dab15ca73a30d521dabf:0
+C report Consignment is valid | tx_ord_map: | 
+C assignments seal ExplicitSeal { txid: 472bdcb06477f19be995ef64813494c6a941ac97ff09dab15ca73a30d521dabf, vout: Vout(0) } opout 3b62b0dca9a96cd964e42164fc84184d82785ed00744921b538ffedccb124b2d/4101/0 state Void
+D1 entity b52deb671699945055634eb2a25ee70023ac933c0c1bcfa183e0487d6675836a digest 2fb2d61aec8efc1336748d29ac3c3a7a1c22098efadcc6278ff8b3f6761cbd15 state 230dbcdf66126eaf888e92be6055bb5a1932d75b80427283913c34948453b217 outpoint 58e2f6454e6874c50f242d2b7169402b94bff6d9c930654c5941fa35d23a30b5:0
+D1 report Consignment is valid | tx_ord_map: | 
+D1 assignments seal ExplicitSeal { txid: 58e2f6454e6874c50f242d2b7169402b94bff6d9c930654c5941fa35d23a30b5, vout: Vout(0) } opout 5c5f1ad5bc79b3d487cf05478bff8a2d6d2a7efe7e9796f7f0cac9d381b4b8fc/4101/0 state Void
+D2 entity b52deb671699945055634eb2a25ee70023ac933c0c1bcfa183e0487d6675836a digest 2fb2d61aec8efc1336748d29ac3c3a7a1c22098efadcc6278ff8b3f6761cbd15 state 230dbcdf66126eaf888e92be6055bb5a1932d75b80427283913c34948453b217 outpoint 58e2f6454e6874c50f242d2b7169402b94bff6d9c930654c5941fa35d23a30b5:0
+D2 report Consignment is valid | tx_ord_map: | 
+D2 assignments seal ExplicitSeal { txid: 58e2f6454e6874c50f242d2b7169402b94bff6d9c930654c5941fa35d23a30b5, vout: Vout(0) } opout 083a0054f4d9a1e2f9370beb9c79852818826bcc96124250c5b127f6b8dc263b/4101/0 state Void
+C7_unspent same_digest true distinct_ids true d1 Consignment is valid | tx_ord_map: |  d2 Consignment is valid | tx_ord_map: | 
+revoke_offline opid 5d8d1c7b7aa2951bc801927327737ad162716cfefcd8bb48b8c65bb3306dd601 not_broadcast
+CASE C9
+expected: report Tapret on a script-tree host and a key-only host; do not broadcast
+observed: tree err use of taproot script descriptors is not yet supported.; key-only ok witness=70e1eec786ef5d6d85ac78c4f2418bc8b2dc1d177d2047d4c4b530eadecefaaa proof=Tapret(TapretProof { path_proof: TapretPathProof { partner_node: None, nonce: 0 }, internal_pk: XOnlyPublicKey(1f601fd9f5e84dd53b862788d6bf85ce369bdd4ecb1b0f6ee967967ef3f2c2cb00e1da7210df3d083160eadd59ca0a26c6a15de6317ea21c5ba6f157ebd8390c) })
+result: REPORT
+C3 pay.rs:112-121 ContractOutpointsFilter::should_include requires wallet.filter_unspent().should_include and a non-empty stock.contract_assignments_for. pay.rs:535-537 returns CompositionError::InsufficientState when that selection is empty. pay.rs:554-570 calls set_rgb_close_method, set_as_unmodifiable, and rgb_embed; those psrgbt methods do not check wallet ownership. wallet.rs:49-94 RgbWallet wraps WalletProvider. This binary does not construct RgbWallet and does not enable the bp feature. stock finds the seal (true). A fee-only unspent set does not (true). The spike puts the external seal on the PSBT itself.
+CASE C3
+expected: generic PSBT commits the transition; wallet ownership is not assumed by psrgbt
+observed: witness 7827144701eb3c772e04fd9bc019aebc2ad16bc4fce89a73385ad8870ab3baa6 txid 7827144701eb3c772e04fd9bc019aebc2ad16bc4fce89a73385ad8870ab3baa6 transition 09cec6a81a9cef2c235254d5c7709e531c6b66e9303dd64e8d612ad26061f5d7 pay.rs:112-121 ContractOutpointsFilter::should_include requires wallet.filter_unspent().should_include and a non-empty stock.contract_assignments_for. pay.rs:535-537 returns CompositionError::InsufficientState when that selection is empty. pay.rs:554-570 calls set_rgb_close_method, set_as_unmodifiable, and rgb_embed; those psrgbt methods do not check wallet ownership. wallet.rs:49-94 RgbWallet wraps WalletProvider. This binary does not construct RgbWallet and does not enable the bp feature. stock finds the seal (true). A fee-only unspent set does not (true). The spike puts the external seal on the PSBT itself.
+result: PASS
+CASE C4
+expected: script-path broadcast and two independent electrs validators return the same bytes
+observed: mined 109 tx 7827144701eb3c772e04fd9bc019aebc2ad16bc4fce89a73385ad8870ab3baa6 consume mined validators_agree true Consignment is valid | tx_ord_map: | 7827144701eb3c772e04fd9bc019aebc2ad16bc4fce89a73385ad8870ab3baa6 Mined(WitnessPos { layer1: Bitcoin, height: 109, timestamp: 1790643331 }) | 
+result: PASS
+CASE C5
+expected: same recovery hex is non-BIP68-final before maturity and mines after it
+observed: start 109 early {"code":-26,"message":"non-BIP68-final"} last_reject non-BIP68-final allowed_at 117 broadcast_at 117 mined 118 tx "8914ae3368c7de01d527433a1ae4ff8e1171b8f4c04e818a4058e3d84acc35ad"
+result: PASS
+CASE C6
+expected: plain spend of a seal with no commitment; record the 0.11.1 validation text
+observed: mined 119 bitcoin spent rights opout 3b62b0dca9a96cd964e42164fc84184d82785ed00744921b538ffedccb124b2d/4101/0 seal ExplicitSeal { txid: 472bdcb06477f19be995ef64813494c6a941ac97ff09dab15ca73a30d521dabf, vout: Vout(0) } witness None report Consignment is valid | tx_ord_map: | 
+result: PASS
+CASE C7
+expected: both contracts validate on the same unspent outpoint and the same O2A digest; record contract 1 after only contract 2 is spent
+observed: unspent_both true same_digest true ids rgb:XF8a1bx5-s9SHzwV-Hi~_KLW-0qfv5_l-5b38MrJ-04G0uPw rgb:CDoAVPTZ-oeL5Nwv-rnHmFKB-iCa8yWE-kJQxbEn-9rjcJjs mined 120 bitcoin spent contract1_on_outpoint seal ExplicitSeal { txid: 58e2f6454e6874c50f242d2b7169402b94bff6d9c930654c5941fa35d23a30b5, vout: Vout(0) } opout 5c5f1ad5bc79b3d487cf05478bff8a2d6d2a7efe7e9796f7f0cac9d381b4b8fc/4101/0 state Void contract1_rights opout 5c5f1ad5bc79b3d487cf05478bff8a2d6d2a7efe7e9796f7f0cac9d381b4b8fc/4101/0 seal ExplicitSeal { txid: 58e2f6454e6874c50f242d2b7169402b94bff6d9c930654c5941fa35d23a30b5, vout: Vout(0) } witness None contract1_report Consignment is valid | tx_ord_map: | 
+result: PASS
+checks_finished

@@ -1,0 +1,3 @@
+Consignment is valid
+tx_ord_map:
+9d0747b746ed05ba14fc013ed92e6f6af44814f99789254b47ab16e0269a0cae Mined(WitnessPos { layer1: Bitcoin, height: 120, timestamp: 1790643341 })

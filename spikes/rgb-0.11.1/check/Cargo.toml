@@ -1,0 +1,24 @@
+[package]
+name = "rgb011-check"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "rgb011-check"
+path = "src/main.rs"
+
+[dependencies]
+amplify.workspace = true
+hex.workspace = true
+o2a-demo-core.workspace = true
+rgb-api.workspace = true
+rgb-consensus.workspace = true
+rgb-ops.workspace = true
+rgb-psbt-utils.workspace = true
+rgb-schemas.workspace = true
+rgb-strict-encoding.workspace = true
+rgb-strict-types.workspace = true
+serde_json.workspace = true
