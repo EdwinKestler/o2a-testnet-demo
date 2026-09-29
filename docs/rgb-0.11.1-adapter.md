@@ -96,7 +96,7 @@ The default recovery delay inside `o2a-demo-core` is 10 blocks, and the default 
 
 Regtest lineage requires `O2A_DEMO_SEED_FILE`, `O2A_DEMO_NETWORK=regtest`, `RGB_CHAIN=regtest`, and `RGB011_EVIDENCE`. Start it only on a chain whose height is already at least 101. The recorded port chain has H0 `108`, hash `3f7e4a7404599036d852d03aa68136da66ad0e36726c9f8c61a826385b64966c`. Leave every block at or below that height in place.
 
-The stage commands, the cookie path, and the two-laptop stage rule are in [block0-runbook.md](block0-runbook.md). The seed file and the RPC cookie stay outside the repository. On mainnet, `genesis` and `claim` also need `--authorize-mainnet` and the typed word `mainnet`. `plan` and `verify` do not. The binary allows plan, verify, genesis, and the one `official_name` claim. It refuses transitions. Configured mainnet endpoints are read-only, and every mainnet broadcast is refused. The operator's wallet funds the seal.
+The stage commands, the cookie path, and the two-laptop stage rule are in [block0-runbook.md](block0-runbook.md). The seed file and the RPC cookie stay outside the repository. On mainnet, `plan`, `genesis`, and `claim` need `--authorize-mainnet` and the typed word `mainnet` before any key is derived. `verify` does not. A mainnet `plan` requires `O2A_DEMO_SEED_FILE`. On regtest or signet, `O2A_DEMO_UNSAFE_PREVIEW=1` is the only request that prints an address from the published unsafe seed, and that command prints its banner. The binary allows plan, verify, genesis, and the one `official_name` claim. It refuses transitions. Configured mainnet endpoints are read-only, and every mainnet broadcast is refused. The operator's wallet funds the seal.
 
 ## Evidence
 

@@ -32,18 +32,21 @@ Signet identities are disposable. The mainnet block-0 identity is permanent.
 `mainnet`. That profile supplies the network byte, coin type, address
 prefix, RGB chain, backend endpoints, and confirmation depth. The stage
 commands are `plan`, `genesis --seal TXID:VOUT`, `claim`, and `verify`.
-The same names run on every profile. `plan` and `verify` do not ask for
-the session lock. On mainnet, `genesis` and `claim` also need
-`--authorize-mainnet` and the typed word `mainnet`, because those
-commands use keys. Transitions are refused. When mainnet endpoints are
+The same names run on every profile. On mainnet, `plan`, `genesis`, and
+`claim` need `--authorize-mainnet` and the typed word `mainnet` before
+any key is derived. `verify` does not ask for the session lock and leaves
+the seed unset. A mainnet `plan` requires a seed file. It does not print
+an address from the published unsafe seed. On regtest or signet, that
+preview runs only when `O2A_DEMO_UNSAFE_PREVIEW=1`, and the command
+prints its banner. Transitions are refused. When mainnet endpoints are
 configured, transport is read-only. This repository refuses every
 mainnet broadcast, including from an authorized session. The operator's
 wallet funds the seal. No mainnet identity network is running.
 
 Read [DEMO-GATE.md](DEMO-GATE.md) before running or changing the demo.
 Regtest and signet identities created here are disposable. The offline
-mainnet dry run uses the published unsafe seed and is not the block-0
-identity.
+mainnet dry run is a test vector inside the harness. It is not the
+block-0 identity, and it does not call mainnet `plan`.
 
 ## Isolated development environment
 

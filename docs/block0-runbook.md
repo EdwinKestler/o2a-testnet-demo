@@ -36,7 +36,7 @@ DOCKER_CONTEXT=default docker exec signet-infra-bitcoind-1 bitcoin-cli -signet -
 
 Core is published on `127.0.0.1:38332`. Electrum for this stack is `127.0.0.1:60601`. Copy the cookie from the container path `/data/signet/.cookie` to a file outside the repository, and point `BITCOIN_COOKIE` at that copy. Do not print the cookie. Do not commit it. Do not edit `dev/bitcoin.conf` or `dev/compose.yaml`.
 
-`o2a-demo-core` defaults the recovery delay to 10 blocks and the entity index to 0. The ceremony exports `O2A_DEMO_DELAY`, `O2A_DEMO_THRESHOLD`, and `O2A_DEMO_ENTITY` for both `plan` and `genesis`. The seed file stays outside the repository. Set `O2A_NETWORK=signet` for a rehearsal and `O2A_NETWORK=mainnet` for block 0. On mainnet, `genesis` and `claim` also need `--authorize-mainnet` and the typed word `mainnet`. `plan` and `verify` do not ask for that word. `verify` leaves the seed unset. The session may sign genesis and the one `official_name` claim. It refuses transitions. When the operator configures mainnet endpoints, transport is read-only. The binary refuses every mainnet broadcast, including from an authorized session. The operator's wallet funds the seal on every network. Signet identities are disposable. The mainnet block-0 identity is permanent.
+`o2a-demo-core` defaults the recovery delay to 10 blocks and the entity index to 0. The ceremony exports `O2A_DEMO_DELAY`, `O2A_DEMO_THRESHOLD`, and `O2A_DEMO_ENTITY` for both `plan` and `genesis`. The seed file stays outside the repository. Set `O2A_NETWORK=signet` for a rehearsal and `O2A_NETWORK=mainnet` for block 0. On mainnet, `plan`, `genesis`, and `claim` also need `--authorize-mainnet` and the typed word `mainnet`. `plan` requires the seed file before it prints an address. `verify` does not ask for that word and leaves the seed unset. The session may sign genesis and the one `official_name` claim. It refuses transitions. When the operator configures mainnet endpoints, transport is read-only. The binary refuses every mainnet broadcast, including from an authorized session. The operator's wallet funds the seal on every network. Signet identities are disposable. The mainnet block-0 identity is permanent.
 
 The projector stays on the operator laptop:
 
@@ -155,7 +155,7 @@ RGB_CHAIN=signet \
 spikes/rgb-0.11.1/target/debug/rgb011-check plan
 ```
 
-For mainnet, set `O2A_NETWORK=mainnet` and `RGB_CHAIN=mainnet`. The command stays `plan`. `plan` prints `address`, `policy`, and `script_pubkey`. The policy line is the descriptor the operator pays.
+For mainnet, set `O2A_NETWORK=mainnet`, `RGB_CHAIN=mainnet`, and `O2A_DEMO_SEED_FILE`. Run `plan --authorize-mainnet` and type `mainnet` before the command derives keys. The command stays `plan`. `plan` prints `address`, `policy`, and `script_pubkey` from that seed file. The policy line is the descriptor the operator pays.
 
 Then read that address back from Bitcoin Core. The two strings match before anyone sends money.
 

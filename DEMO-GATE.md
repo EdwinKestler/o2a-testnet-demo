@@ -117,10 +117,11 @@ transition it is invalid.
   type `1'`, address prefix `tb`, and confirmation depth `1`. Signet
   identities are disposable.
 - Mainnet is the block-0 profile: network byte `0`, coin type `0'`, address
-  prefix `bc`, and confirmation depth `6`. `plan` and `verify` follow the
-  profile and do not ask for the session lock. `genesis` and the one
-  `official_name` claim use keys, so each of those commands also needs
-  `--authorize-mainnet` and the typed word `mainnet`. Transitions are
+  prefix `bc`, and confirmation depth `6`. `plan`, `genesis`, and the one
+  `official_name` claim use keys, so each needs `--authorize-mainnet` and
+  the typed word `mainnet` before key derivation. `verify` follows the
+  profile and does not ask for the session lock. A mainnet `plan` requires
+  a seed file and does not use the published unsafe seed. Transitions are
   refused. Configured mainnet endpoints are read-only. This repository
   refuses every mainnet broadcast, including from an authorized session.
   The operator's wallet funds the seal. The block-0 identity is

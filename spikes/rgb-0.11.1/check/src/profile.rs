@@ -61,9 +61,12 @@ impl Operation {
         )
     }
 
-    /// Genesis and the official_name claim use keys. Plan and verify do not.
+    /// Plan, genesis, and the official_name claim use keys. Verify does not.
     pub fn needs_session_lock(self) -> bool {
-        matches!(self, Operation::Genesis | Operation::OfficialName)
+        matches!(
+            self,
+            Operation::Plan | Operation::Genesis | Operation::OfficialName
+        )
     }
 }
 
@@ -653,7 +656,7 @@ mod tests {
         let plan = session_banner(&from_kind(NetworkKind::Mainnet), Operation::Plan);
         let stage_verify = session_banner(&from_kind(NetworkKind::Mainnet), Operation::Verify);
         assert!(plan.contains("operation=plan"));
-        assert!(!plan.contains("type mainnet"));
+        assert!(plan.contains("type mainnet to confirm this plan session"));
         assert!(!stage_verify.contains("type mainnet"));
         assert_ne!(regtest, signet);
         assert_ne!(signet, mainnet);
@@ -667,12 +670,15 @@ mod tests {
         let wrong = decide(&mainnet, Operation::Genesis, true, Some("regtest")).expect_err("word");
         assert!(wrong.contains("confirmation"), "{wrong}");
         decide(&mainnet, Operation::Genesis, true, Some("mainnet\n")).expect("genesis");
-        decide(&mainnet, Operation::Plan, false, None).expect("plan");
+        let plan = decide(&mainnet, Operation::Plan, false, None).expect_err("plan flag");
+        assert!(plan.contains("--authorize-mainnet"), "{plan}");
+        decide(&mainnet, Operation::Plan, true, Some("mainnet")).expect("authorized plan");
         decide(&mainnet, Operation::Verify, false, None).expect("verify");
         decide(&mainnet, Operation::OfficialName, true, Some("mainnet")).expect("claim");
         let claim = decide(&mainnet, Operation::OfficialName, false, None).expect_err("claim flag");
         assert!(claim.contains("--authorize-mainnet"), "{claim}");
-        begin_cli(&mainnet, Operation::Plan, true).expect("plan does not read stdin");
+        let plan_cli = begin_cli(&mainnet, Operation::Plan, false).expect_err("plan stdin");
+        assert!(plan_cli.contains("--authorize-mainnet"), "{plan_cli}");
         begin_cli(&mainnet, Operation::Verify, true).expect("verify does not read stdin");
         let genesis = begin_cli(&mainnet, Operation::Genesis, false).expect_err("genesis");
         assert!(genesis.contains("--authorize-mainnet"), "{genesis}");
@@ -831,16 +837,26 @@ mod tests {
         let banner = session_banner(&profile, Operation::Plan);
         assert!(banner.contains("active_network=mainnet"));
         assert!(banner.contains("operation=plan"));
-        assert!(!banner.contains("type mainnet"));
-        decide(&profile, Operation::Plan, false, None).expect("plan");
+        assert!(banner.contains("type mainnet to confirm this plan session"));
+        let missing_plan = decide(&profile, Operation::Plan, false, None).expect_err("plan flag");
+        assert!(
+            missing_plan.contains("--authorize-mainnet"),
+            "{missing_plan}"
+        );
+        decide(&profile, Operation::Plan, true, Some("mainnet")).expect("authorized plan");
         decide(&profile, Operation::Verify, false, None).expect("verify");
         decide(&profile, Operation::Genesis, true, Some("mainnet")).expect("authorized genesis");
         decide(&profile, Operation::OfficialName, true, Some("mainnet")).expect("claim");
         let transition =
             decide(&profile, Operation::Transition, true, Some("mainnet")).expect_err("transition");
         assert!(transition.contains("scope"), "{transition}");
-        crate::lineage::plan(false).expect("plan command");
+        let refused_plan = crate::lineage::plan(false).expect_err("plan command");
+        assert!(
+            refused_plan.contains("--authorize-mainnet"),
+            "{refused_plan}"
+        );
 
+        // Test vector only. The CLI mainnet plan command does not call this path.
         let keys = keys_for(profile.coin_type);
         let regtest_keys = keys_for(from_kind(NetworkKind::Regtest).coin_type);
         assert_ne!(keys.root.xonly, regtest_keys.root.xonly);

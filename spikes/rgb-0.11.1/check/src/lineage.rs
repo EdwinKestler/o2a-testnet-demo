@@ -55,12 +55,9 @@ struct Funded {
 
 pub fn plan(authorize: bool) -> Result<(), String> {
     let active = crate::profile::load()?;
+    // The session lock runs before any key derivation.
     crate::profile::begin_cli(&active, crate::profile::Operation::Plan, authorize)?;
-    if active.kind != crate::profile::NetworkKind::Mainnet {
-        require_seed()?;
-    } else if std::env::var("O2A_DEMO_SEED_FILE").is_err() {
-        eprintln!("preview uses the published unsafe seed; this is not the block-0 identity");
-    }
+    require_plan_seed(active.kind)?;
     let keys = keys_for(active.coin_type);
     let state = genesis_state_from(&keys, [0u8; 36]);
     let seal = seal_for_state(&state).map_err(|err| err.to_string())?;
@@ -1518,6 +1515,20 @@ fn require_seed() -> Result<(), String> {
         return Err("O2A_DEMO_SEED_FILE is required".into());
     }
     Ok(())
+}
+
+/// Mainnet plan requires a real seed file. The published-seed preview is
+/// regtest and signet only, and only when `O2A_DEMO_UNSAFE_PREVIEW=1`.
+fn require_plan_seed(kind: crate::profile::NetworkKind) -> Result<(), String> {
+    if std::env::var("O2A_DEMO_SEED_FILE").is_ok() {
+        return Ok(());
+    }
+    let preview = std::env::var("O2A_DEMO_UNSAFE_PREVIEW").as_deref() == Ok("1");
+    if kind != crate::profile::NetworkKind::Mainnet && preview {
+        eprintln!("preview uses the published unsafe seed; this is not the block-0 identity");
+        return Ok(());
+    }
+    Err("O2A_DEMO_SEED_FILE is required".into())
 }
 
 pub(crate) struct FundingObservation {

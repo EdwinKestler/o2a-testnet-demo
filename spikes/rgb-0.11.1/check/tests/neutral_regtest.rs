@@ -3,7 +3,7 @@
 use std::io::{Read, Write};
 use std::net::TcpStream;
 use std::path::PathBuf;
-use std::process::{Command, Output};
+use std::process::{Command, Output, Stdio};
 use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
@@ -199,6 +199,42 @@ fn run_tool(args: &[&str], env: &[(&str, &str)]) -> Output {
         .unwrap_or_else(|err| panic!("rgb011-check {}: {err}", args.join(" ")))
 }
 
+fn run_tool_stdin(args: &[&str], env: &[(&str, &str)], stdin_text: &str) -> Output {
+    let mut command = Command::new(bin());
+    command
+        .env_clear()
+        .args(args)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped());
+    for (key, value) in env {
+        command.env(key, value);
+    }
+    let mut child = command
+        .spawn()
+        .unwrap_or_else(|err| panic!("rgb011-check {}: {err}", args.join(" ")));
+    child
+        .stdin
+        .as_mut()
+        .expect("stdin")
+        .write_all(stdin_text.as_bytes())
+        .expect("stdin write");
+    child
+        .wait_with_output()
+        .unwrap_or_else(|err| panic!("rgb011-check {}: {err}", args.join(" ")))
+}
+
+fn assert_no_printed_address(output: &Output) {
+    let out = String::from_utf8_lossy(&output.stdout);
+    let err = String::from_utf8_lossy(&output.stderr);
+    assert!(!out.contains("address="), "{out}");
+    assert!(!out.contains("bc1"), "{out}");
+    assert!(
+        !err.contains("preview uses the published unsafe seed"),
+        "{err}"
+    );
+}
+
 fn tool_ok(args: &[&str], env: &[(&str, &str)]) -> String {
     let output = run_tool(args, env);
     if !output.status.success() {
@@ -216,6 +252,73 @@ fn deprecated_alias_sets_no_network() {
     assert!(err.contains("sets no network"), "{err}");
     assert!(err.contains("O2A_DEMO_SEED_FILE is required"), "{err}");
     assert!(!err.contains("must be signet"), "{err}");
+}
+
+#[test]
+fn mainnet_plan_without_authorization_is_refused_before_keys() {
+    let output = run_tool(
+        &["plan"],
+        &[("O2A_NETWORK", "mainnet"), ("O2A_DEMO_UNSAFE_PREVIEW", "1")],
+    );
+    let err = String::from_utf8_lossy(&output.stderr);
+    assert!(!output.status.success(), "{err}");
+    assert!(err.contains("--authorize-mainnet"), "{err}");
+    assert_no_printed_address(&output);
+}
+
+#[test]
+fn authorized_mainnet_plan_without_a_seed_file_prints_no_address() {
+    let output = run_tool_stdin(
+        &["plan", "--authorize-mainnet"],
+        &[("O2A_NETWORK", "mainnet"), ("O2A_DEMO_UNSAFE_PREVIEW", "1")],
+        "mainnet\n",
+    );
+    let err = String::from_utf8_lossy(&output.stderr);
+    assert!(!output.status.success(), "{err}");
+    assert!(err.contains("O2A_DEMO_SEED_FILE is required"), "{err}");
+    assert!(
+        err.contains("type mainnet to confirm this plan session"),
+        "{err}"
+    );
+    assert_no_printed_address(&output);
+}
+
+#[test]
+fn unsafe_preview_runs_only_on_regtest_or_signet_when_requested() {
+    let refused = run_tool(&["plan"], &[("O2A_NETWORK", "regtest")]);
+    let refused_err = String::from_utf8_lossy(&refused.stderr);
+    assert!(!refused.status.success(), "{refused_err}");
+    assert!(
+        refused_err.contains("O2A_DEMO_SEED_FILE is required"),
+        "{refused_err}"
+    );
+    assert_no_printed_address(&refused);
+
+    let regtest = run_tool(
+        &["plan"],
+        &[("O2A_NETWORK", "regtest"), ("O2A_DEMO_UNSAFE_PREVIEW", "1")],
+    );
+    let regtest_err = String::from_utf8_lossy(&regtest.stderr);
+    let regtest_out = String::from_utf8_lossy(&regtest.stdout);
+    assert!(regtest.status.success(), "{regtest_err}\n{regtest_out}");
+    assert!(
+        regtest_err.contains("preview uses the published unsafe seed"),
+        "{regtest_err}"
+    );
+    assert!(regtest_out.contains("address=bcrt1p"), "{regtest_out}");
+
+    let signet = run_tool(
+        &["plan"],
+        &[("O2A_NETWORK", "signet"), ("O2A_DEMO_UNSAFE_PREVIEW", "1")],
+    );
+    let signet_out = String::from_utf8_lossy(&signet.stdout);
+    let signet_err = String::from_utf8_lossy(&signet.stderr);
+    assert!(signet.status.success(), "{signet_err}\n{signet_out}");
+    assert!(
+        signet_err.contains("preview uses the published unsafe seed"),
+        "{signet_err}"
+    );
+    assert!(signet_out.contains("address=tb1p"), "{signet_out}");
 }
 
 #[test]
