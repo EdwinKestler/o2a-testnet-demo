@@ -17,6 +17,7 @@ pub struct Node {
     port: u16,
     auth: String,
     pub miner: String,
+    refuse_broadcast: bool,
 }
 
 impl Node {
@@ -26,7 +27,18 @@ impl Node {
 
     /// `create_miner` is for the disposable regtest wallet. Signet reads leave it false.
     pub fn connect_wallet(create_miner: bool) -> Result<Self, String> {
-        let url = std::env::var("BITCOIN_RPC").unwrap_or_else(|_| "http://127.0.0.1:18445".into());
+        Self::connect_profile(&crate::profile::load()?, create_miner)
+    }
+
+    pub fn connect_profile(
+        active: &crate::profile::NetworkProfile,
+        create_miner: bool,
+    ) -> Result<Self, String> {
+        crate::profile::allow_transport(active)?;
+        let url = active
+            .rpc_url
+            .clone()
+            .ok_or_else(|| "backend endpoints are not configured".to_string())?;
         let (host, port) = parse_http(&url)?;
         let auth = if let (Ok(user), Ok(pass)) = (
             std::env::var("BITCOIN_RPC_USER"),
@@ -34,8 +46,10 @@ impl Node {
         ) {
             base64(format!("{user}:{pass}").as_bytes())
         } else {
-            let cookie_path =
-                std::env::var("BITCOIN_COOKIE").unwrap_or_else(|_| "/tmp/rgb011.cookie".into());
+            let cookie_path = active
+                .cookie_path
+                .clone()
+                .ok_or_else(|| "cookie path is not configured".to_string())?;
             let cookie = std::fs::read_to_string(&cookie_path)
                 .map_err(|err| format!("cookie {cookie_path}: {err}"))?;
             base64(cookie.trim().as_bytes())
@@ -44,9 +58,10 @@ impl Node {
             host,
             port,
             auth,
-            miner: std::env::var("BITCOIN_WALLET").unwrap_or_else(|_| "miner".into()),
+            miner: active.wallet.clone(),
+            refuse_broadcast: active.kind == crate::profile::NetworkKind::Mainnet,
         };
-        if create_miner {
+        if create_miner && active.create_miner_wallet {
             match node.call(false, "createwallet", json!([node.miner])) {
                 Ok(_) => {}
                 Err(err)
@@ -59,6 +74,9 @@ impl Node {
     }
 
     pub fn call(&self, wallet: bool, method: &str, params: Value) -> Result<Value, String> {
+        if self.refuse_broadcast && crate::profile::is_broadcast_method(method) {
+            return Err("mainnet broadcast is refused".into());
+        }
         let response = self.raw(wallet, method, params)?;
         if let Some(err) = response.get("error").filter(|value| !value.is_null()) {
             return Err(err.to_string());
@@ -154,8 +172,13 @@ pub struct ElectrumResolver {
 
 impl ElectrumResolver {
     pub fn open() -> Result<Self, String> {
-        let addr = std::env::var("ELECTRUM").unwrap_or_else(|_| "127.0.0.1:50021".into());
-        let rpc = if chain_net() == ChainNet::BitcoinSignet {
+        let active = crate::profile::load()?;
+        crate::profile::allow_transport(&active)?;
+        let addr = active
+            .electrum
+            .clone()
+            .ok_or_else(|| "backend endpoints are not configured".to_string())?;
+        let rpc = if active.kind == crate::profile::NetworkKind::Signet {
             Node::connect_wallet(false)?
         } else {
             Node::connect()?
@@ -213,13 +236,12 @@ impl ElectrumResolver {
     }
 }
 
-pub fn chain_net() -> ChainNet {
-    match std::env::var("RGB_CHAIN").ok().as_deref() {
-        None | Some("") | Some("regtest") => ChainNet::BitcoinRegtest,
-        Some("signet") => ChainNet::BitcoinSignet,
-        Some("mainnet") => panic!("mainnet is not authorized"),
-        Some(other) => panic!("unknown RGB_CHAIN {other}"),
+pub fn chain_net() -> Result<ChainNet, String> {
+    let active = crate::profile::load()?;
+    if active.rgb_conflict {
+        return Err("RGB_CHAIN does not match the selected network".into());
     }
+    Ok(active.rgb_chain)
 }
 
 pub fn wait_electrs(height: u32) -> Result<(), String> {
@@ -247,6 +269,7 @@ impl ResolveWitness for ElectrumResolver {
                 port: self.rpc.port,
                 auth: self.rpc.auth.clone(),
                 miner: self.rpc.miner.clone(),
+                refuse_broadcast: self.rpc.refuse_broadcast,
             },
             next_id: 1,
         };
@@ -318,10 +341,9 @@ impl ResolveWitness for ElectrumResolver {
     }
 
     fn check_chain_net(&self, offered: ChainNet) -> Result<(), WitnessResolverError> {
-        if offered == chain_net() {
-            Ok(())
-        } else {
-            Err(WitnessResolverError::WrongChainNet)
+        match chain_net() {
+            Ok(expected) if offered == expected => Ok(()),
+            _ => Err(WitnessResolverError::WrongChainNet),
         }
     }
 }

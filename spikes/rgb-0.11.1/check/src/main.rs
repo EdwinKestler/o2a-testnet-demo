@@ -2,6 +2,7 @@
 
 mod chain;
 mod lineage;
+mod profile;
 mod schema;
 mod spend;
 
@@ -18,7 +19,7 @@ use o2a_demo_core::{
 };
 use rgbstd::bitcoin::consensus::encode::deserialize;
 use rgbstd::bitcoin::hashes::Hash;
-use rgbstd::bitcoin::{Address, Amount, Network, OutPoint, ScriptBuf, Transaction, Txid};
+use rgbstd::bitcoin::{Address, Amount, OutPoint, ScriptBuf, Transaction, Txid};
 use rgbstd::containers::{Consignment, ConsignmentExt, Fascia};
 use rgbstd::contract::AllocatedState;
 use rgbstd::persistence::{ContractStateRead, Stock};
@@ -35,14 +36,21 @@ const MINER_FEE: u64 = 15_000;
 const NEXT_SATS: u64 = 100_000;
 
 fn main() {
-    let command = std::env::args().nth(1);
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    let (command, authorize) = match profile::split_args(&args) {
+        Ok(parsed) => parsed,
+        Err(err) => {
+            eprintln!("setup failed: {err}");
+            std::process::exit(1);
+        }
+    };
     let result = match command.as_deref() {
-        Some("lineage") => lineage::run(),
-        Some("plan") => lineage::plan(),
-        Some("signet-genesis") => lineage::signet_genesis(),
-        Some("signet-claim") => lineage::signet_claim(),
-        Some("signet-verify") => lineage::signet_verify(),
-        _ => run(),
+        Some("lineage") => lineage::run(authorize),
+        Some("plan") => lineage::plan(authorize),
+        Some("signet-genesis") => lineage::signet_genesis(authorize),
+        Some("signet-claim") => lineage::signet_claim(authorize),
+        Some("signet-verify") => lineage::signet_verify(authorize),
+        _ => run(authorize),
     };
     if let Err(err) = result {
         eprintln!("setup failed: {err}");
@@ -92,16 +100,16 @@ impl WitnessOrdProvider for TentativeOrd {
     }
 }
 
-fn run() -> Result<(), String> {
+fn run(authorize: bool) -> Result<(), String> {
+    let active = profile::load()?;
+    profile::begin_cli(&active, profile::Operation::Compatibility, authorize)?;
+    profile::require_regtest_command(&active)?;
     let dir =
         PathBuf::from(std::env::var("RGB011_EVIDENCE").map_err(|_| "RGB011_EVIDENCE is required")?);
     let mut log = Log::open(dir)?;
     let _ = rgb::resolvers::ContractIssueResolver;
     if std::env::var("O2A_DEMO_SEED_FILE").is_err() {
         return Err("O2A_DEMO_SEED_FILE is required".into());
-    }
-    if std::env::var("O2A_DEMO_NETWORK").ok().as_deref() != Some("regtest") {
-        return Err("O2A_DEMO_NETWORK must be regtest".into());
     }
     let node = chain::Node::connect()?;
     let height = node.height()?;
@@ -118,7 +126,7 @@ fn run() -> Result<(), String> {
         }
     };
     log.line(&format!("H0 {h0}"));
-    log.line("network regtest");
+    log.line(&format!("network {}", active.kind.label()));
     log.line(&format!(
         "rgb-api link ContractIssueResolver is present; RgbWallet and rgb-lib are not called"
     ));
@@ -569,7 +577,8 @@ fn fund_one(node: &chain::Node, script: &ScriptBuf, sats: u64) -> Result<OutPoin
         .clone();
     let inputs =
         json!([{ "txid": utxo["txid"], "vout": utxo["vout"], "sequence": 4_294_967_294u32 }]);
-    let address = Address::from_script(script, Network::Regtest).map_err(|err| err.to_string())?;
+    let address =
+        Address::from_script(script, profile::load()?.bitcoin).map_err(|err| err.to_string())?;
     let raw = node
         .call(
             true,
@@ -671,7 +680,7 @@ fn validate_one<const TRANSFER: bool>(bytes: &[u8], types: &TypeSystem) -> Resul
     let consignment = load_consignment::<TRANSFER>(bytes)?;
     let resolver = chain::ElectrumResolver::open()?;
     let config = ValidationConfig {
-        chain_net: chain::chain_net(),
+        chain_net: chain::chain_net()?,
         safe_height: None,
         trusted_typesystem: types.clone(),
         build_opouts_dag: false,

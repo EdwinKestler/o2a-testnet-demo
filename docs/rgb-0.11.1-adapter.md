@@ -96,7 +96,7 @@ The default recovery delay inside `o2a-demo-core` is 10 blocks, and the default 
 
 Regtest lineage requires `O2A_DEMO_SEED_FILE`, `O2A_DEMO_NETWORK=regtest`, `RGB_CHAIN=regtest`, and `RGB011_EVIDENCE`. Start it only on a chain whose height is already at least 101. The recorded port chain has H0 `108`, hash `3f7e4a7404599036d852d03aa68136da66ad0e36726c9f8c61a826385b64966c`. Leave every block at or below that height in place.
 
-The signet commands, the cookie path, and the two-laptop stage rule are in [block0-runbook.md](block0-runbook.md). The seed file and the RPC cookie stay outside the repository. The binary refuses `O2A_DEMO_NETWORK=mainnet` and `RGB_CHAIN=mainnet`.
+The signet commands, the cookie path, and the two-laptop stage rule are in [block0-runbook.md](block0-runbook.md). The seed file and the RPC cookie stay outside the repository. `O2A_NETWORK=mainnet` also needs `--authorize-mainnet` and the typed word `mainnet` in that session. The binary then allows a local plan, genesis, and the one `official_name` claim. It refuses transitions and every mainnet broadcast.
 
 ## Evidence
 

@@ -125,9 +125,13 @@ pub fn demo_entity_index() -> u32 {
 }
 
 pub fn demo_keys() -> DemoKeys {
+    keys_for(demo_coin())
+}
+
+/// Route B keys for an explicit coin type. `0` is mainnet. `1` is every other coin.
+pub fn keys_for(coin: u32) -> DemoKeys {
     let seed = demo_seed();
     let entity = demo_entity_index();
-    let coin = demo_coin();
     let key = |role: u32, index: u32| derive::identity_key(&seed, coin, entity, role, index);
     DemoKeys {
         root: key(0, 0),
@@ -241,8 +245,7 @@ pub fn recovery_policy_hash(policy: &RecoveryPolicy) -> [u8; 32] {
     tagged_hash("O2A/v0.1/recovery-policy", &encode_recovery_policy(policy))
 }
 
-pub fn demo_recovery_policy() -> RecoveryPolicy {
-    let keys = demo_keys();
+pub fn recovery_policy_from(keys: &DemoKeys) -> RecoveryPolicy {
     let mut key_ids = [
         key_id(2, keys.recovery_0.xonly),
         key_id(2, keys.recovery_1.xonly),
@@ -257,6 +260,10 @@ pub fn demo_recovery_policy() -> RecoveryPolicy {
         delay_blocks: demo_delay_blocks(),
         cancellation_rule: 1,
     }
+}
+
+pub fn demo_recovery_policy() -> RecoveryPolicy {
+    recovery_policy_from(&demo_keys())
 }
 
 pub fn demo_recovery_policy_bytes() -> Vec<u8> {
@@ -276,7 +283,11 @@ fn sort_bindings(bindings: &mut [SealBinding]) {
 
 /// Genesis names controller 0 and the three recovery keys.
 pub fn demo_genesis_state(next_seal: [u8; 36]) -> ResultingState {
-    let keys = demo_keys();
+    genesis_state_from(&demo_keys(), next_seal)
+}
+
+/// Genesis state for an explicit key set. The caller chooses the coin type.
+pub fn genesis_state_from(keys: &DemoKeys, next_seal: [u8; 36]) -> ResultingState {
     let mut controller_bindings = [binding(
         1,
         keys.controller_0.xonly,
@@ -298,7 +309,7 @@ pub fn demo_genesis_state(next_seal: [u8; 36]) -> ResultingState {
             xonly: keys.controller_0.xonly,
             capabilities: encode::demo_controller_capabilities(),
         }],
-        recovery: demo_recovery_policy(),
+        recovery: recovery_policy_from(keys),
         controller_bindings: controller_bindings.to_vec(),
         recovery_bindings: recovery_bindings.to_vec(),
         lifecycle_status: 1,
@@ -346,15 +357,12 @@ fn sign(tag: &'static str, payload: Vec<u8>, key: DemoKey) -> SignedObject {
 }
 
 pub fn genesis_with(root: DemoKey, state: &ResultingState) -> SignedObject {
-    let mut payload = common_header(
-        demo_network(),
-        1,
-        [0u8; 32],
-        None,
-        key_id(0, root.xonly),
-        0,
-        1,
-    );
+    genesis_for(demo_network(), root, state)
+}
+
+/// Genesis for an explicit network byte. The byte is the caller's profile value.
+pub fn genesis_for(network: u8, root: DemoKey, state: &ResultingState) -> SignedObject {
+    let mut payload = common_header(network, 1, [0u8; 32], None, key_id(0, root.xonly), 0, 1);
     payload.extend_from_slice(&2u16.to_le_bytes());
     payload.extend_from_slice(&root.xonly);
     payload.extend_from_slice(&encode_resulting_state(state));
@@ -692,6 +700,21 @@ mod tests {
     fn authority_is_pinned() {
         assert_eq!(SPEC_COMMIT.len(), 40);
         assert_eq!(CANONICAL_RULES.len(), 4);
+    }
+
+    #[test]
+    fn explicit_coin_and_network_match_the_env_helpers() {
+        let keys = demo_keys();
+        assert_eq!(keys, keys_for(demo_coin()));
+        let next = [9u8; 36];
+        let state = demo_genesis_state(next);
+        let encoded = encode_resulting_state(&state);
+        assert_eq!(
+            encoded,
+            encode_resulting_state(&genesis_state_from(&keys, next))
+        );
+        let signed = genesis_with(keys.root, &state);
+        assert_eq!(signed, genesis_for(demo_network(), keys.root, &state));
     }
 
     fn fresh_key(fill: u8) -> DemoKey {

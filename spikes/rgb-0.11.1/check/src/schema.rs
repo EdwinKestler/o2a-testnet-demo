@@ -128,7 +128,7 @@ pub fn issue_at(
 ) -> Result<rgbstd::containers::ValidConsignment<false>, String> {
     issue_on(
         prepared,
-        ChainNet::BitcoinRegtest,
+        crate::profile::load()?.rgb_chain,
         digest,
         outpoint,
         blinding,

@@ -25,13 +25,21 @@ disposable lineage evidence. The operator runbook is
 [docs/block0-runbook.md](docs/block0-runbook.md). The commercial script is
 [docs/guion-demo.md](docs/guion-demo.md).
 
-Regtest is the development and evidence network. Signet is the rehearsal
-network. The network for a later public event is a maintainer decision.
-This repository does not perform a mainnet mint. Mainnet is out of scope.
+Regtest is the development network. Signet is the rehearsal network.
+Signet identities are disposable. The mainnet block-0 identity is permanent.
+
+`O2A_NETWORK` selects one profile: `regtest` (the default), `signet`, or
+`mainnet`. That profile supplies the network byte, coin type, address
+prefix, RGB chain, backend endpoints, and confirmation depth. A mainnet
+session also needs `--authorize-mainnet` and the typed word `mainnet`.
+On mainnet the session may build genesis and the one `official_name`
+claim. Transitions are refused. This repository refuses every mainnet
+broadcast. No mainnet identity network is running.
 
 Read [DEMO-GATE.md](DEMO-GATE.md) before running or changing the demo.
-Every identity created here is disposable and permanently unsuitable for
-mainnet or production use.
+Regtest and signet identities created here are disposable. The offline
+mainnet dry run uses the published unsafe seed and is not the block-0
+identity.
 
 ## Isolated development environment
 

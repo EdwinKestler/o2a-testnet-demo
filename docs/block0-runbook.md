@@ -36,7 +36,7 @@ DOCKER_CONTEXT=default docker exec signet-infra-bitcoind-1 bitcoin-cli -signet -
 
 Core is published on `127.0.0.1:38332`. Electrum for this stack is `127.0.0.1:60601`. Copy the cookie from the container path `/data/signet/.cookie` to a file outside the repository, and point `BITCOIN_COOKIE` at that copy. Do not print the cookie. Do not commit it. Do not edit `dev/bitcoin.conf` or `dev/compose.yaml`.
 
-`o2a-demo-core` defaults the recovery delay to 10 blocks and the entity index to 0. The ceremony exports `O2A_DEMO_DELAY`, `O2A_DEMO_THRESHOLD`, and `O2A_DEMO_ENTITY` for both `plan` and `signet-genesis`. The seed file stays outside the repository. The binary refuses `O2A_DEMO_NETWORK=mainnet` and `RGB_CHAIN=mainnet`.
+`o2a-demo-core` defaults the recovery delay to 10 blocks and the entity index to 0. The ceremony exports `O2A_DEMO_DELAY`, `O2A_DEMO_THRESHOLD`, and `O2A_DEMO_ENTITY` for both `plan` and `signet-genesis`. The seed file stays outside the repository. This rehearsal stays on signet. A mainnet session needs `O2A_NETWORK=mainnet`, `--authorize-mainnet`, and the typed word `mainnet`. That session may build genesis and the one `official_name` claim. It refuses transitions and every mainnet broadcast. Signet identities are disposable. The mainnet block-0 identity is permanent.
 
 The projector stays on the operator laptop:
 

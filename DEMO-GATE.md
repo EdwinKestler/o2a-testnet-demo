@@ -109,14 +109,30 @@ transition it is invalid.
 
 ## Networks
 
-- Regtest is used now for development and append-only evidence.
-- The default public Bitcoin signet is the later live target. It uses network
-  byte `3`, coin type `1'`, and confirmation depth `1`.
-- Testnet3 is not wired. Mainnet is out of scope.
+- `O2A_NETWORK` selects one profile: `regtest` (the default), `signet`, or
+  `mainnet`. Code outside that profile does not keep a second network table.
+- Regtest is the development and evidence network. The profile uses network
+  byte `4`, coin type `1'`, address prefix `bcrt`, and confirmation depth `1`.
+- Signet is the rehearsal network. The profile uses network byte `3`, coin
+  type `1'`, address prefix `tb`, and confirmation depth `1`. Signet
+  identities are disposable.
+- Mainnet is the block-0 profile: network byte `0`, coin type `0'`, address
+  prefix `bc`, and confirmation depth `6`. Each session also needs
+  `--authorize-mainnet` and the typed word `mainnet`. The session may build
+  genesis and the one `official_name` claim. Transitions are refused. This
+  repository refuses every mainnet broadcast. The block-0 identity is
+  permanent. No mainnet identity network is running.
+- Testnet and testnet4 stay recognized for verification. They are not
+  selectable profiles.
 
 ## Non-negotiable identity warning
 
-Every identity created by this demo is disposable. Before creation, the CLI
-must display that warning and require explicit acknowledgement. Demo keys,
-identities, RGB state, proof packages, and evidence must never be promoted to
-mainnet or treated as persistent production identities.
+Regtest and signet identities created by this demo are disposable. Before
+creating one, the CLI must display that warning and require explicit
+acknowledgement. Demo keys, rehearsal identities, RGB state, proof packages,
+and evidence must never be promoted to mainnet.
+
+The mainnet block-0 identity is permanent. This repository does not describe
+it as disposable and does not offer a reset that would mint it again under
+the same identifier. Creating it needs the mainnet profile,
+`--authorize-mainnet`, and the typed word `mainnet` in that session.
