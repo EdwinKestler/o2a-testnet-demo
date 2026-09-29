@@ -33,7 +33,7 @@ pub use eval::{
 };
 pub use seal::{recovery_leaf, script_num, seal_script, SealScript, NUMS_X};
 
-pub const SPEC_COMMIT: &str = "0a8d54f30b431661adefdbf1d4cdb10a42eca47a";
+pub const SPEC_COMMIT: &str = "42fbb86532b9c16ae9c9d78c954d20e2cac9249d";
 pub const CANONICAL_RULES: [&str; 4] = [
     "../o2a-protocol/specs/canonical-encoding.md",
     "../o2a-protocol/specs/cryptographic-profile.md",

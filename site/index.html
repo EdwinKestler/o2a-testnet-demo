@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Material público para la demostración de O2A. Signet es la red del ensayo. La red del evento sigue pendiente.">
-  <title>O2A — demostración en Bitcoin signet</title>
+  <meta name="description" content="La identidad del evento se crea en Bitcoin mainnet y es permanente. Los ensayos corren en signet. No es un lanzamiento de producto.">
+  <title>O2A — la identidad del evento en Bitcoin mainnet</title>
   <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -14,16 +14,16 @@
       <span class="brand">O2A / DEMO</span>
       <span class="language"><span aria-current="page">ES</span><a href="en/" lang="en">EN</a></span>
     </nav>
-    <p class="eyebrow">Demostración · red de ensayo</p>
-    <h1>O2A — demostración en Bitcoin signet</h1>
+    <p class="eyebrow">Demostración · mainnet</p>
+    <h1>O2A — la identidad del evento en Bitcoin mainnet</h1>
     <p class="lede">El primer EntityID de O2A se acuña en vivo. El sello ya está financiado, con 6 confirmaciones. En el escenario se firma la génesis, el EntityID aparece de inmediato, dos verificadores dicen CURRENT, el artista firma el nombre oficial y se restaura la copia de respaldo.</p>
-    <p class="section-intro">Signet es la red del ensayo. La red de un evento público sigue siendo una decisión del maintainer.</p>
+    <p class="section-intro">La identidad del evento se crea en Bitcoin mainnet y es permanente. Los ensayos corren en signet.</p>
     <div class="claim-grid" aria-label="Lo que no afirmamos">
-      <div class="claim"><strong>No está en producción.</strong> Esta demostración no es un lanzamiento. La red del evento requiere autorización explícita del maintainer y sigue pendiente. Signet es la red de ensayo.</div>
+      <div class="claim"><strong>No es un lanzamiento de producto.</strong> La identidad del evento se crea en Bitcoin mainnet y es permanente. Los ensayos corren en signet.</div>
       <div class="claim"><strong>Las identidades de ensayo (signet) son pruebas y se descartan.</strong></div>
       <div class="claim"><strong>No reemplaza ticketing.</strong> No afirma sustituir el sistema actual de venta de entradas.</div>
     </div>
-    <p class="warning">Antes de crear una identidad de ensayo, el participante oye que es de prueba y se descarta. En un evento, oye la frase que corresponde a la red que el maintainer autorice.</p>
+    <p class="warning">Antes de crear una identidad de ensayo, el participante oye que es de prueba y se descarta. En el evento oye: "Esta identidad es permanente y pertenece al artista. Su respaldo queda en dos lugares, uno en manos del artista."</p>
   </header>
 
   <main id="contenido">
@@ -40,7 +40,7 @@
         <article class="act">
           <div class="act-number">Acto 2 · acuerdo</div>
           <div><h3>Lo que ves</h3><p>Dos verificadores, en dos laptops, dicen CURRENT. Si no coinciden, las dos líneas se quedan en pantalla.</p></div>
-          <div class="underneath"><h3>Qué ocurre debajo</h3><p>Cada laptop corre <span class="mono">rgb011-check signet-verify</span> sin la semilla. Lo ideal es que usen backends de Bitcoin distintos. El ensayo 3 usó dos carpetas en una sola máquina.</p></div>
+          <div class="underneath"><h3>Qué ocurre debajo</h3><p>Cada laptop comprueba el paquete contra Bitcoin mainnet, sin la semilla. Lo ideal es que usen backends distintos. El ensayo 3, en signet, usó dos carpetas en una sola máquina.</p></div>
         </article>
         <article class="act">
           <div class="act-number">Acto 3 · nombre</div>
@@ -51,9 +51,8 @@
 
       <aside class="pending-panel" aria-labelledby="pending">
         <h3 id="pending">Decisiones todavía abiertas</h3>
-        <p>Cada ficha sigue abierta. El texto es un ejemplo, no una decisión. D2 es el claim <span class="mono">official_name</span>. D5 es el sello prefinanciado. Esas dos ya no están en esta lista.</p>
+        <p>Cada ficha sigue abierta. El texto es un ejemplo, no una decisión. D2 es el claim <span class="mono">official_name</span>. D5 es el sello prefinanciado. D8 es Bitcoin mainnet, decisión del maintainer 2026-09-29, ADR-0011. Esas tres ya no están en esta lista.</p>
         <ul class="pending-list">
-          <li class="pending-chip" data-source="red del evento: autorización explícita del maintainer">red del evento: autorización explícita del maintainer</li>
           <li class="pending-chip" data-source="sujeto: sin nombre real">D1 · sujeto: sin nombre real</li>
           <li class="pending-chip" data-source="verificadores: dos laptops nuestras, o nuestras laptops más un verificador público en los teléfonos del público">D3 · verificadores: dos laptops nuestras, o nuestras laptops más un verificador público en los teléfonos del público</li>
           <li class="pending-chip" data-source="duración del segmento">D4 · duración del segmento</li>
@@ -79,7 +78,8 @@
             <tr><td>Nombre oficial</td><td>El claim <span class="mono">official_name</span>. Lo firma el controlador. No gasta Bitcoin.</td></tr>
             <tr><td>Controlador</td><td>La llave que firma el nombre oficial.</td></tr>
             <tr><td>Recuperación</td><td>2 de 3, después de una demora. No se ejecuta en el escenario.</td></tr>
-            <tr><td>Signet</td><td>La red del ensayo. Las monedas de prueba no tienen valor.</td></tr>
+            <tr><td>Signet</td><td>La red del ensayo. Las monedas de prueba no tienen valor. Una identidad de ensayo es de prueba y se descarta.</td></tr>
+            <tr><td>Mainnet</td><td>La red del evento. La identidad es permanente y pertenece al artista.</td></tr>
             <tr><td>RGB</td><td>El carrier de las transiciones futuras, cuando el programa sea final.</td></tr>
           </tbody>
         </table>
@@ -117,10 +117,10 @@
           <div class="table-wrap">
             <table>
               <thead><tr><th>Fecha</th><th>Objeto</th><th>Txid</th><th>Bloque</th><th>Explorador</th></tr></thead>
-              <tbody><tr><td colspan="5">Vacío a propósito. Se llena después de un evento público. El ensayo 3 no ocupa esta fila.</td></tr></tbody>
+              <tbody><tr><td colspan="5">Vacío a propósito. Se llena después del evento en mainnet. El ensayo 3 no ocupa esta fila.</td></tr></tbody>
             </table>
           </div>
-          <p><a href="https://mempool.space/signet" target="_blank" rel="noopener noreferrer">Abrir el explorador público de signet<span aria-hidden="true"> ↗</span></a></p>
+          <p><a href="https://mempool.space/" target="_blank" rel="noopener noreferrer">Abrir el explorador público de Bitcoin<span aria-hidden="true"> ↗</span></a></p>
         </article>
       </div>
     </section>
@@ -129,8 +129,8 @@
       <p class="eyebrow">05 / Haz la prueba</p>
       <h2 id="verificar">Verifícalo tú mismo</h2>
       <div class="verify-box">
-        <p>El evento todavía no tiene un paquete público. El ensayo 3 está en <span class="mono">evidence/signet-block0-rehearsal-3-2026-09-28</span>.</p>
-        <p>La comprobación del adaptador 0.11.1 es <span class="mono">spikes/rgb-0.11.1/target/debug/rgb011-check signet-verify</span>:</p>
+        <p>El evento en mainnet todavía no tiene un paquete público. El ensayo 3, en signet, está en <span class="mono">evidence/signet-block0-rehearsal-3-2026-09-28</span>.</p>
+        <p>La comprobación de ese ensayo, en el adaptador 0.11.1, es <span class="mono">spikes/rgb-0.11.1/target/debug/rgb011-check signet-verify</span>:</p>
         <pre><code>env -u O2A_DEMO_SEED_FILE -u O2A_DEMO_ENTITY \
 RGB_CHAIN=signet \
 RGB011_EVIDENCE=PACKAGE_DIR \
@@ -144,7 +144,8 @@ spikes/rgb-0.11.1/target/debug/rgb011-check signet-verify</code></pre>
       <h2 id="preguntas">Preguntas</h2>
       <div class="questions">
         <article class="question"><h3>¿Esto es cripto o tokens?</h3><p>No hay un token O2A. Bitcoin fija el sello del EntityID y el orden de esa salida.</p></article>
-        <article class="question"><h3>¿Cuánto cuesta cada firma?</h3><p>El nombre oficial es un objeto firmado y no cuesta una transacción de Bitcoin. El sello se paga antes. Si el evento es en signet, las monedas no tienen valor. Si el evento es en mainnet, solo con autorización explícita del maintainer.</p></article>
+        <article class="question"><h3>¿Cuánto cuesta cada firma?</h3><p>El nombre oficial es un objeto firmado y no cuesta una transacción de Bitcoin. El sello se paga antes, con al menos 48 horas y 6 confirmaciones. En mainnet, el sello es un pago de Bitcoin ya confirmado.</p></article>
+        <article class="question"><h3>¿Por qué mainnet?</h3><p>La identidad tiene que ser real y permanente para pertenecer al artista. Todo se ensayó tres veces en signet. La red es una configuración, el mismo código.</p></article>
         <article class="question"><h3>¿Por qué RGB?</h3><p>RGB es el carrier de las transiciones, cuando el programa sea final. El claim del escenario no paga una transacción. El sello de Bitcoin es el ancla del EntityID.</p></article>
         <article class="question"><h3>¿Y si el artista pierde la llave?</h3><p>La recuperación es 2 de 3, con demora. La oferta por defecto es 1008 bloques. Hacen falta dos de las tres llaves. La recuperación no se hace en el escenario.</p></article>
         <article class="question"><h3>¿Por qué no una base de datos nuestra?</h3><p>Porque las dos laptops leen el mismo paquete sin consultar un servicio de O2A.</p></article>

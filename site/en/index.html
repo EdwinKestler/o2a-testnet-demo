@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Public material for the O2A demonstration. Signet is the rehearsal network. The event network is still pending.">
-  <title>O2A — demonstration on Bitcoin signet</title>
+  <meta name="description" content="The event identity is created on Bitcoin mainnet and is permanent. Rehearsals run on signet. This is not a product release.">
+  <title>O2A — event identity on Bitcoin mainnet</title>
   <link rel="stylesheet" href="../assets/style.css">
 </head>
 <body>
@@ -14,16 +14,16 @@
       <span class="brand">O2A / DEMO</span>
       <span class="language"><a href="../" lang="es">ES</a><span aria-current="page">EN</span></span>
     </nav>
-    <p class="eyebrow">Demonstration · rehearsal network</p>
-    <h1>O2A — demonstration on Bitcoin signet</h1>
+    <p class="eyebrow">Demonstration · mainnet</p>
+    <h1>O2A — event identity on Bitcoin mainnet</h1>
     <p class="lede">The first O2A EntityID is minted live. Its seal is already funded and has 6 confirmations. On stage the artist signs the genesis, the EntityID appears immediately, two verifiers report CURRENT, the artist signs the official name, and the package is restored from backup.</p>
-    <p class="section-intro">Signet is the rehearsal network. The network of a public event remains a maintainer decision.</p>
+    <p class="section-intro">The event identity is created on Bitcoin mainnet and is permanent. Rehearsals run on signet.</p>
     <div class="claim-grid" aria-label="What we are not claiming">
-      <div class="claim"><strong>It is not in production.</strong> This demonstration is not a release. The event network needs the maintainer's explicit authorization and is still pending. Signet is the rehearsal network.</div>
+      <div class="claim"><strong>This is not a product release.</strong> The event identity is created on Bitcoin mainnet and is permanent. Rehearsals run on signet.</div>
       <div class="claim"><strong>Rehearsal identities (signet) are tests and are discarded.</strong></div>
       <div class="claim"><strong>It does not replace ticketing.</strong> It makes no claim to replace today's ticket-sales systems.</div>
     </div>
-    <p class="warning">Before a rehearsal identity is created, the participant hears that it is a test and will be discarded. At an event, they hear the sentence that matches the network the maintainer authorizes.</p>
+    <p class="warning">Before a rehearsal identity is created, the participant hears that it is a test and will be discarded. At the event they hear: "This identity is permanent and belongs to the artist. Its backup stays in two places, one of them with the artist."</p>
   </header>
 
   <main id="content">
@@ -40,7 +40,7 @@
         <article class="act">
           <div class="act-number">Act 2 · agreement</div>
           <div><h3>What you see</h3><p>Two verifiers, on two laptops, report CURRENT. If they disagree, both lines stay on the page.</p></div>
-          <div class="underneath"><h3>What happens underneath</h3><p>Each laptop runs <span class="mono">rgb011-check signet-verify</span> with the seed unset. Ideally they use different Bitcoin backends. Rehearsal 3 used two directories on one machine.</p></div>
+          <div class="underneath"><h3>What happens underneath</h3><p>Each laptop checks the package against Bitcoin mainnet, with the seed unset. Ideally they use different backends. Rehearsal 3, on signet, used two directories on one machine.</p></div>
         </article>
         <article class="act">
           <div class="act-number">Act 3 · name</div>
@@ -51,9 +51,8 @@
 
       <aside class="pending-panel" aria-labelledby="pending">
         <h3 id="pending">Decisions still open</h3>
-        <p>Every chip is still open. The text is a placeholder, not a decision. D2 is the <span class="mono">official_name</span> claim. D5 is the pre-funded seal. Those two are no longer in this list.</p>
+        <p>Every chip is still open. The text is a placeholder, not a decision. D2 is the <span class="mono">official_name</span> claim. D5 is the pre-funded seal. D8 is Bitcoin mainnet, maintainer decision 2026-09-29, ADR-0011. Those three are no longer in this list.</p>
         <ul class="pending-list">
-          <li class="pending-chip" data-source="red del evento: autorización explícita del maintainer">event network: explicit maintainer authorization</li>
           <li class="pending-chip" data-source="sujeto: sin nombre real">D1 · subject, with no real name</li>
           <li class="pending-chip" data-source="verificadores: dos laptops nuestras, o nuestras laptops más un verificador público en los teléfonos del público">D3 · two of our laptops, or our laptops plus a public verifier on audience phones</li>
           <li class="pending-chip" data-source="duración del segmento">D4 · segment length</li>
@@ -79,7 +78,8 @@
             <tr><td>Official name</td><td>The <span class="mono">official_name</span> claim. The controller signs it. It spends no Bitcoin.</td></tr>
             <tr><td>Controller</td><td>The key that signs the official name.</td></tr>
             <tr><td>Recovery</td><td>2 of 3, after a delay. It is not performed on stage.</td></tr>
-            <tr><td>Signet</td><td>The rehearsal network. The test coins have no value.</td></tr>
+            <tr><td>Signet</td><td>The rehearsal network. The test coins have no value. A rehearsal identity is a test and is discarded.</td></tr>
+            <tr><td>Mainnet</td><td>The event network. The identity is permanent and belongs to the artist.</td></tr>
             <tr><td>RGB</td><td>The carrier for later transitions, once the program is final.</td></tr>
           </tbody>
         </table>
@@ -117,10 +117,10 @@
           <div class="table-wrap">
             <table>
               <thead><tr><th>Date</th><th>Object</th><th>Txid</th><th>Block</th><th>Explorer</th></tr></thead>
-              <tbody><tr><td colspan="5">Intentionally empty. Filled after a public event. Rehearsal 3 does not occupy this row.</td></tr></tbody>
+              <tbody><tr><td colspan="5">Intentionally empty. Filled after the mainnet event. Rehearsal 3 does not occupy this row.</td></tr></tbody>
             </table>
           </div>
-          <p><a href="https://mempool.space/signet" target="_blank" rel="noopener noreferrer">Open the public signet explorer<span aria-hidden="true"> ↗</span></a></p>
+          <p><a href="https://mempool.space/" target="_blank" rel="noopener noreferrer">Open the public Bitcoin explorer<span aria-hidden="true"> ↗</span></a></p>
         </article>
       </div>
     </section>
@@ -129,8 +129,8 @@
       <p class="eyebrow">05 / Try it</p>
       <h2 id="verify">Verify it yourself</h2>
       <div class="verify-box">
-        <p>The event has not produced a public package. Rehearsal 3 is in <span class="mono">evidence/signet-block0-rehearsal-3-2026-09-28</span>.</p>
-        <p>The 0.11.1 check is <span class="mono">spikes/rgb-0.11.1/target/debug/rgb011-check signet-verify</span>:</p>
+        <p>The mainnet event has not produced a public package. Rehearsal 3, on signet, is in <span class="mono">evidence/signet-block0-rehearsal-3-2026-09-28</span>.</p>
+        <p>The check for that rehearsal, on the 0.11.1 adapter, is <span class="mono">spikes/rgb-0.11.1/target/debug/rgb011-check signet-verify</span>:</p>
         <pre><code>env -u O2A_DEMO_SEED_FILE -u O2A_DEMO_ENTITY \
 RGB_CHAIN=signet \
 RGB011_EVIDENCE=PACKAGE_DIR \
@@ -144,7 +144,8 @@ spikes/rgb-0.11.1/target/debug/rgb011-check signet-verify</code></pre>
       <h2 id="questions">Questions</h2>
       <div class="questions">
         <article class="question"><h3>Is this crypto or tokens?</h3><p>There is no O2A token. Bitcoin anchors the EntityID seal and the order of that output.</p></article>
-        <article class="question"><h3>What does each signature cost?</h3><p>The official name is a signed object and costs no Bitcoin transaction. The seal is funded ahead of the show. If the event is on signet, the coins have no value. If the event is on mainnet, that happens only with the maintainer's explicit authorization.</p></article>
+        <article class="question"><h3>What does each signature cost?</h3><p>The official name is a signed object and costs no Bitcoin transaction. The seal is funded at least 48 hours ahead and already has 6 confirmations. On mainnet, the seal is a confirmed Bitcoin payment.</p></article>
+        <article class="question"><h3>Why mainnet?</h3><p>The identity has to be real and permanent to belong to the artist. Everything was rehearsed three times on signet. The network is a configuration, the same code.</p></article>
         <article class="question"><h3>Why RGB?</h3><p>RGB carries later transitions once the program is final. The stage claim pays no Bitcoin transaction. The Bitcoin seal is the EntityID's anchor.</p></article>
         <article class="question"><h3>What if the artist loses their key?</h3><p>Recovery is 2 of 3, with a delay. The default offer is 1008 blocks. Any two of the three recovery keys can act after that delay. Recovery is not performed on stage.</p></article>
         <article class="question"><h3>Why not use our database?</h3><p>The two laptops read the same package without querying an O2A service.</p></article>
