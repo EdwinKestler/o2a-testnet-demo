@@ -1,7 +1,7 @@
 # O2A Demo Gate
 
 **Status:** mandatory boundary for the disposable testnet demonstration.
-Specification authority: sibling `../o2a-protocol` at commit `0a8d54f30b431661adefdbf1d4cdb10a42eca47a`.
+Specification authority: sibling `../o2a-protocol` at commit `42fbb86532b9c16ae9c9d78c954d20e2cac9249d`.
 
 Maintained RGB line: rgb-protocol `0.11.1`, close method Opret. The adapter
 lives in the separate workspace `spikes/rgb-0.11.1`. `o2a-demo-core` has no
