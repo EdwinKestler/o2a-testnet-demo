@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "o2a.verify/v1",
+  "title": "O2A verify document v1",
+  "description": "One verification. entity_id, state_id, and the seal outpoint are recomputed from the signed genesis. official_name is recomputed from the signed claim. package.json is not an input.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "network",
+    "verifier_id",
+    "entity_id",
+    "state_id",
+    "identity_history_state",
+    "layers",
+    "reasons"
+  ],
+  "properties": {
+    "network": {
+      "type": "string",
+      "enum": ["regtest", "signet", "mainnet"]
+    },
+    "verifier_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "entity_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "state_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "identity_history_state": {
+      "type": "string",
+      "enum": [
+        "CURRENT",
+        "PENDING_CONFIRMATION",
+        "INCOMPLETE",
+        "INVALID",
+        "SEAL_CLOSED_WITHOUT_VALID_TRANSITION"
+      ]
+    },
+    "layers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bitcoin", "rgb", "o2a"],
+      "properties": {
+        "bitcoin": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "seal_outpoint",
+            "confirmations",
+            "required_depth",
+            "unspent",
+            "source",
+            "best_block_hash",
+            "height"
+          ],
+          "properties": {
+            "seal_outpoint": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^[0-9a-f]{64}:[0-9]+$"
+            },
+            "confirmations": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "required_depth": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "unspent": {
+              "type": "boolean"
+            },
+            "source": {
+              "type": "string",
+              "minLength": 1
+            },
+            "best_block_hash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "height": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "rgb": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["status"],
+          "properties": {
+            "status": {
+              "type": "string"
+            }
+          }
+        },
+        "o2a": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["genesis_valid", "claim_valid", "official_name"],
+          "properties": {
+            "genesis_valid": {
+              "type": "boolean"
+            },
+            "claim_valid": {
+              "type": "boolean"
+            },
+            "official_name": {
+              "type": ["string", "null"]
+            }
+          }
+        }
+      }
+    },
+    "reasons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

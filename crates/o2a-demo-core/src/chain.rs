@@ -32,6 +32,9 @@ pub struct LineageEvidence {
     pub anchor: Option<InclusionProof>,
     pub observation: Option<CurrentSealView>,
     pub o2a_ok: bool,
+    /// Whether the spend of the current seal is authorized by a valid O2A
+    /// successor. This is separate from validity of the genesis and claims.
+    pub valid_transition: bool,
     pub best_height: u32,
     pub required_depth: u32,
 }
@@ -40,7 +43,7 @@ pub struct LineageEvidence {
 pub struct LineageReport {
     pub identity_history_state: &'static str,
     pub bitcoin: &'static str,
-    pub rgb: &'static str,
+    pub rgb: String,
     pub o2a: &'static str,
     pub header_trust: &'static str,
 }
@@ -85,7 +88,7 @@ fn at_depth(best_height: u32, height: u32, required_depth: u32) -> bool {
 /// `INVALID` is a script that does not match the policy.
 /// `PENDING_CONFIRMATION` is a seal-creating transaction on the named chain
 /// below the required depth. `INCOMPLETE` is a missing proof or observation.
-pub fn evaluate_lineage(evidence: &LineageEvidence, rgb: &'static str) -> LineageReport {
+pub fn evaluate_lineage(evidence: &LineageEvidence, rgb: &str) -> LineageReport {
     let header_trust =
         "headers come from one electrs instance; this is a trust assumption, not a light client";
     let script_mismatch = evidence
@@ -96,7 +99,7 @@ pub fn evaluate_lineage(evidence: &LineageEvidence, rgb: &'static str) -> Lineag
         return LineageReport {
             identity_history_state: "INVALID",
             bitcoin: "script does not match the policy",
-            rgb,
+            rgb: rgb.to_string(),
             o2a: if evidence.o2a_ok {
                 "objects accepted"
             } else {
@@ -130,7 +133,7 @@ pub fn evaluate_lineage(evidence: &LineageEvidence, rgb: &'static str) -> Lineag
         return LineageReport {
             identity_history_state: "INCOMPLETE",
             bitcoin: "seal-creating transaction is absent from the named best chain",
-            rgb,
+            rgb: rgb.to_string(),
             o2a: if evidence.o2a_ok {
                 "objects accepted"
             } else {
@@ -143,7 +146,7 @@ pub fn evaluate_lineage(evidence: &LineageEvidence, rgb: &'static str) -> Lineag
         return LineageReport {
             identity_history_state: "PENDING_CONFIRMATION",
             bitcoin: "seal-creating transaction is below the required depth",
-            rgb,
+            rgb: rgb.to_string(),
             o2a: if evidence.o2a_ok {
                 "objects accepted"
             } else {
@@ -156,7 +159,7 @@ pub fn evaluate_lineage(evidence: &LineageEvidence, rgb: &'static str) -> Lineag
         return LineageReport {
             identity_history_state: "INCOMPLETE",
             bitcoin: "current seal was not observed",
-            rgb,
+            rgb: rgb.to_string(),
             o2a: if evidence.o2a_ok {
                 "objects accepted"
             } else {
@@ -169,7 +172,7 @@ pub fn evaluate_lineage(evidence: &LineageEvidence, rgb: &'static str) -> Lineag
         return LineageReport {
             identity_history_state: "CURRENT",
             bitcoin: "current seal is unspent and the supplied proofs meet the header",
-            rgb,
+            rgb: rgb.to_string(),
             o2a: if evidence.o2a_ok {
                 "objects accepted"
             } else {
@@ -182,7 +185,7 @@ pub fn evaluate_lineage(evidence: &LineageEvidence, rgb: &'static str) -> Lineag
         return LineageReport {
             identity_history_state: "INCOMPLETE",
             bitcoin: "spent seal has no inclusion proof",
-            rgb,
+            rgb: rgb.to_string(),
             o2a: if evidence.o2a_ok {
                 "objects accepted"
             } else {
@@ -197,7 +200,7 @@ pub fn evaluate_lineage(evidence: &LineageEvidence, rgb: &'static str) -> Lineag
         return LineageReport {
             identity_history_state: "INCOMPLETE",
             bitcoin: "seal spend is not on the named best chain at the required depth",
-            rgb,
+            rgb: rgb.to_string(),
             o2a: if evidence.o2a_ok {
                 "objects accepted"
             } else {
@@ -206,19 +209,23 @@ pub fn evaluate_lineage(evidence: &LineageEvidence, rgb: &'static str) -> Lineag
             header_trust,
         };
     }
-    if evidence.o2a_ok {
+    if evidence.valid_transition {
         LineageReport {
             identity_history_state: "CURRENT",
             bitcoin: "seal spend is included at the required depth",
-            rgb,
-            o2a: "objects accepted",
+            rgb: rgb.to_string(),
+            o2a: if evidence.o2a_ok {
+                "objects accepted"
+            } else {
+                "objects rejected"
+            },
             header_trust,
         }
     } else {
         LineageReport {
             identity_history_state: "SEAL_CLOSED_WITHOUT_VALID_TRANSITION",
             bitcoin: "seal spend is included at the required depth",
-            rgb,
+            rgb: rgb.to_string(),
             o2a: "no valid transition closes the seal",
             header_trust,
         }
@@ -255,6 +262,7 @@ mod tests {
                 spend: None,
             }),
             o2a_ok: true,
+            valid_transition: false,
             best_height: best,
             required_depth: depth,
         }
@@ -266,6 +274,45 @@ mod tests {
         assert_eq!(pending.identity_history_state, "PENDING_CONFIRMATION");
         let current = evaluate_lineage(&evidence(105, 6), "rgb");
         assert_eq!(current.identity_history_state, "CURRENT");
+    }
+
+    #[test]
+    fn block_zero_unspent_at_depth_is_current() {
+        let report = evaluate_lineage(&evidence(105, 6), "RGB validator: valid");
+        assert_eq!(report.identity_history_state, "CURRENT");
+    }
+
+    #[test]
+    fn block_zero_spend_below_depth_is_incomplete() {
+        let mut shallow = evidence(105, 6);
+        shallow.observation = Some(CurrentSealView {
+            unspent: false,
+            spend: Some(included(105)),
+        });
+        assert_eq!(
+            evaluate_lineage(&shallow, "RGB validator: valid").identity_history_state,
+            "INCOMPLETE"
+        );
+    }
+
+    #[test]
+    fn block_zero_deep_spend_without_transition_is_closed() {
+        let mut deep = evidence(110, 6);
+        deep.observation = Some(CurrentSealView {
+            unspent: false,
+            spend: Some(included(105)),
+        });
+        let report = evaluate_lineage(&deep, "RGB validator: valid");
+        assert_eq!(
+            report.identity_history_state,
+            "SEAL_CLOSED_WITHOUT_VALID_TRANSITION"
+        );
+    }
+
+    #[test]
+    fn lineage_report_propagates_the_rgb_status() {
+        let report = evaluate_lineage(&evidence(105, 6), "RGB validator: rejected C7");
+        assert_eq!(report.rgb, "RGB validator: rejected C7");
     }
 }
 

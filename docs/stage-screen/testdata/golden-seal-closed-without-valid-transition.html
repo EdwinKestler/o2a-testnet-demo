@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>O2A stage</title>
+  <style>
+    html, body { margin: 0; background: #0E1230; color: #EEF0FA; }
+    body {
+      font-family: Arial, "Liberation Sans", sans-serif;
+      font-size: 28px;
+      line-height: 1.35;
+    }
+    main { padding: 2.5vh 3vw 6vh; }
+    h1, h2 { font-weight: 700; color: #F2B33D; margin: 0 0 0.3em; }
+    h1 { font-size: 3rem; }
+    h2 { font-size: 2rem; }
+    .badge {
+      display: inline-block;
+      margin: 0 0 0.8em;
+      padding: 0.25em 0.6em;
+      border: 4px solid #F2B33D;
+      color: #F2B33D;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+    .badge-mainnet {
+      border-color: #FF2A2A;
+      color: #FF2A2A;
+      font-size: 4.5rem;
+    }
+    section { margin-top: 1.2em; }
+    .card {
+      background: #141A40;
+      padding: 0.8em 1em;
+      margin-top: 0.6em;
+    }
+    .entity, .mono {
+      font-family: Consolas, "Liberation Mono", monospace;
+      line-height: 1.4;
+      word-break: break-all;
+    }
+    .mono { font-size: 1.7rem; }
+    .entity { font-size: 2.2rem; }
+    .qr-slot { margin-top: 0.8em; }
+    .qr-slot img { width: 360px; height: 360px; background: #FFFFFF; display: block; }
+    .panels { display: flex; gap: 1em; }
+    .panels article { flex: 1; }
+    dl { margin: 0; }
+    dt { color: #F2B33D; font-size: 1.1rem; margin-top: 0.45em; }
+    dd { margin: 0; word-break: break-all; }
+    .claim-line { font-size: 2rem; margin: 0.2em 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <p id="network-badge" class="badge">SIGNET</p>
+    <section id="preflight">
+      <h2>Pre-flight</h2>
+      <div class="card">
+        <p>Node height <span id="node-height">120</span></p>
+        <p>Electrs height <span id="electrs-height">119</span></p>
+        <p>Seal address <span id="seal-address" class="mono">tb1pstageaddress000000000000000000000000000000</span></p>
+        <p>Funding depth <span id="funding-depth">4 / 6</span></p>
+      </div>
+    </section>
+    <section id="reveal">
+      <h2>EntityID</h2>
+      <p>Verifier A</p>
+      <p id="entity-a" class="entity">1111111111111111111111111111111111111111111111111111111111111111</p>
+      <p>Verifier B</p>
+      <p id="entity-b" class="entity">1111111111111111111111111111111111111111111111111111111111111111</p>
+      <div class="qr-slot"><img id="qr" src="stage-qr.png" alt="QR code"></div>
+    </section>
+    <section id="verifiers">
+      <h2>Verifiers</h2>
+      <div class="panels">
+        <article class="card" id="panel-a">
+          <h2>Verifier A</h2>
+          <dl><dt>verifier_id</dt><dd id="a-verifier_id">laptop-a</dd><dt>network</dt><dd id="a-network">signet</dd><dt>entity_id</dt><dd id="a-entity_id">1111111111111111111111111111111111111111111111111111111111111111</dd><dt>state_id</dt><dd id="a-state_id">3333333333333333333333333333333333333333333333333333333333333333</dd><dt>identity_history_state</dt><dd id="a-identity_history_state">SEAL_CLOSED_WITHOUT_VALID_TRANSITION</dd><dt>seal_outpoint</dt><dd id="a-seal_outpoint">4444444444444444444444444444444444444444444444444444444444444444:0</dd><dt>confirmations</dt><dd id="a-confirmations">2</dd><dt>required_depth</dt><dd id="a-required_depth">1</dd><dt>unspent</dt><dd id="a-unspent">false</dd><dt>source</dt><dd id="a-source">bitcoin-rpc getrawtransaction+getblockheader</dd><dt>best_block_hash</dt><dd id="a-best_block_hash">5555555555555555555555555555555555555555555555555555555555555555</dd><dt>height</dt><dd id="a-height">100</dd><dt>rgb_status</dt><dd id="a-rgb_status">Consignment is valid</dd><dt>genesis_valid</dt><dd id="a-genesis_valid">true</dd><dt>claim_valid</dt><dd id="a-claim_valid">false</dd><dt>official_name</dt><dd id="a-official_name">Rehearsal Name</dd><dt>reasons</dt><dd id="a-reasons">seal closed</dd></dl>
+        </article>
+        <article class="card" id="panel-b">
+          <h2>Verifier B</h2>
+          <dl><dt>verifier_id</dt><dd id="b-verifier_id">laptop-b</dd><dt>network</dt><dd id="b-network">signet</dd><dt>entity_id</dt><dd id="b-entity_id">1111111111111111111111111111111111111111111111111111111111111111</dd><dt>state_id</dt><dd id="b-state_id">3333333333333333333333333333333333333333333333333333333333333333</dd><dt>identity_history_state</dt><dd id="b-identity_history_state">SEAL_CLOSED_WITHOUT_VALID_TRANSITION</dd><dt>seal_outpoint</dt><dd id="b-seal_outpoint">4444444444444444444444444444444444444444444444444444444444444444:0</dd><dt>confirmations</dt><dd id="b-confirmations">2</dd><dt>required_depth</dt><dd id="b-required_depth">1</dd><dt>unspent</dt><dd id="b-unspent">false</dd><dt>source</dt><dd id="b-source">bitcoin-rpc getrawtransaction+getblockheader</dd><dt>best_block_hash</dt><dd id="b-best_block_hash">5555555555555555555555555555555555555555555555555555555555555555</dd><dt>height</dt><dd id="b-height">100</dd><dt>rgb_status</dt><dd id="b-rgb_status">Consignment is valid</dd><dt>genesis_valid</dt><dd id="b-genesis_valid">true</dd><dt>claim_valid</dt><dd id="b-claim_valid">false</dd><dt>official_name</dt><dd id="b-official_name">Rehearsal Name</dd><dt>reasons</dt><dd id="b-reasons">seal closed</dd></dl>
+        </article>
+      </div>
+    </section>
+    <section id="claim">
+      <h2>Claim</h2>
+      <div class="card">
+        <p class="claim-line">Verifier A <span id="name-a">Rehearsal Name</span></p>
+        <p class="claim-line">signature valid <span id="sig-a">false</span></p>
+        <p class="claim-line">Verifier B <span id="name-b">Rehearsal Name</span></p>
+        <p class="claim-line">signature valid <span id="sig-b">false</span></p>
+      </div>
+    </section>
+  </main>
+  <script id="screen-data" type="application/json">{
+  "badge": "SIGNET",
+  "badge_class": "badge",
+  "network": "signet",
+  "preflight": {
+    "electrs_height": "119",
+    "funding_depth": "4 / 6",
+    "node_height": "120",
+    "seal_address": "tb1pstageaddress000000000000000000000000000000"
+  },
+  "verifier_a": {
+    "best_block_hash": "5555555555555555555555555555555555555555555555555555555555555555",
+    "claim_valid": "false",
+    "confirmations": "2",
+    "entity_id": "1111111111111111111111111111111111111111111111111111111111111111",
+    "genesis_valid": "true",
+    "height": "100",
+    "identity_history_state": "SEAL_CLOSED_WITHOUT_VALID_TRANSITION",
+    "network": "signet",
+    "official_name": "Rehearsal Name",
+    "reasons": "seal closed",
+    "required_depth": "1",
+    "rgb_status": "Consignment is valid",
+    "seal_outpoint": "4444444444444444444444444444444444444444444444444444444444444444:0",
+    "source": "bitcoin-rpc getrawtransaction+getblockheader",
+    "state_id": "3333333333333333333333333333333333333333333333333333333333333333",
+    "unspent": "false",
+    "verifier_id": "laptop-a"
+  },
+  "verifier_b": {
+    "best_block_hash": "5555555555555555555555555555555555555555555555555555555555555555",
+    "claim_valid": "false",
+    "confirmations": "2",
+    "entity_id": "1111111111111111111111111111111111111111111111111111111111111111",
+    "genesis_valid": "true",
+    "height": "100",
+    "identity_history_state": "SEAL_CLOSED_WITHOUT_VALID_TRANSITION",
+    "network": "signet",
+    "official_name": "Rehearsal Name",
+    "reasons": "seal closed",
+    "required_depth": "1",
+    "rgb_status": "Consignment is valid",
+    "seal_outpoint": "4444444444444444444444444444444444444444444444444444444444444444:0",
+    "source": "bitcoin-rpc getrawtransaction+getblockheader",
+    "state_id": "3333333333333333333333333333333333333333333333333333333333333333",
+    "unspent": "false",
+    "verifier_id": "laptop-b"
+  }
+}</script>
+  <script>
+    (function () {
+      var raw = document.getElementById("screen-data").textContent;
+      var data;
+      try {
+        data = JSON.parse(raw);
+      } catch (err) {
+        return;
+      }
+      if (secretMarked(JSON.stringify(data))) {
+        document.body.textContent = "refusing a field that matches the secret denylist";
+        return;
+      }
+      var badge = document.getElementById("network-badge");
+      badge.textContent = String(data.badge);
+      badge.className = data.badge_class;
+      copyText("node-height", data.preflight.node_height);
+      copyText("electrs-height", data.preflight.electrs_height);
+      copyText("seal-address", data.preflight.seal_address);
+      copyText("funding-depth", data.preflight.funding_depth);
+      copyText("entity-a", data.verifier_a.entity_id);
+      copyText("entity-b", data.verifier_b.entity_id);
+      copyText("name-a", data.verifier_a.official_name);
+      copyText("name-b", data.verifier_b.official_name);
+      copyText("sig-a", data.verifier_a.claim_valid);
+      copyText("sig-b", data.verifier_b.claim_valid);
+      copyPanel("a", data.verifier_a);
+      copyPanel("b", data.verifier_b);
+    })();
+
+    function copyText(id, value) {
+      var node = document.getElementById(id);
+      if (!node) {
+        return;
+      }
+      node.textContent = value === undefined || value === null ? "missing" : String(value);
+    }
+
+    function copyPanel(prefix, panel) {
+      Object.keys(panel).forEach(function (key) {
+        copyText(prefix + "-" + key, panel[key]);
+      });
+    }
+
+    function secretMarked(value) {
+      var lower = String(value).toLowerCase();
+      var markers = ["xprv", "tprv", "mnemonic", "seed.hex", "o2a_demo_seed"];
+      for (var i = 0; i < markers.length; i += 1) {
+        if (lower.indexOf(markers[i]) !== -1) {
+          return true;
+        }
+      }
+      var normalized = lower.split("\\").join("/");
+      if (normalized.indexOf("/") === -1) {
+        return false;
+      }
+      var parts = normalized.split("/");
+      for (var j = 0; j < parts.length; j += 1) {
+        var segment = parts[j].replace(/^[\s"'',:]+|[\s"'',:]+$/g, "");
+        if (segment === "seed" || segment.indexOf("seed.") === 0) {
+          return true;
+        }
+      }
+      return false;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>O2A stage</title>
+  <style>
+    html, body { margin: 0; background: #0E1230; color: #EEF0FA; }
+    body {
+      font-family: Arial, "Liberation Sans", sans-serif;
+      font-size: 28px;
+      line-height: 1.35;
+    }
+    main { padding: 2.5vh 3vw 6vh; }
+    h1, h2 { font-weight: 700; color: #F2B33D; margin: 0 0 0.3em; }
+    h1 { font-size: 3rem; }
+    h2 { font-size: 2rem; }
+    .badge {
+      display: inline-block;
+      margin: 0 0 0.8em;
+      padding: 0.25em 0.6em;
+      border: 4px solid #F2B33D;
+      color: #F2B33D;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+    .badge-mainnet {
+      border-color: #FF2A2A;
+      color: #FF2A2A;
+      font-size: 4.5rem;
+    }
+    section { margin-top: 1.2em; }
+    .card {
+      background: #141A40;
+      padding: 0.8em 1em;
+      margin-top: 0.6em;
+    }
+    .entity, .mono {
+      font-family: Consolas, "Liberation Mono", monospace;
+      line-height: 1.4;
+      word-break: break-all;
+    }
+    .mono { font-size: 1.7rem; }
+    .entity { font-size: 2.2rem; }
+    .qr-slot { margin-top: 0.8em; }
+    .qr-slot img { width: 360px; height: 360px; background: #FFFFFF; display: block; }
+    .panels { display: flex; gap: 1em; }
+    .panels article { flex: 1; }
+    dl { margin: 0; }
+    dt { color: #F2B33D; font-size: 1.1rem; margin-top: 0.45em; }
+    dd { margin: 0; word-break: break-all; }
+    .claim-line { font-size: 2rem; margin: 0.2em 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <p id="network-badge" class="@@BADGE_CLASS@@">@@BADGE_TEXT@@</p>
+    <section id="preflight">
+      <h2>Pre-flight</h2>
+      <div class="card">
+        <p>Node height <span id="node-height">@@NODE_HEIGHT@@</span></p>
+        <p>Electrs height <span id="electrs-height">@@ELECTRS_HEIGHT@@</span></p>
+        <p>Seal address <span id="seal-address" class="mono">@@SEAL_ADDRESS@@</span></p>
+        <p>Funding depth <span id="funding-depth">@@FUNDING_DEPTH@@</span></p>
+      </div>
+    </section>
+    <section id="reveal">
+      <h2>EntityID</h2>
+      <p>Verifier A</p>
+      <p id="entity-a" class="entity">@@ENTITY_A@@</p>
+      <p>Verifier B</p>
+      <p id="entity-b" class="entity">@@ENTITY_B@@</p>
+      <div class="qr-slot"><img id="qr" src="stage-qr.png" alt="QR code"></div>
+    </section>
+    <section id="verifiers">
+      <h2>Verifiers</h2>
+      <div class="panels">
+        <article class="card" id="panel-a">
+          <h2>Verifier A</h2>
+          @@PANEL_A@@
+        </article>
+        <article class="card" id="panel-b">
+          <h2>Verifier B</h2>
+          @@PANEL_B@@
+        </article>
+      </div>
+    </section>
+    <section id="claim">
+      <h2>Claim</h2>
+      <div class="card">
+        <p class="claim-line">Verifier A <span id="name-a">@@NAME_A@@</span></p>
+        <p class="claim-line">signature valid <span id="sig-a">@@SIG_A@@</span></p>
+        <p class="claim-line">Verifier B <span id="name-b">@@NAME_B@@</span></p>
+        <p class="claim-line">signature valid <span id="sig-b">@@SIG_B@@</span></p>
+      </div>
+    </section>
+  </main>
+  <script id="screen-data" type="application/json">@@SCREEN_JSON@@</script>
+  <script>
+    (function () {
+      var raw = document.getElementById("screen-data").textContent;
+      var data;
+      try {
+        data = JSON.parse(raw);
+      } catch (err) {
+        return;
+      }
+      if (secretMarked(JSON.stringify(data))) {
+        document.body.textContent = "refusing a field that matches the secret denylist";
+        return;
+      }
+      var badge = document.getElementById("network-badge");
+      badge.textContent = String(data.badge);
+      badge.className = data.badge_class;
+      copyText("node-height", data.preflight.node_height);
+      copyText("electrs-height", data.preflight.electrs_height);
+      copyText("seal-address", data.preflight.seal_address);
+      copyText("funding-depth", data.preflight.funding_depth);
+      copyText("entity-a", data.verifier_a.entity_id);
+      copyText("entity-b", data.verifier_b.entity_id);
+      copyText("name-a", data.verifier_a.official_name);
+      copyText("name-b", data.verifier_b.official_name);
+      copyText("sig-a", data.verifier_a.claim_valid);
+      copyText("sig-b", data.verifier_b.claim_valid);
+      copyPanel("a", data.verifier_a);
+      copyPanel("b", data.verifier_b);
+    })();
+
+    function copyText(id, value) {
+      var node = document.getElementById(id);
+      if (!node) {
+        return;
+      }
+      node.textContent = value === undefined || value === null ? "missing" : String(value);
+    }
+
+    function copyPanel(prefix, panel) {
+      Object.keys(panel).forEach(function (key) {
+        copyText(prefix + "-" + key, panel[key]);
+      });
+    }
+
+    function secretMarked(value) {
+      var lower = String(value).toLowerCase();
+      var markers = ["xprv", "tprv", "mnemonic", "seed.hex", "o2a_demo_seed"];
+      for (var i = 0; i < markers.length; i += 1) {
+        if (lower.indexOf(markers[i]) !== -1) {
+          return true;
+        }
+      }
+      var normalized = lower.split("\\").join("/");
+      if (normalized.indexOf("/") === -1) {
+        return false;
+      }
+      var parts = normalized.split("/");
+      for (var j = 0; j < parts.length; j += 1) {
+        var segment = parts[j].replace(/^[\s"'',:]+|[\s"'',:]+$/g, "");
+        if (segment === "seed" || segment.indexOf("seed.") === 0) {
+          return true;
+        }
+      }
+      return false;
+    }
+  </script>
+</body>
+</html>

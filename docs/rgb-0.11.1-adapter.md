@@ -86,7 +86,7 @@ From the repository root:
 cargo build --manifest-path spikes/rgb-0.11.1/Cargo.toml --locked --bin rgb011-check
 ```
 
-The binary is `spikes/rgb-0.11.1/target/debug/rgb011-check`. Its commands are `lineage`, `plan`, `genesis --seal TXID:VOUT`, `claim`, and `verify`. With no command it runs the compatibility check. `signet-genesis` and `signet-claim` remain as aliases. Each alias sets no network and prints a deprecation note. `signet-verify` is the same kind of alias for `verify`.
+The binary is `spikes/rgb-0.11.1/target/debug/rgb011-check`. Its commands are `lineage`, `plan`, `genesis --seal TXID:VOUT`, `claim`, `verify`, and `publish-package <directory>`. With no command it runs the compatibility check. `signet-genesis` and `signet-claim` remain as aliases. Each alias sets no network and prints a deprecation note. `signet-verify` is the same kind of alias for `verify`. `verify --json` and `signet-verify --json` print one verification document on stdout and leave the text report off. `publish-package` writes `genesis.o2a`, `claim.o2a`, and hint `package.json` into an empty directory. It does not derive keys and it does not open a node. The field rules are in [formats/README.md](formats/README.md).
 
 The default recovery delay inside `o2a-demo-core` is 10 blocks, and the default entity index is 0. A ceremony sets `O2A_DEMO_DELAY`, `O2A_DEMO_THRESHOLD`, and `O2A_DEMO_ENTITY` before `plan` and again before `genesis`. A different delay is a different address. Rehearsal 3 used delay `1008`, threshold `2`, and entity `31`. Delay `1007` produced the unfunded address `tb1pxlm4rc3nl8pd8ervyc273tyjzrhflczf0kn59rht5ncq4un53t6qj9l23t`.
 

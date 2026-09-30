@@ -429,13 +429,11 @@ pub fn gather_report(
         tip.best_height,
     )?;
     let current_view = &observed[current];
-    let o2a_ok = if current_view.unspent {
-        o2a_objects_ok
-    } else if let Some(spend) = &current_view.spend {
-        o2a_objects_ok && spend.txid == hex_internal(anchor_txid)?
-    } else {
-        false
-    };
+    let anchor_internal = hex_internal(anchor_txid)?;
+    let valid_transition = current_view
+        .spend
+        .as_ref()
+        .is_some_and(|spend| spend.txid == anchor_internal);
     let evidence = LineageEvidence {
         seals: seals
             .iter()
@@ -455,7 +453,8 @@ pub fn gather_report(
                 spend: current_view.spend.clone(),
             })
         },
-        o2a_ok,
+        o2a_ok: o2a_objects_ok,
+        valid_transition,
         best_height: tip.best_height,
         required_depth,
     };
