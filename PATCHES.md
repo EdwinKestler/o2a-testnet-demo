@@ -1,5 +1,7 @@
 # Upstream patches
 
+> **Archived: RGB-WG 0.12 adapter only.** These patches apply to the archived 0.12 adapter (`crates/o2a-demo-rgb`), which ADR-0010 superseded with rgb-protocol v0.11.1. The maintained 0.11.1 adapter (`spikes/rgb-0.11.1`) uses no patches. Kept for reproducibility of the 0.12 evidence; scheduled for removal with the archived crate after Lugano.
+
 ## 0001 — RGB witness height off by one
 
 - Spec tracking: `../o2a-protocol/docs/upstream-needs.md`, item 5.

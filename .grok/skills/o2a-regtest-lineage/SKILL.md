@@ -16,6 +16,7 @@ when-to-use: When producing lineage evidence or fixtures (F-series) on regtest.
 - Cross-check every seal address with Bitcoin Core getdescriptorinfo + deriveaddresses on the equivalent tr(NUMS,{...}) descriptor.
 
 ## Verification
+- Run the 0.11.1 integration tests SERIALLY: `cargo test --manifest-path spikes/rgb-0.11.1/Cargo.toml --locked -- --test-threads=1`. In parallel, a throwaway electrs container can crash at startup (`Option::unwrap()` on `None`, exit 101). That is a harness flake, not a result: re-run serially before reporting anything as failed.
 - Every verification runs in two fresh validator directories, with the consignment imported. Outputs must be byte-identical.
 - Reorg tests: invalidateblock / reconsiderblock above H0 only.
 
