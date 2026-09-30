@@ -57,6 +57,16 @@ Start the local evidence network:
 docker compose --file dev/compose.yaml --profile rgb up --detach --wait bitcoin electrs
 ```
 
+The maintained RGB 0.11.1 stack and its neutral-regtest integration harness
+build `o2a-rgb011-electrs:latest` from `dev/Dockerfile.electrs`. That Dockerfile
+pins romanz/electrs v0.12.0 at commit
+`37501cc4b94aea99e50670a6524fa3ad4ac9aabb`; the upstream source is MIT licensed,
+which is already in the routine D14 allowlist, so no exception-register entry is
+needed. The harness uses the same read-only Bitcoin data-volume mount and cookie
+authentication as `spikes/rgb-0.11.1/compose.yaml`. This electrs version has no
+P2P configuration option and obtains blocks through Bitcoin Core RPC/REST, so
+the isolated test node remains `listen=0` and no `daemon_p2p_addr` is required.
+
 Smoke project: `docker compose -p o2a-seal-smoke --file dev/compose.yaml --file dev/compose.smoke.yaml --profile rgb up --detach --wait bitcoin electrs`
 Smoke evidence (2026-09-25) reproduces only at commit bce2b58; the crate on main is a compiled code reference.
 2026-09-25: that override also passes `-rpcallowip=172.30.32.0/24` on the bitcoind command; `dev/bitcoin.conf` stays on `172.30.30.0/24`.

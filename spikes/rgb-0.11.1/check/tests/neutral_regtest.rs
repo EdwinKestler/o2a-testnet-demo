@@ -10,24 +10,40 @@ use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 fn bin() -> std::path::PathBuf {
     std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../target/debug/rgb011-check")
 }
-const RPC_USER: &str = "o2ae2e";
-const RPC_PASSWORD: &str = "o2ae2e-pass";
+const BITCOIN_IMAGE: &str = "o2a-rgb011-bitcoin:latest";
+const ELECTRS_IMAGE: &str = "o2a-rgb011-electrs:latest";
 
 struct Cleanup {
     network: String,
     bitcoin: String,
     electrs: String,
+    bitcoin_volume: String,
+    electrs_volume: String,
     evidence: PathBuf,
     seed: PathBuf,
+    cookie: PathBuf,
 }
 
 impl Drop for Cleanup {
     fn drop(&mut self) {
+        if std::thread::panicking() {
+            eprintln!(
+                "bitcoind diagnostics before cleanup:\n{}",
+                container_logs(&self.bitcoin)
+            );
+            eprintln!(
+                "electrs diagnostics before cleanup:\n{}",
+                container_logs(&self.electrs)
+            );
+        }
         let _ = docker(&["rm", "-f", &self.electrs]);
         let _ = docker(&["rm", "-f", &self.bitcoin]);
         let _ = docker(&["network", "rm", &self.network]);
+        let _ = docker(&["volume", "rm", "-f", &self.electrs_volume]);
+        let _ = docker(&["volume", "rm", "-f", &self.bitcoin_volume]);
         let _ = std::fs::remove_dir_all(&self.evidence);
         let _ = std::fs::remove_file(&self.seed);
+        let _ = std::fs::remove_file(&self.cookie);
     }
 }
 
@@ -57,19 +73,14 @@ fn docker_ok(args: &[&str]) -> String {
 }
 
 fn cli(container: &str, args: &[&str]) -> Output {
-    // This image's bitcoin-cli accepts -rpcuser=<user> and -rpcpassword=<pw> only.
-    let user = format!("-rpcuser={RPC_USER}");
-    let password = format!("-rpcpassword={RPC_PASSWORD}");
     let mut owned = vec![
         "exec".to_string(),
         container.to_string(),
         "bitcoin-cli".to_string(),
         "-regtest".to_string(),
-        "-datadir=/data".to_string(),
+        "-datadir=/var/lib/bitcoin".to_string(),
         "-rpcconnect=127.0.0.1".to_string(),
         "-rpcport=18443".to_string(),
-        user,
-        password,
     ];
     owned.extend(args.iter().map(|arg| (*arg).to_string()));
     let refs: Vec<&str> = owned.iter().map(String::as_str).collect();
@@ -118,12 +129,22 @@ fn electrum_height(addr: &str) -> Option<u64> {
 }
 
 fn container_logs(name: &str) -> String {
-    let output = docker(&["logs", "--tail", "80", name]);
+    let output = docker(&["logs", name]);
     format!(
         "logs stdout:\n{}\nlogs stderr:\n{}",
         String::from_utf8_lossy(&output.stdout),
         String::from_utf8_lossy(&output.stderr)
     )
+}
+
+fn wait_for_electrs_index(container: &str, height: u64) -> Result<(), String> {
+    let logs = container_logs(container);
+    let marker = format!("height={height}: indexed");
+    if logs.contains(&marker) {
+        Ok(())
+    } else {
+        Err(format!("electrs has not logged an indexed tip at {height}"))
+    }
 }
 
 fn wait_until(
@@ -334,46 +355,69 @@ fn neutral_commands_use_external_funding_on_regtest() {
     let network = format!("o2a-np-net-{suffix}");
     let bitcoin = format!("o2a-np-btc-{suffix}");
     let electrs = format!("o2a-np-el-{suffix}");
+    let bitcoin_volume = format!("o2a-np-btc-data-{suffix}");
+    let electrs_volume = format!("o2a-np-el-data-{suffix}");
     let evidence = std::env::temp_dir().join(format!("o2a-np-evidence-{suffix}"));
     let seed = std::env::temp_dir().join(format!("o2a-np-seed-{suffix}"));
+    let cookie = std::env::temp_dir().join(format!("o2a-np-cookie-{suffix}"));
     std::fs::create_dir_all(&evidence).expect("evidence dir");
     std::fs::write(&seed, "42".repeat(64)).expect("seed");
     let _cleanup = Cleanup {
         network: network.clone(),
         bitcoin: bitcoin.clone(),
         electrs: electrs.clone(),
+        bitcoin_volume: bitcoin_volume.clone(),
+        electrs_volume: electrs_volume.clone(),
         evidence: evidence.clone(),
         seed: seed.clone(),
+        cookie: cookie.clone(),
     };
 
+    let repo_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../../..")
+        .canonicalize()
+        .expect("repository root");
+    let bitcoin_dockerfile = repo_root.join("dev/Dockerfile.bitcoin");
+    let electrs_dockerfile = repo_root.join("dev/Dockerfile.electrs");
+    let repo_root = repo_root.to_str().expect("UTF-8 repository root");
+    let bitcoin_dockerfile = bitcoin_dockerfile.to_str().expect("UTF-8 Dockerfile path");
+    let electrs_dockerfile = electrs_dockerfile.to_str().expect("UTF-8 Dockerfile path");
+    docker_ok(&[
+        "build",
+        "--tag",
+        BITCOIN_IMAGE,
+        "--file",
+        bitcoin_dockerfile,
+        repo_root,
+    ]);
+    docker_ok(&[
+        "build",
+        "--tag",
+        ELECTRS_IMAGE,
+        "--file",
+        electrs_dockerfile,
+        repo_root,
+    ]);
     docker_ok(&["network", "create", &network]);
+    docker_ok(&["volume", "create", &bitcoin_volume]);
+    docker_ok(&["volume", "create", &electrs_volume]);
+    let bitcoin_mount = format!("{bitcoin_volume}:/var/lib/bitcoin");
     docker_ok(&[
         "run",
         "-d",
+        "--pull=never",
         "--name",
         &bitcoin,
         "--network",
         &network,
         "-p",
         "127.0.0.1::18443",
-        "-e",
-        "BITCOIN_DATA=/data",
-        "bitcoin/bitcoin:31.1",
-        "-regtest=1",
-        "-server=1",
-        "-txindex=1",
-        "-rest=1",
-        "-listen=0",
-        "-discover=0",
-        "-natpmp=0",
-        "-dnsseed=0",
-        "-walletrbf=0",
-        "-fallbackfee=0.0002",
-        &format!("-rpcuser={RPC_USER}"),
-        &format!("-rpcpassword={RPC_PASSWORD}"),
-        "-rpcbind=0.0.0.0:18443",
+        "--volume",
+        &bitcoin_mount,
+        BITCOIN_IMAGE,
+        "-conf=/etc/bitcoin/bitcoin.conf",
+        "-datadir=/var/lib/bitcoin",
         "-rpcallowip=0.0.0.0/0",
-        "-printtoconsole=1",
     ]);
     let bitcoin_name = bitcoin.clone();
     wait_until("bitcoind", &bitcoin_name, 90, || {
@@ -384,6 +428,8 @@ fn neutral_commands_use_external_funding_on_regtest() {
             Err(show(&output))
         }
     });
+    let rpc_cookie = docker_ok(&["exec", &bitcoin, "cat", "/var/lib/bitcoin/regtest/.cookie"]);
+    std::fs::write(&cookie, format!("{rpc_cookie}\n")).expect("host RPC cookie");
     cli_ok(&bitcoin, &["createwallet", "miner"]);
     let mine_to = cli_ok(&bitcoin, &["-rpcwallet=miner", "getnewaddress"])
         .trim_matches('"')
@@ -393,40 +439,44 @@ fn neutral_commands_use_external_funding_on_regtest() {
         &["-rpcwallet=miner", "generatetoaddress", "101", &mine_to],
     );
 
-    let electrs_script = format!(
-        r#"set -e
-mkdir -p "$HOME/db"
-cat > "$HOME/electrs.toml" <<EOF
-network = "regtest"
-db_dir = "$HOME/db"
-daemon_rpc_addr = "{bitcoin}:18443"
-electrum_rpc_addr = "0.0.0.0:50001"
-auth = "{RPC_USER}:{RPC_PASSWORD}"
-log_filters = "info"
-EOF
-exec electrs --skip-default-conf-files --conf "$HOME/electrs.toml"
-"#
-    );
+    let electrs_bitcoin_mount = format!("{bitcoin_volume}:/var/lib/bitcoin:ro");
+    let electrs_data_mount = format!("{electrs_volume}:/var/lib/electrs");
     docker_ok(&[
         "run",
         "-d",
+        "--pull=never",
         "--name",
         &electrs,
         "--network",
         &network,
         "-p",
         "127.0.0.1::50001",
-        "--entrypoint",
-        "/bin/sh",
-        "getumbrel/electrs:v0.12.0",
-        "-c",
-        &electrs_script,
+        "--volume",
+        &electrs_bitcoin_mount,
+        "--volume",
+        &electrs_data_mount,
+        "--env",
+        "RUST_BACKTRACE=1",
+        "--env",
+        "RUST_LOG=info",
+        ELECTRS_IMAGE,
+        "--network=regtest",
+        "--daemon-dir=/var/lib/bitcoin",
+        &format!("--daemon-rpc-addr={bitcoin}:18443"),
+        "--electrum-rpc-addr=0.0.0.0:50001",
+        "--monitoring-addr=0.0.0.0:4224",
+        "--db-dir=/var/lib/electrs",
     ]);
     let rpc_port = published_port(&bitcoin, 18443);
     let electrum_port = published_port(&electrs, 50001);
     let electrum_addr = format!("127.0.0.1:{electrum_port}");
     let electrs_name = electrs.clone();
     wait_until("electrs", &electrs_name, 180, || {
+        // An Electrum request before the new database has an indexed header can
+        // trigger electrs v0.12.0's headers_subscribe None unwrap. The maintained
+        // stack's index-complete log marker proves the tip exists before this
+        // first RPC probe.
+        wait_for_electrs_index(&electrs, 101)?;
         match electrum_height(&electrum_addr) {
             Some(height) if height >= 100 => Ok(()),
             Some(height) => Err(format!("electrs height {height}")),
@@ -442,8 +492,7 @@ exec electrs --skip-default-conf-files --conf "$HOME/electrs.toml"
         ("O2A_DEMO_DELAY", "10".to_string()),
         ("O2A_DEMO_THRESHOLD", "2".to_string()),
         ("BITCOIN_RPC", format!("http://127.0.0.1:{rpc_port}")),
-        ("BITCOIN_RPC_USER", RPC_USER.to_string()),
-        ("BITCOIN_RPC_PASSWORD", RPC_PASSWORD.to_string()),
+        ("BITCOIN_COOKIE", cookie.display().to_string()),
         ("ELECTRUM", electrum_addr.clone()),
         ("BITCOIN_WALLET", "miner".to_string()),
         ("RGB011_EVIDENCE", evidence.display().to_string()),
