@@ -1,0 +1,27 @@
+{
+  "close_method": "opret1st",
+  "global_types": {
+    "3101": "genesisDigest",
+    "3102": "transitionDigest"
+  },
+  "owned_types": {
+    "4101": "identity (Declarative)"
+  },
+  "program": "O2A RGB program v0.1 (candidate)",
+  "rgb_line": "rgb-protocol 0.11.1",
+  "schema_id": "rgb:sch:0c4GOQpl9wgzWtkBQqf4ULj~1Xp~TkJj0Ger~0CLB6A#subway-october-region",
+  "schema_name": "O2aIdentityV01",
+  "schema_strict_hex": "00000e4f32614964656e7469747956303100021d0c25511a3ccd258e10086865b7e225d01ac96111c2c50805cd15576f1b137a4cb60100000d67656e657369734469676573741e0c25511a3ccd258e10086865b7e225d01ac96111c2c50805cd15576f1b137a4cb6010000107472616e736974696f6e44696765737401051000086964656e74697479a51f00011d0c01000100010510010001000002a51f00011e0c010001000105100100010001051001000100000a7472616e736974696f6ea61f00011e0c01000100010510010001000105100100010000077265636f766572010510",
+  "schema_strict_len": 228,
+  "schema_strict_sha256": "ee097382b2de46bfd406d63fd7114cffe368ecea0ab747412540fb0596d9536e",
+  "transition_types": {
+    "8101": "transition",
+    "8102": "recover"
+  },
+  "type_library": "O2AIdentityV01",
+  "type_library_id": "stl:97gbFI0s-rEf6LLT-HHm3fnw-iN9kack-y0azYjy-QpNSjSU#everest-meteor-student",
+  "type_system_id": "sts:HXgdkDPU-LhVdKYi-jTAirsR-M3zmamx-jL76eBD-jyonuV8#mobile-version-chant",
+  "type_system_strict_len": 170,
+  "type_system_strict_sha256": "1d78ee0d71eb9291b70eef4458042029b994327f72f0ead63efc2c649e2c8489",
+  "validators": "none"
+}

@@ -1,0 +1,5 @@
+    Fetching advisory database from `https://github.com/RustSec/advisory-db.git`
+      Loaded 1348 security advisories (from /home/kestl/.cargo/advisory-db)
+    Updating crates.io index
+    Scanning Cargo.lock for vulnerabilities (139 crate dependencies)
+exit 0
