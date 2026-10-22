@@ -1,0 +1,221 @@
+rgb011-check v0.1.0 (/media/kestl/andor/ffwd/o2a-testnet-demo/spikes/rgb-0.11.1/check)
+├── amplify v4.8.1
+│   ├── amplify_apfloat v0.3.1
+│   │   ├── amplify_num v0.5.4
+│   │   └── bitflags v2.13.2
+│   ├── amplify_derive v4.0.1 (proc-macro)
+│   │   ├── amplify_syn v2.0.1
+│   │   │   ├── proc-macro2 v1.0.107
+│   │   │   │   └── unicode-ident v1.0.26
+│   │   │   ├── quote v1.0.47
+│   │   │   │   └── proc-macro2 v1.0.107 (*)
+│   │   │   └── syn v1.0.109
+│   │   │       ├── proc-macro2 v1.0.107 (*)
+│   │   │       ├── quote v1.0.47 (*)
+│   │   │       └── unicode-ident v1.0.26
+│   │   ├── proc-macro2 v1.0.107 (*)
+│   │   ├── quote v1.0.47 (*)
+│   │   └── syn v1.0.109 (*)
+│   ├── amplify_num v0.5.4
+│   ├── amplify_syn v2.0.1 (*)
+│   ├── ascii v1.1.0
+│   └── rand v0.8.8
+│       ├── libc v0.2.189
+│       ├── rand_chacha v0.3.1
+│       │   ├── ppv-lite86 v0.2.21
+│       │   │   └── zerocopy v0.8.59
+│       │   │       └── zerocopy-derive v0.8.59 (proc-macro)
+│       │   │           ├── proc-macro2 v1.0.107 (*)
+│       │   │           ├── quote v1.0.47 (*)
+│       │   │           └── syn v2.0.119
+│       │   │               ├── proc-macro2 v1.0.107 (*)
+│       │   │               ├── quote v1.0.47 (*)
+│       │   │               └── unicode-ident v1.0.26
+│       │   └── rand_core v0.6.4
+│       │       └── getrandom v0.2.17
+│       │           ├── cfg-if v1.0.5
+│       │           └── libc v0.2.189
+│       └── rand_core v0.6.4 (*)
+├── hex v0.4.3
+├── o2a-demo-core v0.1.0 (/media/kestl/andor/ffwd/o2a-testnet-demo/crates/o2a-demo-core)
+│   ├── bitcoin_hashes v0.14.101
+│   │   ├── bitcoin-io v0.1.101
+│   │   ├── hex-conservative v0.2.3
+│   │   │   └── arrayvec v0.7.8
+│   │   └── serde v1.0.229
+│   │       ├── serde_core v1.0.229
+│   │       └── serde_derive v1.0.229 (proc-macro)
+│   │           ├── proc-macro2 v1.0.107 (*)
+│   │           ├── quote v1.0.47 (*)
+│   │           └── syn v3.0.6
+│   │               ├── proc-macro2 v1.0.107 (*)
+│   │               ├── quote v1.0.47 (*)
+│   │               └── unicode-ident v1.0.26
+│   ├── hex v0.4.3
+│   └── secp256k1 v0.29.1
+│       ├── bitcoin_hashes v0.14.101 (*)
+│       ├── secp256k1-sys v0.10.1
+│       └── serde v1.0.229 (*)
+├── rgb-api v0.11.1
+│   ├── amplify v4.8.1 (*)
+│   ├── baid64 v0.4.1
+│   │   ├── amplify v4.8.1 (*)
+│   │   ├── base64 v0.22.1
+│   │   ├── mnemonic v1.1.1
+│   │   └── sha2 v0.10.9
+│   │       ├── cfg-if v1.0.5
+│   │       ├── cpufeatures v0.2.17
+│   │       └── digest v0.10.7
+│   │           ├── block-buffer v0.10.4
+│   │           │   └── generic-array v0.14.7
+│   │           │       └── typenum v1.20.1
+│   │           └── crypto-common v0.1.7
+│   │               ├── generic-array v0.14.7 (*)
+│   │               └── typenum v1.20.1
+│   ├── chrono v0.4.45
+│   │   ├── iana-time-zone v0.1.65
+│   │   └── num-traits v0.2.19
+│   ├── indexmap v2.14.2
+│   │   ├── equivalent v1.0.2
+│   │   └── hashbrown v0.17.1
+│   ├── nonasync v0.1.3
+│   │   ├── amplify v4.8.1 (*)
+│   │   └── log v0.4.34
+│   ├── rgb-ops v0.11.1
+│   │   ├── amplify v4.8.1 (*)
+│   │   ├── baid64 v0.4.1 (*)
+│   │   ├── chrono v0.4.45 (*)
+│   │   ├── nonasync v0.1.3 (*)
+│   │   ├── rand v0.9.5
+│   │   │   ├── rand_chacha v0.9.0
+│   │   │   │   ├── ppv-lite86 v0.2.21 (*)
+│   │   │   │   └── rand_core v0.9.5
+│   │   │   │       └── getrandom v0.3.4
+│   │   │   │           ├── cfg-if v1.0.5
+│   │   │   │           └── libc v0.2.189
+│   │   │   └── rand_core v0.9.5 (*)
+│   │   ├── rgb-aluvm v0.11.1
+│   │   │   ├── amplify v4.8.1 (*)
+│   │   │   ├── baid64 v0.4.1 (*)
+│   │   │   ├── blake3 v1.8.7
+│   │   │   │   ├── arrayvec v0.7.8
+│   │   │   │   ├── cfg-if v1.0.5
+│   │   │   │   ├── constant_time_eq v0.4.2
+│   │   │   │   └── cpufeatures v0.3.1
+│   │   │   ├── half v2.7.1
+│   │   │   │   ├── cfg-if v1.0.5
+│   │   │   │   └── zerocopy v0.8.59 (*)
+│   │   │   ├── rgb-ascii-armor v1.0.4
+│   │   │   │   ├── amplify v4.8.1 (*)
+│   │   │   │   ├── baid64 v0.4.1 (*)
+│   │   │   │   ├── base85 v2.0.0
+│   │   │   │   │   └── thiserror v1.0.69
+│   │   │   │   │       └── thiserror-impl v1.0.69 (proc-macro)
+│   │   │   │   │           ├── proc-macro2 v1.0.107 (*)
+│   │   │   │   │           ├── quote v1.0.47 (*)
+│   │   │   │   │           └── syn v2.0.119 (*)
+│   │   │   │   ├── rgb-strict-encoding v1.0.4
+│   │   │   │   │   ├── amplify v4.8.1 (*)
+│   │   │   │   │   ├── bitcoin v0.32.102
+│   │   │   │   │   │   ├── base58ck v0.1.101
+│   │   │   │   │   │   │   └── bitcoin_hashes v0.14.101 (*)
+│   │   │   │   │   │   ├── bech32 v0.11.1
+│   │   │   │   │   │   ├── bitcoin-io v0.1.101
+│   │   │   │   │   │   ├── bitcoin-units v0.1.101
+│   │   │   │   │   │   │   └── serde v1.0.229 (*)
+│   │   │   │   │   │   ├── bitcoin_hashes v0.14.101 (*)
+│   │   │   │   │   │   ├── hex-conservative v0.2.3 (*)
+│   │   │   │   │   │   ├── hex_lit v0.1.1
+│   │   │   │   │   │   ├── secp256k1 v0.29.1 (*)
+│   │   │   │   │   │   └── serde v1.0.229 (*)
+│   │   │   │   │   └── rgb-strict-encoding-derive v1.0.4 (proc-macro)
+│   │   │   │   │       ├── amplify_syn v2.0.1 (*)
+│   │   │   │   │       ├── heck v0.5.0
+│   │   │   │   │       ├── proc-macro2 v1.0.107 (*)
+│   │   │   │   │       ├── quote v1.0.47 (*)
+│   │   │   │   │       └── syn v1.0.109 (*)
+│   │   │   │   └── sha2 v0.11.0
+│   │   │   │       ├── cfg-if v1.0.5
+│   │   │   │       ├── cpufeatures v0.3.1
+│   │   │   │       └── digest v0.11.3
+│   │   │   │           ├── block-buffer v0.12.1
+│   │   │   │           │   └── hybrid-array v0.4.15
+│   │   │   │           │       └── typenum v1.20.1
+│   │   │   │           ├── const-oid v0.10.2
+│   │   │   │           └── crypto-common v0.2.2
+│   │   │   │               └── hybrid-array v0.4.15 (*)
+│   │   │   ├── rgb-strict-encoding v1.0.4 (*)
+│   │   │   ├── rgb-strict-types v1.0.4
+│   │   │   │   ├── amplify v4.8.1 (*)
+│   │   │   │   ├── baid64 v0.4.1 (*)
+│   │   │   │   ├── indexmap v2.14.2 (*)
+│   │   │   │   ├── rgb-ascii-armor v1.0.4 (*)
+│   │   │   │   ├── rgb-strict-encoding v1.0.4 (*)
+│   │   │   │   └── sha2 v0.11.0 (*)
+│   │   │   ├── ripemd v0.2.0
+│   │   │   │   └── digest v0.11.3 (*)
+│   │   │   └── sha2 v0.11.0 (*)
+│   │   ├── rgb-ascii-armor v1.0.4 (*)
+│   │   ├── rgb-consensus v0.11.1
+│   │   │   ├── amplify v4.8.1 (*)
+│   │   │   ├── baid64 v0.4.1 (*)
+│   │   │   ├── base85 v2.0.0 (*)
+│   │   │   ├── bitcoin v0.32.102 (*)
+│   │   │   ├── chrono v0.4.45 (*)
+│   │   │   ├── daggy v0.9.0
+│   │   │   │   ├── petgraph v0.8.3
+│   │   │   │   │   ├── fixedbitset v0.5.7
+│   │   │   │   │   ├── hashbrown v0.15.5
+│   │   │   │   │   │   └── foldhash v0.1.5
+│   │   │   │   │   ├── indexmap v2.14.2 (*)
+│   │   │   │   │   ├── serde v1.0.229 (*)
+│   │   │   │   │   └── serde_derive v1.0.229 (proc-macro) (*)
+│   │   │   │   └── serde v1.0.229 (*)
+│   │   │   ├── rand v0.9.5 (*)
+│   │   │   ├── rgb-aluvm v0.11.1 (*)
+│   │   │   ├── rgb-strict-encoding v1.0.4 (*)
+│   │   │   ├── rgb-strict-types v1.0.4 (*)
+│   │   │   ├── ripemd v0.2.0 (*)
+│   │   │   ├── secp256k1 v0.33.1
+│   │   │   │   ├── rand v0.9.5 (*)
+│   │   │   │   └── secp256k1-sys v0.14.1
+│   │   │   └── sha2 v0.11.0 (*)
+│   │   ├── rgb-invoicing v0.11.1
+│   │   │   ├── amplify v4.8.1 (*)
+│   │   │   ├── baid64 v0.4.1 (*)
+│   │   │   ├── fast32 v1.0.3
+│   │   │   ├── fluent-uri v0.3.2
+│   │   │   │   ├── borrow-or-share v0.2.4
+│   │   │   │   └── ref-cast v1.0.27
+│   │   │   │       └── ref-cast-impl v1.0.27 (proc-macro)
+│   │   │   │           ├── proc-macro2 v1.0.107 (*)
+│   │   │   │           ├── quote v1.0.47 (*)
+│   │   │   │           └── syn v3.0.6 (*)
+│   │   │   ├── indexmap v2.14.2 (*)
+│   │   │   ├── percent-encoding v2.3.2
+│   │   │   ├── rgb-consensus v0.11.1 (*)
+│   │   │   ├── rgb-strict-encoding v1.0.4 (*)
+│   │   │   └── rgb-strict-types v1.0.4 (*)
+│   │   ├── rgb-strict-encoding v1.0.4 (*)
+│   │   └── rgb-strict-types v1.0.4 (*)
+│   ├── rgb-psbt-utils v0.11.1
+│   │   ├── amplify v4.8.1 (*)
+│   │   ├── rgb-ops v0.11.1 (*)
+│   │   ├── rgb-strict-encoding v1.0.4 (*)
+│   │   └── serde v1.0.229 (*)
+│   └── rgb-strict-types v1.0.4 (*)
+├── rgb-consensus v0.11.1 (*)
+├── rgb-ops v0.11.1 (*)
+├── rgb-psbt-utils v0.11.1 (*)
+├── rgb-schemas v0.11.1
+│   ├── amplify v4.8.1 (*)
+│   ├── rgb-aluvm v0.11.1 (*)
+│   ├── rgb-ops v0.11.1 (*)
+│   └── rgb-strict-types v1.0.4 (*)
+├── rgb-strict-encoding v1.0.4 (*)
+├── rgb-strict-types v1.0.4 (*)
+└── serde_json v1.0.140
+    ├── itoa v1.0.18
+    ├── memchr v2.8.3
+    ├── ryu v1.0.23
+    └── serde v1.0.229 (*)

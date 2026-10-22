@@ -4,6 +4,7 @@ mod chain;
 mod format;
 mod lineage;
 mod profile;
+mod program_v01;
 mod schema;
 mod spend;
 
@@ -56,6 +57,12 @@ fn main() {
         Some("genesis") => lineage::genesis(authorize, parsed.seal.as_deref()),
         Some("claim") => lineage::claim(authorize),
         Some("verify") => lineage::stage_verify(authorize, parsed.json),
+        // Offline and keyless: prints the candidate ADR-0012 program bytes and IDs.
+        Some("program-dump") => program_v01::dump().and_then(|value| {
+            serde_json::to_string_pretty(&value)
+                .map(|text| println!("{text}"))
+                .map_err(|err| err.to_string())
+        }),
         Some("signet-genesis") => {
             eprintln!(
                 "note: signet-genesis is deprecated; use genesis --seal <outpoint>. This alias sets no network."

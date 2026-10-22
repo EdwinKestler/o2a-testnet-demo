@@ -1,0 +1,77 @@
+   Compiling rgb011-check v0.1.0 (/media/kestl/andor/ffwd/o2a-testnet-demo/spikes/rgb-0.11.1/check)
+warning: unused variable: `secp`
+   --> check/src/spend.rs:114:9
+    |
+114 |     let secp = Secp256k1::new();
+    |         ^^^^ help: if this is intentional, prefix it with an underscore: `_secp`
+    |
+    = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: constant `MINER_FEE` is never used
+  --> check/src/main.rs:40:7
+   |
+40 | const MINER_FEE: u64 = 15_000;
+   |       ^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: variants `Transition` and `Broadcast` are never constructed
+  --> check/src/profile.rs:38:5
+   |
+31 | pub enum Operation {
+   |          --------- variants in this enum
+...
+38 |     Transition,
+   |     ^^^^^^^^^^
+39 |     Broadcast,
+   |     ^^^^^^^^^
+   |
+   = note: `Operation` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: function `refuse_broadcast` is never used
+   --> check/src/profile.rs:328:8
+    |
+328 | pub fn refuse_broadcast(profile: &NetworkProfile) -> Result<(), String> {
+    |        ^^^^^^^^^^^^^^^^
+
+warning: function `issue` is never used
+   --> check/src/program_v01.rs:124:8
+    |
+124 | pub fn issue(
+    |        ^^^^^
+
+warning: function `transition` is never used
+   --> check/src/program_v01.rs:152:8
+    |
+152 | pub fn transition(
+    |        ^^^^^^^^^^
+
+warning: field `tx` is never read
+  --> check/src/spend.rs:49:9
+   |
+48 | pub struct CommittedSpend {
+   |            -------------- field in this struct
+49 |     pub tx: Transaction,
+   |         ^^
+
+warning: `rgb011-check` (bin "rgb011-check" test) generated 3 warnings (3 duplicates)
+warning: `rgb011-check` (bin "rgb011-check") generated 7 warnings (run `cargo fix --bin "rgb011-check" -p rgb011-check` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.89s
+     Running unittests src/main.rs (target/debug/deps/rgb011_check-f3d4072bee78e7e6)
+
+running 5 tests
+builder_without_digest is_err=false
+test program_v01::tests::builder_without_digest_outcome_is_recorded ... ok
+test program_v01::tests::unknown_transition_name_is_rejected ... ok
+test program_v01::tests::genesis_and_transition_carry_digests ... ok
+test program_v01::tests::program_is_deterministic ... ok
+test program_v01::tests::differs_from_demo_schema ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 17 filtered out; finished in 0.11s
+
+     Running tests/neutral_regtest.rs (target/debug/deps/neutral_regtest-744b32d5a725491a)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.00s
+
